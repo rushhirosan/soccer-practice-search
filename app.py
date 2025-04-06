@@ -7,6 +7,7 @@ import sqlite3
 import unicodedata
 import logging
 import psycopg2
+from typing import Optional, Any
 
 
 # ロガーの設定
@@ -23,16 +24,15 @@ app = Flask(__name__)
 DATABASE = 'soccer_content.db'
 
 
-def convert_to_embed_url(video_url):
+def convert_to_embed_url(video_url: str) -> str:
     """YouTubeの通常リンクからVIDEO_IDを抽出し、埋め込みリンクを生成する"""
-    #logger.info(f"Converting video URL: {video_url}")
     if "watch?v=" in video_url:
         video_id = video_url.split("watch?v=")[-1]
         return f"https://www.youtube.com/embed/{video_id}"
     return video_url  # 他のリンク形式の場合そのまま返す
 
 
-def convert_activities(activities):
+def convert_activities(activities: list) -> list:
     """アクティビティリストのデータを変換する"""
     logger.info("Converting activities")
     result = []
@@ -67,7 +67,7 @@ def convert_activities(activities):
     return result
 
 
-def build_query_with_filters(base_query, filters, params):
+def build_query_with_filters(base_query: str, filters: dict, params: list) -> tuple[str, list]:
     """フィルタに基づいてクエリを構築する補助関数"""
     if filters.get('type_filter'):
         base_query += " AND category_title = %s"
@@ -88,58 +88,43 @@ def build_query_with_filters(base_query, filters, params):
     return base_query, params
 
 
-def execute_query(conn, query, params):
+def get_db() -> Optional[psycopg2.extensions.connection]:
+    """データベース接続を取得する"""
+    if 'db' not in g:
+        try:
+            g.db = get_db_connection()
+        except Exception as e:
+            logger.error(f"Failed to connect to database: {e}")
+            return None
+    return g.db
+
+
+def execute_query(query: str, params: list = None) -> list:
     """クエリを実行し、結果を返す"""
-    logger.info(f"Executing query: {query} with params: {params}")    
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    db = get_db()
+    if db is None:
+        logger.error("No database connection available")
+        return []
+
     try:
-        cursor.execute(query, params)
-        results = cursor.fetchall()
-        #print("results", results)
-        return results
+        with db.cursor() as cursor:
+            cursor.execute(query, params or [])
+            return cursor.fetchall()
     except Exception as e:
         logger.error(f"Error executing query: {e}")
         return []
+    finally:
+        # 接続はプールに返すため、ここでは閉じない
+        pass
 
 
-# def safe_query(conn, query, params):
-#     """安全にクエリを実行する関数"""
-#     logger.info(f"Executing safe query: {query} with params: {params}")
-#     query = f"SELECT ID FROM contents WHERE ID IN ('ewMGrhiWc1E', 'vY8B71_TVLw', '6sFICjN9bPQ', 'hUBAMSuydJI', 'y_ZXOJJFyuA', 'EnZ95vi9RU8', 'TIu4PNw_PTQ', 'XPPl5NDFdMc', 'sYVfBvdc6Xo', 'HKcB-ZrL52Q');"
-#     try:
-#         #result = conn.execute(query, params)
-#         result = conn.execute(query)
-#         t = conn.fetchall()
-#         print("RES", result, len(t))
-#         if result is None:
-#             logger.warning("Query returned no results.")
-#             return None
-# 
-#         row = result.fetchone()
-#         print("row", row)
-#         if row is None:
-#             logger.warning("No row found.")
-#             return None
-# 
-#         return row[0]
-# 
-#     except Exception as e:
-#         logger.error(f"Error executing query: {e}")
-#         return None
-
-def get_total_data_by_id(conn, q, ids):
+def get_total_data_by_id(q: str, ids: list) -> int:
     """IDリストに基づいて総データ数を取得"""
-
-    conn = get_db_connection()
-
     if not ids:
         return 0
 
     # プレースホルダを作成
     placeholders = ', '.join(['%s'] * len(ids))
-
-    # qが指定されている場合、titleのLIKE句のパラメータを作成
     q_like = f"%{q}%" if q else None
 
     # クエリの作成
@@ -156,68 +141,15 @@ def get_total_data_by_id(conn, q, ids):
         query += " AND title LIKE %s"
         params.append(q_like)
 
-    cursor = conn.cursor()  # カーソルを取得
-
-    # クエリを実行
-    cursor.execute(query, params)
-
-    # 結果を取得
-    result = cursor.fetchone()  # 1行を取得
-
-    if result:
-        count = result[0]  # count(*)の値
-    else:
-        count = 0
-
-    cursor.close()  # カーソルを閉じる
-
-    return count
+    try:
+        result = execute_query(query, params)
+        return result[0][0] if result else 0
+    except Exception as e:
+        logger.error(f"Error getting total data: {e}")
+        return 0
 
 
-# def get_total_data_by_id(conn, q, ids):
-#     """IDリストに基づいて総データ数を取得"""
-#     #print("HOIHIOHIOHOIHI", q, ids)
-#
-#     if not ids:
-#         return 0
-#
-#     placeholders = ', '.join(['%s'] * len(ids))
-#     q_like = f"%{q}%" if q else None
-#
-#     query = f'''
-#         SELECT count(*) FROM contents
-#         WHERE ID IN ({placeholders})
-#     '''
-#     params = ids
-#     if q:
-#         query += " AND title LIKE %s"
-#         params.append(q_like)
-#
-#     print("THISIS", query, params)
-#
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#
-#     res = cursor.execute(query, params)
-#     print("WWWW", res)
-#
-#     return res
-
-    #result = conn.execute(query, params).fetchone()
-    # if result is not None:
-    #     return result[0]
-    # else:
-    #     return 0  # 該当するレコードがない場合、0を返す
-
-    #return conn.execute(query, params).fetchone()[0]
-    # count = safe_query(conn, query, params)
-    # #print(count)
-    # if count is None:
-    #     logger.info("No data found, count set to 0")
-    #     count = 0
-
-
-def get_data_by_id(conn, q, ids, sort, offset, limit=None):
+def get_data_by_id(q: str, ids: list, sort: str, offset: int, limit: int = None) -> list:
     """IDリストに基づいてデータを取得"""
     if not ids:
         return []
@@ -241,34 +173,29 @@ def get_data_by_id(conn, q, ids, sort, offset, limit=None):
     params.extend([limit, offset])
 
     # クエリ実行
-    return execute_query(conn, query, params)
+    return execute_query(query, params)
 
 
-
-def multi_search_total(conn, q, filters):
+def multi_search_total(q: str, filters: dict) -> int:
     """複数のフィルタ条件に基づいて総データ数を取得"""
     base_query = "SELECT * FROM category WHERE 1=1"
     params = []
     base_query, params = build_query_with_filters(base_query, filters, params)
 
-    rows = execute_query(conn, base_query, params)
-    #ids = [row["ID"] for row in rows]
-    #print("rows", rows)
+    rows = execute_query(base_query, params)
     ids = [row[0] for row in rows]
-    return get_total_data_by_id(conn, q, ids)
+    return get_total_data_by_id(q, ids)
 
 
-def multi_search(conn, q, filters, sort, offset, limit):
+def multi_search(q: str, filters: dict, sort: str, offset: int, limit: int) -> list:
     """複数のフィルタ条件に基づいてデータを取得"""
     base_query = "SELECT * FROM category WHERE 1=1"
     params = []
     base_query, params = build_query_with_filters(base_query, filters, params)
-    #print("HIHI", base_query, params)
 
-    rows = execute_query(conn, base_query, params)
-    #ids = [row["ID"] for row in rows]
+    rows = execute_query(base_query, params)
     ids = [row[0] for row in rows]
-    return get_data_by_id(conn, q, ids, sort, offset, limit)
+    return get_data_by_id(q, ids, sort, offset, limit)
 
 
 @app.route('/search')
@@ -290,7 +217,7 @@ def search_activities():
         'channel_filter': channel_filter
     }
 
-    conn = get_db_connection()
+    conn = get_db()
     with closing(conn.cursor()) as c:  # ✅ カーソルのみ `closing` を使用
         try:
             if query:
@@ -313,11 +240,11 @@ def search_activities():
 
                     activities = c.fetchall()
                 else:
-                    total = multi_search_total(c, query, filters)
-                    activities = multi_search(c, query, filters, sort, offset, limit)
+                    total = multi_search_total(query, filters)
+                    activities = multi_search(query, filters, sort, offset, limit)
             else:
-                total = multi_search_total(c, query, filters)
-                activities = multi_search(c, query, filters, sort, offset, limit)
+                total = multi_search_total(query, filters)
+                activities = multi_search(query, filters, sort, offset, limit)
 
         except psycopg2.Error as e:
             logger.error("Error while executing search query: %s", e)
@@ -337,7 +264,7 @@ def search_activities():
 def save_feedback_to_db(feedback):
     """フィードバックデータをデータベースに保存する"""
     logger.info(f"Saving feedback: {feedback}")
-    conn = get_db_connection()
+    conn = get_db()
     try:
         with conn.cursor() as c:
             c.execute(
@@ -353,7 +280,7 @@ def save_feedback_to_db(feedback):
 
 # DBからユニークな値を取得する関数
 def get_unique_values(column_name):
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     query = f"""
         SELECT DISTINCT {column_name} 
@@ -376,7 +303,7 @@ def get_unique_values_api(column):
 
 
 def get_levels():
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT DISTINCT level FROM category")
@@ -395,7 +322,7 @@ def get_levels_api():
 
 
 def get_channels():
-    conn = get_db_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT id, cname, clink FROM cid")
@@ -434,20 +361,25 @@ def submit_feedback():
     return jsonify({'message': 'Feedback submitted successfully'}), 200
 
 
-@app.teardown_appcontext
-def close_db(error):
-    """リクエストが終わったら接続を閉じる"""
+def close_db(e: Optional[Any] = None) -> None:
+    """データベース接続を閉じる"""
     db = g.pop('db', None)
     if db is not None:
-        #db.close()
-        pool.putconn(db)
-        logger.info("Closing database connection...")
+        try:
+            pool.putconn(db)
+            logger.info("Database connection returned to pool")
+        except Exception as e:
+            logger.error(f"Error while closing database connection: {e}")
 
 
 @app.route('/')
 def index():
     logger.info("Starting Flask application")
     return render_template('home.html')
+
+
+# アプリケーションコンテキストが終了したときに接続を閉じる
+app.teardown_appcontext(close_db)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from flask import g
 from psycopg2.pool import SimpleConnectionPool
 from contextlib import contextmanager
-
+from typing import Optional, List, Dict, Any, Generator, Union
 
 import sqlite3
 import psycopg2
@@ -31,7 +31,6 @@ load_dotenv()
 #     'port': os.getenv('DB_PORT', '5432'),
 # }
 
-
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if not DATABASE_URL:
@@ -53,7 +52,7 @@ logger = logging.getLogger(__name__)
 pool = SimpleConnectionPool(1, 10, dsn=DATABASE_URL)  # 最小1、最大10の接続プール
 
 
-def get_db_connection():
+def get_db_connection() -> psycopg2.extensions.connection:
     """リクエストごとに同じ接続を再利用する"""
     if "db" not in g or g.db.closed:
         if "db" in g:
@@ -66,7 +65,7 @@ def get_db_connection():
 
 
 @contextmanager
-def use_db_connection():
+def use_db_connection() -> Generator[psycopg2.extensions.connection, None, None]:
     """接続の管理を安全に行うコンテキストマネージャ"""
     conn = get_db_connection()
     try:
@@ -83,33 +82,35 @@ def use_db_connection():
 #     #return sqlite3.connect(DATABASE_PATH)
 
 
-def delete_table(tbl_name: str):
+def delete_table(tbl_name: str) -> None:
     """テーブルを削除して、データを削除"""
     logger.info(f"Deleting data and dropping {tbl_name} table if it exists...")
-    with closing(get_db_connection()) as conn:
-        c = conn.cursor()
-        try:
-            c.execute(f"DROP TABLE IF EXISTS {tbl_name} CASCADE")
-            conn.commit()
-            logger.info(f"{tbl_name} table deleted successfully.")
-        except psycopg2.Error as e:
-            logger.error("Error while deleting table: %s", e)
+    with use_db_connection() as conn:
+        with conn.cursor() as c:
+            try:
+                c.execute(f"DROP TABLE IF EXISTS {tbl_name} CASCADE")
+                conn.commit()
+                logger.info(f"{tbl_name} table deleted successfully.")
+            except psycopg2.Error as e:
+                logger.error("Error while deleting table: %s", e)
+                conn.rollback()
 
 
-def create_table(query: str):
+def create_table(query: str) -> None:
     """テーブル作成の汎用関数"""
     logger.info("Creating table...")
-    with closing(get_db_connection()) as conn:
-        c = conn.cursor()
-        try:
-            c.execute(query)
-            conn.commit()
-            logger.info("Table created successfully.")
-        except psycopg2.Error as e: # sqlite3.Error < for sqlite
-            logger.error("Error while creating table: %s", e)
+    with use_db_connection() as conn:
+        with conn.cursor() as c:
+            try:
+                c.execute(query)
+                conn.commit()
+                logger.info("Table created successfully.")
+            except psycopg2.Error as e: # sqlite3.Error < for sqlite
+                logger.error("Error while creating table: %s", e)
+                conn.rollback()
 
 
-def create_cid_table():
+def create_cid_table() -> None:
     """`cid`テーブルを作成"""
     logger.info("Creating 'cid' table...")
     query = '''
@@ -124,7 +125,7 @@ def create_cid_table():
     # id INTEGER PRIMARY KEY AUTOINCREMENT, <- for sqlite
 
 
-def create_contents_table():
+def create_contents_table() -> None:
     """`contents`テーブルを作成"""
     logger.info("Creating 'contents' table...")
     query = '''
@@ -142,7 +143,7 @@ def create_contents_table():
     create_table(query)
 
 
-def create_category_table():
+def create_category_table() -> None:
     """`category`テーブルを作成"""
     logger.info("Creating 'category' table...")
     query = '''
@@ -158,7 +159,7 @@ def create_category_table():
     create_table(query)
 
 
-def create_feedback_table():
+def create_feedback_table() -> None:
     """`feedback`テーブルを作成"""
     logger.info("Creating 'feedback' table...")
     query = '''
@@ -175,7 +176,7 @@ def create_feedback_table():
     # id INTEGER PRIMARY KEY AUTOINCREMENT, < for sqlite
 
 
-def insert_cid_data(cid: str, cname: str, clink: str):
+def insert_cid_data(cid: str, cname: str, clink: str) -> None:
     """`cid`テーブルにデータを挿入"""
     logger.info("Inserting data into 'cid' table...")
     with use_db_connection() as conn:
@@ -190,26 +191,28 @@ def insert_cid_data(cid: str, cname: str, clink: str):
                 logger.info("Data inserted into 'cid' table successfully.")
             except psycopg2.Error as e:
                 logger.error("Error while inserting data into 'cid' table: %s", e)
+                conn.rollback()
 
 
-def insert_category_data(contents_data, channel_category):
+def insert_category_data(contents_data: List[Dict[str, Any]], channel_category: int) -> None:
     """`category`テーブルにデータを挿入"""
     logger.info("Inserting data into 'category' table...")
-    with closing(get_db_connection()) as conn:
-        c = conn.cursor()
-        try:
-            for data in contents_data:
-                c.execute('''
-                    INSERT INTO category (ID, category_title, players, level, channel_brand_category)
-                    VALUES (%s, %s, %s, %s, %s) ON CONFLICT (ID) DO NOTHING
-                ''', (data["id"], data["category"], data["nop"], data["level"], channel_category))
+    with use_db_connection() as conn:
+        with conn.cursor() as c:
+            try:
+                for data in contents_data:
+                    c.execute('''
+                        INSERT INTO category (ID, category_title, players, level, channel_brand_category)
+                        VALUES (%s, %s, %s, %s, %s) ON CONFLICT (ID) DO NOTHING
+                    ''', (data["id"], data["category"], data["nop"], data["level"], channel_category))
                 conn.commit()
-            logger.info("Data inserted into 'category' table successfully.")
-        except psycopg2.Error as e:
-            logger.error("Error while inserting data into 'category' table: %s", e)
+                logger.info("Data inserted into 'category' table successfully.")
+            except psycopg2.Error as e:
+                logger.error("Error while inserting data into 'category' table: %s", e)
+                conn.rollback()
 
 
-def insert_contents_data(video_data, channel_category):
+def insert_contents_data(video_data: List[Dict[str, Any]], channel_category: int) -> None:
     """CSVファイルからデータをデータベースに挿入"""
     logger.info("Inserting data from CSV into 'contents' table...")
     #df = pd.read_csv(file_path)
@@ -225,7 +228,7 @@ def insert_contents_data(video_data, channel_category):
     #         logger.info("Processing stopped due to duplicate IDs.")
     #         return
     with use_db_connection() as conn:  # データベース接続
-        with closing(conn.cursor()) as c:  # カーソルのクローズを自動管理
+        with conn.cursor() as c:  # カーソルのクローズを自動管理
             try:
                 for data in video_data:
                     # like_count の変換処理
@@ -271,7 +274,7 @@ def insert_contents_data(video_data, channel_category):
                 logger.error("Unexpected error: %s", e)
 
 
-def search_content_table():
+def search_content_table() -> List[tuple]:
     """`contents`テーブルを検索"""
     logger.info("Searching data in 'contents' table...")
     with use_db_connection() as conn:
@@ -282,7 +285,7 @@ def search_content_table():
         results = c.fetchall()
         logger.info("Search completed. Found %d records.", len(results))
         print(results)
-        return [[result[0], result[1]] for result in results]
+        return results
 
 # def search_table(search_term: str = None):
 #     """`contents`テーブルからデータを検索"""
@@ -302,41 +305,43 @@ def search_content_table():
 #         return [[result[0], result[1]] for result in results]
 
 
-def get_channel_name_from_id(id):
-    """ 指定した ID のチャンネル名を取得 """
-    conn = pool.getconn()  # コネクションプールから接続を取得
-    try:
+def get_channel_name_from_id(id: int) -> str:
+    """チャンネルIDからチャンネル名を取得"""
+    logger.info(f"Getting channel name for ID: {id}")
+    with use_db_connection() as conn:
         with conn.cursor() as c:
-            query = 'SELECT cname FROM cid WHERE id = %s'  # プレースホルダーを使用
-            c.execute(query, (id,))  # タプルで値を渡す
-            result = c.fetchone()  # 1行のみ取得
-            return result[0] if result else None  # データがあれば返す、なければ None
-    finally:
-        pool.putconn(conn)  # 使用後に接続をプールに戻す
+            try:
+                c.execute("SELECT cname FROM cid WHERE id = %s", (id,))
+                result = c.fetchone()
+                return result[0] if result else "Unknown Channel"
+            except psycopg2.Error as e:
+                logger.error("Error while getting channel name: %s", e)
+                return "Unknown Channel"
 
 
-def search_db():
+def search_db() -> List[str]:
     """データベースのテーブル一覧を表示"""
     logger.info("Fetching list of tables in the database...")
     with use_db_connection() as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-        """)
-        tables = c.fetchall()
-        table_names = [table[0] for table in tables]
-        logger.info("Tables found: %s", table_names)
-        #print("テーブル一覧:", table_names)
-        return table_names
+        with conn.cursor() as c:
+            try:
+                c.execute("""
+                    SELECT table_name
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                """)
+                tables = c.fetchall()
+                table_names = [table[0] for table in tables]
+                logger.info("Tables found: %s", table_names)
+                return table_names
+            except psycopg2.Error as e:
+                logger.error("Error while fetching table list: %s", e)
+                return []
 
 
-def search_term_in_table(table):
-    """`table` テーブルの `term` を検索"""
-    #logger.info("Searching data in '%s' table for term '%s'...", table)
-
-    # テーブル名のバリデーション（任意の安全策）
+def search_term_in_table(table: str) -> List[tuple]:
+    """指定されたテーブルの全データを検索"""
+    # テーブル名のバリデーション
     allowed_tables = {'contents', 'cid', 'category', 'feedback'}
     if table not in allowed_tables:
         logger.error("Invalid table name: %s", table)
@@ -344,24 +349,37 @@ def search_term_in_table(table):
 
     with use_db_connection() as conn:
         with conn.cursor() as c:
-            # 動的にテーブル名を埋め込む
-            query = f"SELECT * FROM {table}"# WHERE cname ILIKE %s OR clink ILIKE %s"
-            c.execute(query)
-            #c.execute(query, (f"%{term}%", f"%{term}%"))
-            results = c.fetchall()
-            logger.info("Search completed. Found %d records.", len(results))
-            return results
+            try:
+                query = f"SELECT * FROM {table}"
+                c.execute(query)
+                results = c.fetchall()
+                logger.info("Search completed. Found %d records.", len(results))
+                return results
+            except psycopg2.Error as e:
+                logger.error("Error while searching table: %s", e)
+                return []
 
-def temp_func(tbl_name):
+def temp_func(tbl_name: str) -> List[tuple]:
+    """一時的な関数 - 特定のIDを持つレコードを検索"""
     with use_db_connection() as conn:
         with conn.cursor() as c:
-            #query = f"SELECT * FROM {tbl_name}"  # WHERE cname ILIKE %s OR clink ILIKE %s"
-            query = f"SELECT ID FROM {tbl_name} WHERE ID IN ('ewMGrhiWc1E', 'vY8B71_TVLw', '6sFICjN9bPQ', 'hUBAMSuydJI', 'y_ZXOJJFyuA', 'EnZ95vi9RU8', 'TIu4PNw_PTQ', 'XPPl5NDFdMc', 'sYVfBvdc6Xo', 'HKcB-ZrL52Q');"
-            c.execute(query)
-            # c.execute(query, (f"%{term}%", f"%{term}%"))
-            results = c.fetchall()
-            logger.info("Search completed. Found %d records.", len(results))
-            return results
+            try:
+                query = f"""
+                    SELECT ID FROM {tbl_name} 
+                    WHERE ID IN (
+                        'ewMGrhiWc1E', 'vY8B71_TVLw', '6sFICjN9bPQ', 
+                        'hUBAMSuydJI', 'y_ZXOJJFyuA', 'EnZ95vi9RU8', 
+                        'TIu4PNw_PTQ', 'XPPl5NDFdMc', 'sYVfBvdc6Xo', 
+                        'HKcB-ZrL52Q'
+                    )
+                """
+                c.execute(query)
+                results = c.fetchall()
+                logger.info("Search completed. Found %d records.", len(results))
+                return results
+            except psycopg2.Error as e:
+                logger.error("Error while executing temp_func: %s", e)
+                return []
 
 # def find_duplicates(df: pd.DataFrame) -> list:
 #     """重複したIDを検索"""

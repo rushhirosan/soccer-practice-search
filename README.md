@@ -25,3 +25,110 @@
    ```bash
    git clone https://github.com/yourusername/soccer-content-search.git
    cd soccer-content-search
+   ```
+
+2. **依存関係のインストール**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **環境変数の設定**
+
+   `utilities/.env` ファイルを作成し、以下の環境変数を設定してください：
+
+   ```env
+   API_KEY=your_youtube_api_key
+   CHANNEL_ID=your_channel_id
+   CHANNEL_LINK=your_channel_link
+   DATABASE_URL=your_database_url
+   ```
+
+4. **データベースの初期化**
+
+   ```bash
+   python main.py
+   ```
+
+5. **アプリケーションの起動**
+
+   ```bash
+   python app.py
+   ```
+
+## Fly.io へのデプロイ
+
+このアプリケーションは Fly.io にデプロイできます。
+
+### 前提条件
+
+1. **Fly.io CLI のインストール**
+
+   ```bash
+   curl -L https://fly.io/install.sh | sh
+   ```
+
+2. **Fly.io へのログイン**
+
+   ```bash
+   fly auth login
+   ```
+
+### デプロイ手順
+
+1. **自動デプロイ（推奨）**
+
+   ```bash
+   ./deploy.sh
+   ```
+
+   このスクリプトは以下を自動で実行します：
+   - Fly.io アプリケーションの作成
+   - PostgreSQL データベースの作成
+   - 環境変数の設定
+   - アプリケーションのデプロイ
+
+2. **手動デプロイ**
+
+   ```bash
+   # アプリケーションの作成
+   fly apps create soccer-practice-search
+
+   # PostgreSQL データベースの作成
+   fly postgres create soccer-practice-db --region nrt
+   fly postgres attach soccer-practice-db --app soccer-practice-search
+
+   # 環境変数の設定
+   fly secrets set DATABASE_URL="your_database_url"
+
+   # デプロイ
+   fly deploy
+   ```
+
+### デプロイ後の確認
+
+デプロイが完了すると、以下のURLでアプリケーションにアクセスできます：
+
+```
+https://soccer-practice-search.fly.dev
+```
+
+### ヘルスチェック
+
+アプリケーションの状態は以下のエンドポイントで確認できます：
+
+```
+https://soccer-practice-search.fly.dev/health
+```
+
+## 技術スタック
+
+- **バックエンド**: Flask (Python)
+- **データベース**: PostgreSQL
+- **デプロイ**: Fly.io
+- **コンテナ**: Docker
+- **プロセス管理**: Gunicorn
+
+## ライセンス
+
+このプロジェクトは MIT ライセンスの下で公開されています。

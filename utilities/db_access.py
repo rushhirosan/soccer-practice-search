@@ -205,7 +205,7 @@ def insert_category_data(contents_data: List[Dict[str, Any]], channel_category: 
                         INSERT INTO category (ID, category_title, players, level, channel_brand_category)
                         VALUES (%s, %s, %s, %s, %s) ON CONFLICT (ID) DO NOTHING
                     ''', (data["id"], data["category"], data["nop"], data["level"], channel_category))
-                conn.commit()
+                    conn.commit()
                 logger.info("Data inserted into 'category' table successfully.")
             except psycopg2.Error as e:
                 logger.error("Error while inserting data into 'category' table: %s", e)

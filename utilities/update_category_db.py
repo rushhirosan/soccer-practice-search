@@ -94,7 +94,7 @@ def update_category(contents):
         logger.info("Fetching contents from the database...")
         contents_data = []
 
-        for content_id, title in contents:
+        for content_id, title, *_ in contents:
 
             # カテゴリの予測
             category = assign_category(title)

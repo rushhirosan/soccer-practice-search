@@ -14,11 +14,23 @@ logger = logging.getLogger(__name__)
 
 
 def get_channel_details(channel_id, api_key):
-    url = f"https://www.googleapis.com/youtube/v3/channels?part=brandingSettings&id={channel_id}&key={api_key}"
+    url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}&key={api_key}"
+    try:
     response = requests.get(url)
+        response.raise_for_status()
     data = response.json()
+        
+        if 'error' in data:
+            logger.error(f"YouTube API error for channel {channel_id}: {data['error']}")
+            return 'N/A'
+            
     if 'items' in data and len(data['items']) > 0:
-        return data['items'][0]['brandingSettings']['channel'].get('title', 'N/A')
+            return data['items'][0]['snippet']['title']
+        else:
+            logger.warning(f"No channel data found for {channel_id}")
+            return 'N/A'
+    except Exception as e:
+        logger.error(f"Error fetching channel details for {channel_id}: {e}")
     return 'N/A'
 
 

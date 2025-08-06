@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateLevelSelect();
     populateSelect("type-input", "category_title");  // カテゴリの選択肢を設定
     populateSelect("players-input", "players");  // プレイヤー数の選択肢を設定
+    disableTabFocus(); // タブボタンのフォーカス無効化
 });
 
 // ユニークな選択肢を取得・設定する関数
@@ -42,10 +43,19 @@ function populateSelect(selectId, columnName) {
             // 数値順にソート
             n_vs_n.sort((a, b) => a.num1 - b.num1 || a.num2 - b.num2);
             n_people.sort((a, b) => a.num - b.num);
-            others.sort(); // それ以外は通常の文字列ソート
+            
+            // カテゴリーの場合、「その他」を一番下に表示
+            let sortedOthers;
+            if (selectId === "type-input") {
+                const nonSonota = others.filter(value => value !== "その他").sort();
+                const sonota = others.filter(value => value === "その他");
+                sortedOthers = [...nonSonota, ...sonota];
+            } else {
+                sortedOthers = others.sort(); // プレイヤー数の場合は通常の文字列ソート
+            }
 
             // 並び替えたリストを `<select>` に追加
-            [...n_vs_n.map(obj => obj.value), ...n_people.map(obj => obj.value), ...others].forEach(value => {
+            [...n_vs_n.map(obj => obj.value), ...n_people.map(obj => obj.value), ...sortedOthers].forEach(value => {
                 const option = document.createElement("option");
                 option.value = value;
                 option.textContent = value;
@@ -298,3 +308,27 @@ function submitFeedback(formData) {
     })
     .catch(error => console.error('エラー:', error));
 }
+
+// タブボタンのフォーカス無効化
+function disableTabFocus() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('focus', function(e) {
+            e.target.style.outline = 'none';
+            e.target.style.webkitOutline = 'none';
+            e.target.style.mozOutline = 'none';
+            e.target.style.boxShadow = 'none';
+            e.target.style.border = 'none';
+        });
+        
+        button.addEventListener('focusin', function(e) {
+            e.target.style.outline = 'none';
+            e.target.style.webkitOutline = 'none';
+            e.target.style.mozOutline = 'none';
+            e.target.style.boxShadow = 'none';
+            e.target.style.border = 'none';
+        });
+    });
+}
+
+

@@ -378,8 +378,579 @@ def index():
     return render_template('home.html')
 
 
+@app.route('/health')
+def health_check():
+    """ヘルスチェック用エンドポイント"""
+    return jsonify({"status": "healthy", "message": "Service is running"}), 200
+
+
+@app.route('/db-stats')
+def database_stats():
+    """データベース統計を表示するエンドポイント"""
+    try:
+        conn = get_db()
+        with conn.cursor() as c:
+            # 存在するテーブルを確認
+            c.execute("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public'
+            """)
+            tables = [row[0] for row in c.fetchall()]
+            
+            stats = {"tables": tables, "counts": {}}
+            
+            # 各テーブルの件数を取得
+            for table in tables:
+                try:
+                    c.execute(f"SELECT COUNT(*) FROM {table}")
+                    count = c.fetchone()[0]
+                    stats["counts"][table] = count
+                except Exception as e:
+                    stats["counts"][table] = f"Error: {str(e)}"
+            
+            # 総件数を計算
+            total = sum([count for count in stats["counts"].values() if isinstance(count, int)])
+            stats["total"] = total
+            
+            return jsonify(stats), 200
+    except Exception as e:
+        logger.error(f"Error getting database stats: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/clear-database', methods=['POST'])
+def clear_database():
+    """データベースをクリアするエンドポイント"""
+    try:
+        db = get_db()
+        if db is None:
+            return jsonify({"error": "Database connection failed"}), 500
+
+        with db.cursor() as cursor:
+            # テーブルを削除（存在する場合）
+            cursor.execute("DROP TABLE IF EXISTS feedback CASCADE")
+            cursor.execute("DROP TABLE IF EXISTS category CASCADE")
+            cursor.execute("DROP TABLE IF EXISTS contents CASCADE")
+            cursor.execute("DROP TABLE IF EXISTS cid CASCADE")
+            db.commit()
+            
+        return jsonify({"message": "Database cleared successfully"})
+        
+    except Exception as e:
+        logger.error(f"Error clearing database: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/db-info')
+def database_info():
+    """データベース接続情報を表示するエンドポイント（セキュリティのため一部マスク）"""
+    try:
+        db_url = os.getenv('DATABASE_URL', 'Not set')
+        if db_url and db_url != 'Not set':
+            # セキュリティのため、ホスト名のみ表示
+            if '://' in db_url:
+                parts = db_url.split('://')
+                if len(parts) > 1:
+                    host_part = parts[1].split('@')
+                    if len(host_part) > 1:
+                        host = host_part[1].split('/')[0]
+                        return jsonify({
+                            "database_type": "PostgreSQL",
+                            "host": host,
+                            "connection_status": "Configured"
+                        })
+            return jsonify({
+                "database_type": "PostgreSQL",
+                "connection_status": "Configured (URL format masked)"
+            })
+        else:
+            return jsonify({
+                "database_type": "Not configured",
+                "connection_status": "No DATABASE_URL found"
+            })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/drop-soccer-tables', methods=['POST'])
+def drop_soccer_tables():
+    """soccer_practice_searchデータベースのテーブルを削除するエンドポイント"""
+    try:
+        db = get_db()
+        if db is None:
+            return jsonify({"error": "Database connection failed"}), 500
+
+        with db.cursor() as cursor:
+            # soccer_practice_searchデータベースのテーブルを削除
+            cursor.execute("DROP SCHEMA IF EXISTS soccer_practice_search CASCADE")
+            db.commit()
+            
+        return jsonify({"message": "soccer_practice_search tables dropped successfully"})
+        
+    except Exception as e:
+        logger.error(f"Error dropping soccer tables: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/init-database', methods=['POST'])
+def init_database():
+    """データベースを初期化し、テーブルを作成するエンドポイント"""
+    try:
+        from utilities.db_access import (
+            create_cid_table, create_contents_table, 
+            create_category_table, create_feedback_table
+        )
+        
+        # テーブルを作成
+        create_cid_table()
+        create_contents_table()
+        create_category_table()
+        create_feedback_table()
+        
+        return jsonify({"message": "Database initialized successfully"})
+        
+    except Exception as e:
+        logger.error(f"Error initializing database: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/test-simple', methods=['GET'])
+def test_simple():
+    """シンプルなテストエンドポイント"""
+    try:
+        return jsonify({
+            "status": "success",
+            "message": "App is working",
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error in test-simple: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/test-db-connection', methods=['GET'])
+def test_db_connection():
+    """データベース接続テスト"""
+    try:
+        db = get_db()
+        if db is None:
+            return jsonify({"error": "No database connection"}), 500
+            
+        with db.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM contents")
+            count = cursor.fetchone()[0]
+            
+        return jsonify({
+            "status": "success",
+            "database_connected": True,
+            "contents_count": count
+        })
+    except Exception as e:
+        logger.error(f"Error in test-db-connection: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/fetch-youtube-data', methods=['POST'])
+def fetch_youtube_data():
+    """YouTubeデータを取得してデータベースに挿入するエンドポイント"""
+    try:
+        logger.info("Starting fetch-youtube-data endpoint")
+        
+        # インポート
+        try:
+            from utilities.get_videos import get_youtube_video_data
+            from utilities.db_access import insert_cid_data, insert_contents_data, insert_category_data
+            logger.info("Successfully imported required modules")
+        except ImportError as e:
+            logger.error(f"Import error: {e}")
+            return jsonify({"error": f"Import error: {e}"}), 500
+        
+        # チャンネルIDを取得（複数対応）
+        channel_ids_str = os.getenv('CHANNEL_ID')
+        logger.info(f"CHANNEL_ID from env: {channel_ids_str}")
+        
+        if not channel_ids_str:
+            logger.error("CHANNEL_ID not set")
+            return jsonify({"error": "CHANNEL_ID not set"}), 500
+            
+        # カンマ区切りのチャンネルIDを分割
+        channel_ids = [cid.strip() for cid in channel_ids_str.split(',')]
+        logger.info(f"Parsed channel IDs: {channel_ids}")
+        
+        # YouTubeデータを取得
+        api_keys = os.getenv('API_KEYS', '').split(',')  # カンマ区切りで複数のAPIキー
+        if not api_keys or api_keys[0] == '':
+            api_key = os.getenv('API_KEY')  # 単一のAPIキー（後方互換性）
+            api_keys = [api_key] if api_key else []
+        
+        if not api_keys:
+            logger.error("No API keys available")
+            return jsonify({"error": "No API keys available"}), 500
+            
+        logger.info(f"Available API keys: {len(api_keys)}")
+            
+        all_videos = []
+        total_videos = 0
+        processed_channels = 0
+        current_api_key_index = 0
+        
+        for i, channel_id in enumerate(channel_ids):
+            logger.info(f"Processing channel {i+1}/{len(channel_ids)}: {channel_id}")
+                
+            try:
+                # 各チャンネルからデータを取得
+                videos = get_youtube_video_data(channel_id, api_keys[current_api_key_index])
+                logger.info(f"Retrieved {len(videos) if videos else 0} videos from channel {channel_id}")
+            except Exception as e:
+                logger.error(f"Error getting videos from channel {channel_id}: {e}")
+                continue
+            
+            if videos:
+                all_videos.extend(videos)
+                total_videos += len(videos)
+                
+                try:
+                    # チャンネル情報を挿入（実際のチャンネル名を取得）
+                    from utilities.get_channel_id import get_channel_details
+                    channel_name = get_channel_details(channel_id, api_keys[current_api_key_index])
+                    if channel_name == "N/A":
+                        channel_name = f"サッカーチャンネル{i+1}"  # フォールバック
+                    channel_link = f"https://www.youtube.com/channel/{channel_id}"
+                    insert_cid_data(channel_id, channel_name, channel_link)
+                    logger.info(f"Inserted channel data for {channel_id} with name: {channel_name}")
+                    
+                    # 動画データを挿入
+                    insert_contents_data(videos, i+1)  # channel_category = i+1
+                    logger.info(f"Inserted {len(videos)} videos to contents table")
+                    
+                                                # カテゴリデータを挿入（main.pyと同じ処理）
+                    from utilities.update_category_db import update_category
+                    from utilities.db_access import search_content_table, create_category_table
+                    
+                    # カテゴリテーブルを作成
+                    create_category_table()
+                    
+                    # contentsテーブルからデータを取得
+                    contents = search_content_table()
+                    
+                    # update_category関数でカテゴリを自動判定
+                    contents_data = update_category(contents)
+                    
+                    # カテゴリデータを挿入
+                    insert_category_data(contents_data, i+1)
+                    logger.info(f"Inserted category data for {len(videos)} videos")
+                    
+                    processed_channels += 1
+                    logger.info(f"Successfully processed channel {channel_id} with {len(videos)} videos")
+                except Exception as e:
+                    logger.error(f"Error inserting data for channel {channel_id}: {e}")
+                    continue
+            else:
+                logger.warning(f"No videos found for channel {channel_id}")
+        
+        videos = all_videos  # 後続の処理のために設定
+        
+        if not videos:
+            return jsonify({"error": "No videos found"}), 500
+        
+        logger.info(f"Processing completed. Processed {processed_channels} channels with {len(videos)} total videos")
+        
+        return jsonify({
+            "message": f"Successfully processed {processed_channels} channels with {len(videos)} videos",
+            "count": len(videos),
+            "channels_processed": processed_channels
+        })
+        
+    except Exception as e:
+        logger.error(f"Error fetching YouTube data: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route('/debug-youtube', methods=['GET'])
+def debug_youtube():
+    """YouTube API接続をテストするデバッグエンドポイント"""
+    try:
+        from utilities.get_videos import fetch_videos_from_channel, fetch_video_details
+        
+        # 環境変数を取得
+        api_key = os.getenv('API_KEY')
+        channel_id = os.getenv('CHANNEL_ID')
+        
+        if not api_key:
+            return jsonify({"error": "API_KEY not set"}), 500
+            
+        if not channel_id:
+            return jsonify({"error": "CHANNEL_ID not set"}), 500
+            
+        # チャンネルIDを分割
+        channel_ids = [cid.strip() for cid in channel_id.split(',')]
+        
+        # 最初のチャンネルでテスト
+        test_channel_id = channel_ids[0]
+        channel_data = fetch_videos_from_channel(test_channel_id, api_key)
+        
+        if not channel_data:
+                    return jsonify({
+            "error": "No channel data returned",
+            "api_key": api_key[:10] + "..." if api_key else None,
+            "test_channel_id": test_channel_id,
+            "all_channel_ids": channel_ids
+        }), 500
+            
+        # 動画数を確認
+        items = channel_data.get('items', [])
+        video_count = len(items)
+        
+        # 最初の動画の詳細を取得（テスト用）
+        if items:
+            first_video_id = items[0]['id']['videoId']
+            details = fetch_video_details([first_video_id], api_key)
+            
+            return jsonify({
+                "status": "success",
+                "test_channel_id": test_channel_id,
+                "all_channel_ids": channel_ids,
+                "video_count": video_count,
+                "first_video": {
+                    "id": first_video_id,
+                    "title": items[0]['snippet']['title'],
+                    "details": details[0] if details else None
+                },
+                "channel_data_keys": list(channel_data.keys())
+            })
+        else:
+                    return jsonify({
+            "error": "No videos found in channel",
+            "test_channel_id": test_channel_id,
+            "all_channel_ids": channel_ids,
+            "channel_data_keys": list(channel_data.keys())
+        }), 500
+            
+    except Exception as e:
+        logger.error(f"Error in debug_youtube: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/table-structure/<table_name>', methods=['GET'])
+def get_table_structure(table_name):
+    """テーブルの構造を確認"""
+    try:
+        from utilities.db_access import get_db_connection
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # テーブルの構造を取得
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable 
+            FROM information_schema.columns 
+            WHERE table_name = %s
+            ORDER BY ordinal_position
+        """, (table_name,))
+        
+        columns = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            "table_name": table_name,
+            "columns": [{"name": col[0], "type": col[1], "nullable": col[2]} for col in columns]
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/update-channel-names', methods=['POST'])
+def update_channel_names():
+    """既存のチャンネル名を実際のYouTubeチャンネル名で更新"""
+    try:
+        from utilities.get_channel_id import get_channel_details
+        from utilities.db_access import get_db_connection
+        
+        api_key = os.getenv('API_KEY')
+        if not api_key:
+            return jsonify({"error": "API key not set"}), 500
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 現在のチャンネル情報を取得
+        cursor.execute("SELECT cid FROM cid")
+        channels = cursor.fetchall()
+        
+        updated_count = 0
+        errors = []
+        
+        for (channel_id,) in channels:
+            try:
+                # 実際のチャンネル名を取得
+                channel_name = get_channel_details(channel_id, api_key)
+                
+                if channel_name != "N/A":
+                    # チャンネル名を更新（cnameカラムを使用）
+                    cursor.execute(
+                        "UPDATE cid SET cname = %s WHERE cid = %s",
+                        (channel_name, channel_id)
+                    )
+                    updated_count += 1
+                    logger.info(f"Updated channel {channel_id} to: {channel_name}")
+                else:
+                    errors.append(f"Could not get name for channel {channel_id}")
+                    
+            except Exception as e:
+                errors.append(f"Error updating {channel_id}: {str(e)}")
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            "success": True,
+            "updated_count": updated_count,
+            "errors": errors
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating channel names: {e}")
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route('/update-channel-names-manual', methods=['POST'])
+def update_channel_names_manual():
+    """手動でチャンネル名を更新（.envファイルの情報を使用）"""
+    try:
+        from utilities.db_access import get_db_connection
+        
+        # .envファイルの情報に基づくチャンネル名マッピング
+        channel_names = {
+            'UCbOAexGZEFnMfgQZAomSrHQ': '雑誌『サッカークリニック』, web版 (『サックリ』)',
+            'UCjDIumxHAYlytjbTKXRSicA': 'COACH UNITED編集部',
+            'UCRwozhdOYYgp2v_UtuRjIbg': 'ゲキサカ',
+            'UC_WCtGlbSkJVg3bgxOPja5g': 'サカサポChannel',
+            'UC4Nrt3aTTnjVAW_ein2nTQQ': 'REGATEドリブル塾',
+            'UCg2c6yQb47SSeKbg1n9HSOg': 'KSS SOCCER SCHOOL',
+            'UCuC6lqWJeqBa0I4C4KDgRdw': 'サカイク編集部',
+            'UC4V5lKucWAYx5m41wfO5s4A': 'Footy14Skills',
+            'UCq3OMmpMGUFCgTm0UFCtAFQ': 'イースリーショップ'
+        }
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        updated_count = 0
+        errors = []
+        
+        for channel_id, channel_name in channel_names.items():
+            try:
+                # チャンネル名を更新
+                cursor.execute(
+                    "UPDATE cid SET cname = %s WHERE cid = %s",
+                    (channel_name, channel_id)
+                )
+                if cursor.rowcount > 0:
+                    updated_count += 1
+                    logger.info(f"Updated channel {channel_id} to: {channel_name}")
+                else:
+                    errors.append(f"Channel {channel_id} not found in database")
+                    
+            except Exception as e:
+                errors.append(f"Error updating {channel_id}: {str(e)}")
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            "success": True,
+            "updated_count": updated_count,
+            "errors": errors
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating channel names manually: {e}")
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
 # アプリケーションコンテキストが終了したときに接続を閉じる
 app.teardown_appcontext(close_db)
+
+
+
+
+@app.route('/robots.txt')
+def robots():
+    """robots.txtを生成"""
+    from flask import make_response
+    
+    robots_txt = '''User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://soccer-practice-search.fly.dev/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1'''
+    
+    response = make_response(robots_txt)
+    response.headers['Content-Type'] = 'text/plain'
+    return response
+
+@app.route('/privacy')
+def privacy():
+    """プライバシーポリシーページ"""
+    return render_template('privacy.html')
+
+@app.route('/google-search-console.html')
+def google_search_console():
+    """Google Search Console所有権確認ページ"""
+    return render_template('google-search-console.html')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """サイトマップを生成"""
+    from flask import make_response
+    
+    # 現在の日時を取得
+    current_time = datetime.now().strftime('%Y-%m-%d')
+    
+    # サイトマップのXMLを生成
+    sitemap_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/#search</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/#about</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/privacy</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+</urlset>'''
+    
+    response = make_response(sitemap_xml)
+    response.headers['Content-Type'] = 'application/xml'
+    return response
 
 
 if __name__ == '__main__':

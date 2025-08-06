@@ -42,7 +42,7 @@ def fetch_video_details(video_ids: List[str], api_key: str) -> List[Dict]:
 
 def fetch_videos_from_channel(channel_id: str, api_key: str, next_page_token: Optional[str] = None) -> Dict:
     """チャンネルから動画一覧を取得"""
-    base_url = f"https://www.googleapis.com/youtube/v3/search?key={api_key}&channelId={channel_id}&part=snippet&type=video&maxResults=50"
+    base_url = f"https://www.googleapis.com/youtube/v3/search?key={api_key}&channelId={channel_id}&part=snippet&type=video&maxResults=100"
     url = f"{base_url}&pageToken={next_page_token}" if next_page_token else base_url
     try:
         response = requests.get(url)
@@ -93,22 +93,32 @@ def get_youtube_video_data(channel_id: str, api_key: str) -> List:
     """指定したチャンネルIDから動画データを取得しCSVに保存"""
     video_data = []
     next_page_token = None
+    page_count = 0
+    max_pages = 10  # 最大10ページまで取得（1000件）に削減
+    max_videos = 500  # 最大500件まで取得
 
-    while True:
+    while page_count < max_pages and len(video_data) < max_videos:
         channel_data = fetch_videos_from_channel(channel_id, api_key, next_page_token)
         if not channel_data:
             logger.warning("No data returned for channel ID: %s", channel_id)
             break
 
         video_ids = [item['id']['videoId'] for item in channel_data.get('items', [])]
+        
+        # 動画数制限をチェック
+        remaining_slots = max_videos - len(video_data)
+        if len(video_ids) > remaining_slots:
+            video_ids = video_ids[:remaining_slots]
+        
         details = fetch_video_details(video_ids, api_key)
 
         for item in channel_data.get('items', []):
+            if len(video_data) >= max_videos:
+                break
+                
             video_id = item['id']['videoId']
             video_title = item['snippet']['title']
             ch_id = item['snippet']['channelId']
-            #ch_title = item['snippet']['channelTitle']
-            #ch_desc = item['snippet']['description']
             upload_date = item['snippet']['publishedAt']
             video_url = f"https://www.youtube.com/watch?v={video_id}"
 
@@ -128,12 +138,14 @@ def get_youtube_video_data(channel_id: str, api_key: str) -> List:
                 'duration': duration
             })
 
+        page_count += 1
+        logger.info(f"Processed page {page_count} for channel {channel_id}, total videos so far: {len(video_data)}")
+        
         next_page_token = channel_data.get('nextPageToken')
-        if not next_page_token:
+        if not next_page_token or len(video_data) >= max_videos:
             break
 
-        time.sleep(1)  # API制限によりウェイトを追加
+        time.sleep(2)  # API制限によりウェイトを増加
 
-    #save_video_data_to_csv(output_file, video_data)
     logger.info("Video data collection completed for channel: %s", channel_id)
     return video_data

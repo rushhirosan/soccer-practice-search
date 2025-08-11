@@ -161,8 +161,8 @@ header h1 {
 
 /* タブコンテナ */
 .tab-container {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   background: var(--surface-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -254,12 +254,15 @@ header h1 {
   min-height: calc(100vh - 230px); /* フッターの高さ分を引く */
   background: var(--surface-color);
   padding-bottom: 80px; /* フッターの高さ分のパディングを追加 */
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* サイドペイン */
 .search-container {
-  width: 250px;
+  width: 200px;
   padding: 1rem;
+  margin-left: 1rem;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border-right: 1px solid var(--border-color);
     display: flex;
@@ -360,10 +363,13 @@ button:active {
 /* メインコンテンツ */
 .main-content {
     flex-grow: 1;
-  padding: 1rem;
+  padding: 0.75rem;
     overflow-y: auto;
   background: var(--surface-color);
   margin-bottom: 80px; /* フッターの高さ分のマージンを追加 */
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
 }
 
 .main-content.full-width {
@@ -388,10 +394,12 @@ button:active {
 
 /* カードコンテナ */
 .card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1rem;
-  padding-bottom: 6rem; /* フッターの高さ分のマージンを追加 */
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem !important;
+  padding-bottom: 6rem !important; /* フッターの高さ分のマージンを追加 */
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* カード */
@@ -399,11 +407,15 @@ button:active {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1rem;
+  padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  min-height: 400px;
 }
 
 .card::before {
@@ -436,17 +448,26 @@ button:active {
 
 .card .info {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
 .card .info div {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 0.9rem;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  font-weight: 500;
 }
 
 .card .info div::before {
@@ -459,14 +480,20 @@ button:active {
     display: flex;
   justify-content: center;
     align-items: center;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
 .video-container iframe {
-  width: 100%;
-  height: 200px;
+  width: 100% !important;
+  height: 300px !important;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
+  min-width: 0 !important;
+  max-width: none !important;
 }
 
 /* ページネーション */
@@ -681,7 +708,9 @@ button:active {
   }
   
   .card-container {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr) !important;
+    width: 100% !important;
+    max-width: none !important;
   }
   
   .split-container {
@@ -701,9 +730,11 @@ button:active {
   }
   
   .card-container {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding-bottom: 6rem; /* モバイルでもフッター分のパディングを追加 */
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    padding-bottom: 6rem !important; /* モバイルでもフッター分のパディングを追加 */
+    width: 100% !important;
+    max-width: none !important;
   }
   
   .search-container {

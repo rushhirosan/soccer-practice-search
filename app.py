@@ -280,18 +280,27 @@ def save_feedback_to_db(feedback):
 
 # DBからユニークな値を取得する関数
 def get_unique_values(column_name):
-    conn = get_db()
-    cursor = conn.cursor()
-    query = f"""
-        SELECT DISTINCT {column_name} 
-        FROM category 
-        WHERE {column_name} IS NOT NULL AND {column_name} != ''
-        ORDER BY {column_name} ASC
-    """
-    cursor.execute(query)
-    values = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return values
+    try:
+        conn = get_db()
+        if conn is None:
+            logger.error("Database connection failed")
+            return []
+        
+        cursor = conn.cursor()
+        query = f"""
+            SELECT DISTINCT {column_name} 
+            FROM category 
+            WHERE {column_name} IS NOT NULL AND {column_name} != ''
+            ORDER BY {column_name} ASC
+        """
+        cursor.execute(query)
+        values = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        logger.info(f"Retrieved {len(values)} unique values for column {column_name}")
+        return values
+    except Exception as e:
+        logger.error(f"Error getting unique values for {column_name}: {e}")
+        return []
 
 
 # APIエンドポイント
@@ -303,16 +312,21 @@ def get_unique_values_api(column):
 
 
 def get_levels():
-    conn = get_db()
-    cursor = conn.cursor()
     try:
-        cursor.execute("SELECT DISTINCT level FROM category")
+        conn = get_db()
+        if conn is None:
+            logger.error("Database connection failed")
+            return []
+        
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT level FROM category WHERE level IS NOT NULL AND level != ''")
         levels = [{"level": row[0]} for row in cursor.fetchall()]
+        cursor.close()
+        logger.info(f"Retrieved {len(levels)} levels")
+        return levels
     except Exception as e:
         logger.error(f"Error loading level option: {e}")
-    finally:
-        conn.close()
-    return levels
+        return []
 
 
 # APIエンドポイント（JSONでチャネル一覧を返す）
@@ -322,23 +336,75 @@ def get_levels_api():
 
 
 def get_channels():
-    conn = get_db()
-    cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id, cname, clink FROM cid")
+        conn = get_db()
+        if conn is None:
+            logger.error("Database connection failed")
+            return []
+        
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, cname, clink FROM cid WHERE cname IS NOT NULL AND cname != ''")
         channels = [{"id": row[0], "channel_name": row[1], "channel_link": row[2]} for row in cursor.fetchall()]
+        cursor.close()
+        logger.info(f"Retrieved {len(channels)} channels")
+        return channels
     except Exception as e:
         logger.error(f"Error loading channel option: {e}")
-        channels = []
-    finally:
-        conn.close()
-    return channels
+        return []
 
 
 # APIエンドポイント（JSONでチャネル一覧を返す）
 @app.route("/get_channels")
 def get_channels_api():
     return jsonify(get_channels())
+
+@app.route("/debug/database-status")
+def debug_database_status():
+    """データベースの状態を確認するデバッグエンドポイント"""
+    try:
+        conn = get_db()
+        if conn is None:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        cursor = conn.cursor()
+        
+        # 各テーブルのレコード数を確認
+        tables = ['cid', 'contents', 'category']
+        table_counts = {}
+        
+        for table in tables:
+            try:
+                cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                count = cursor.fetchone()[0]
+                table_counts[table] = count
+            except Exception as e:
+                table_counts[table] = f"Error: {str(e)}"
+        
+        # サンプルデータを取得
+        sample_data = {}
+        try:
+            cursor.execute("SELECT cname FROM cid LIMIT 3")
+            sample_data['channels'] = [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            sample_data['channels'] = f"Error: {str(e)}"
+        
+        try:
+            cursor.execute("SELECT category_title FROM category LIMIT 3")
+            sample_data['categories'] = [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            sample_data['categories'] = f"Error: {str(e)}"
+        
+        cursor.close()
+        
+        return jsonify({
+            "table_counts": table_counts,
+            "sample_data": sample_data,
+            "database_url": "Configured" if os.getenv('DATABASE_URL') else "Not set"
+        })
+        
+    except Exception as e:
+        logger.error(f"Debug database status error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/submit-feedback', methods=['POST'])

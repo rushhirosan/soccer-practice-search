@@ -1,23 +1,57 @@
 // 初期化
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Content Loaded - Starting initialization");
     displayCards([]); // 初期状態で「検索してください」を表示
     updatePaginationButtons(); // 初期化時にボタンを更新
     initTabSwitching(); // タブ切り替え処理の初期化
     setupSearchHandler(); // 検索の初期設定
-    populateChannelSelect(); // チャネル選択肢を設定
-    populateLevelSelect();
-    populateSelect("type-input", "category_title");  // カテゴリの選択肢を設定
-    populateSelect("players-input", "players");  // プレイヤー数の選択肢を設定
+    
+    // ドロップダウンの選択肢を設定（少し遅延させて確実に実行）
+    setTimeout(() => {
+        console.log("Populating dropdowns...");
+        populateChannelSelect(); // チャネル選択肢を設定
+        populateLevelSelect();
+        populateSelect("type-input", "category_title");  // カテゴリの選択肢を設定
+        populateSelect("players-input", "players");  // プレイヤー数の選択肢を設定
+    }, 100);
+    
     disableTabFocus(); // タブボタンのフォーカス無効化
+    
+    // 5秒後に再度実行（フォールバック）
+    setTimeout(() => {
+        console.log("Fallback: Re-populating dropdowns...");
+        populateChannelSelect();
+        populateLevelSelect();
+        populateSelect("type-input", "category_title");
+        populateSelect("players-input", "players");
+    }, 5000);
 });
 
 // ユニークな選択肢を取得・設定する関数
 function populateSelect(selectId, columnName) {
+    console.log(`Fetching data for ${columnName}...`);
     fetch(`/get_unique_values/${columnName}`)
-        .then(response => response.json())
+        .then(response => {
+            console.log(`Response status for ${columnName}:`, response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log(`Received data for ${columnName}:`, data);
             const select = document.getElementById(selectId);
+            if (!select) {
+                console.error(`Select element with id '${selectId}' not found`);
+                return;
+            }
+            
             select.innerHTML = `<option value="">${selectId === "type-input" ? "カテゴリ" : "プレイヤー数"}を選択</option>`; // 初期値をセット
+
+            if (!Array.isArray(data) || data.length === 0) {
+                console.warn(`No data received for ${columnName}`);
+                return;
+            }
 
             const n_vs_n = [];
             const n_people = [];
@@ -61,54 +95,139 @@ function populateSelect(selectId, columnName) {
                 option.textContent = value;
                 select.appendChild(option);
             });
+            
+            console.log(`Successfully populated ${selectId} with ${data.length} options`);
         })
-        .catch(error => console.error(`${columnName} データ取得エラー:`, error));
+        .catch(error => {
+            console.error(`${columnName} データ取得エラー:`, error);
+            // エラー時にデフォルトの選択肢を追加
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = `<option value="">${selectId === "type-input" ? "カテゴリ" : "プレイヤー数"}を選択</option>`;
+                if (selectId === "type-input") {
+                    const defaultOptions = ["対人", "その他"];
+                    defaultOptions.forEach(value => {
+                        const option = document.createElement("option");
+                        option.value = value;
+                        option.textContent = value;
+                        select.appendChild(option);
+                    });
+                }
+            }
+        });
 }
 
 
 
 
 function populateLevelSelect() {
+    console.log("Fetching levels...");
     fetch("/get_levels")
-        .then(response => response.json())
+        .then(response => {
+            console.log("Levels response status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Received levels data:", data);
             const select = document.getElementById("level-input");
+            if (!select) {
+                console.error("Level select element not found");
+                return;
+            }
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                console.warn("No levels data received");
+                return;
+            }
+            
             data.forEach(level => {
                 const option = document.createElement("option");
                 option.value = level.level;
                 option.textContent = level.level;
                 select.appendChild(option);
             });
+            console.log(`Successfully populated levels with ${data.length} options`);
         })
-        .catch(error => console.error("データ取得エラー:", error));
-
+        .catch(error => {
+            console.error("レベルデータ取得エラー:", error);
+            // エラー時にデフォルトの選択肢を追加
+            const select = document.getElementById("level-input");
+            if (select) {
+                const defaultLevels = ["初級", "中級", "上級"];
+                defaultLevels.forEach(level => {
+                    const option = document.createElement("option");
+                    option.value = level;
+                    option.textContent = level;
+                    select.appendChild(option);
+                });
+            }
+        });
 }
 
 function populateChannelSelect() {
+    console.log("Fetching channels...");
     fetch("/get_channels")
-        .then(response => response.json())
+        .then(response => {
+            console.log("Channels response status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Received channels data:", data);
             const select = document.getElementById("channel-input");
+            if (!select) {
+                console.error("Channel select element not found");
+                return;
+            }
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                console.warn("No channels data received");
+                return;
+            }
+            
             data.forEach(channel => {
                 const option = document.createElement("option");
                 option.value = channel.id;
                 option.textContent = channel.channel_name;
                 select.appendChild(option);
             });
+            
             const ul = document.querySelector(".right-half ul");
-            ul.innerHTML = ""; // リストをクリア
-            data.forEach(channel => {
-                const li = document.createElement("li");
-                const a = document.createElement("a");
-                a.textContent = channel.channel_name;
-                a.href = channel.channel_link; // URLをセット（DBから取得）
-                a.target = "_blank"; // 新しいタブで開く
-                a.rel = "noopener noreferrer"; // セキュリティ対策
-                li.appendChild(a);
-                ul.appendChild(li);
-            });
+            if (ul) {
+                ul.innerHTML = ""; // リストをクリア
+                data.forEach(channel => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.textContent = channel.channel_name;
+                    a.href = channel.channel_link; // URLをセット（DBから取得）
+                    a.target = "_blank"; // 新しいタブで開く
+                    a.rel = "noopener noreferrer"; // セキュリティ対策
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                });
+            }
+            
+            console.log(`Successfully populated channels with ${data.length} options`);
         })
-        .catch(error => console.error("データ取得エラー:", error));
+        .catch(error => {
+            console.error("チャンネルデータ取得エラー:", error);
+            // エラー時にデフォルトの選択肢を追加
+            const select = document.getElementById("channel-input");
+            if (select) {
+                const defaultChannels = ["サッカーチャンネル1", "サッカーチャンネル2"];
+                defaultChannels.forEach((channel, index) => {
+                    const option = document.createElement("option");
+                    option.value = `channel_${index + 1}`;
+                    option.textContent = channel;
+                    select.appendChild(option);
+                });
+            }
+        });
 }
 
 // カード表示用関数

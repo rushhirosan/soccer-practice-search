@@ -1,76 +1,48 @@
 import requests
-import logging
-from typing import Optional
+import os
+from dotenv import load_dotenv
 
-# ロガーの設定
-logging.basicConfig(
-    level=logging.INFO,  # ログレベルを INFO に設定
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler()  # 標準出力にログを表示
-    ]
-)
-logger = logging.getLogger(__name__)
+load_dotenv()
 
-
-def get_channel_details(channel_id, api_key):
-    url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}&key={api_key}"
+def get_channel_id(channel_link):
+    """YouTubeチャンネルリンクからチャンネルIDを取得"""
     try:
-    response = requests.get(url)
+        response = requests.get(channel_link)
         response.raise_for_status()
-    data = response.json()
         
-        if 'error' in data:
-            logger.error(f"YouTube API error for channel {channel_id}: {data['error']}")
-            return 'N/A'
-            
-    if 'items' in data and len(data['items']) > 0:
-            return data['items'][0]['snippet']['title']
-        else:
-            logger.warning(f"No channel data found for {channel_id}")
-            return 'N/A'
+        # HTMLからチャンネルIDを抽出
+        content = response.text
+        if 'channel_id=' in content:
+            start = content.find('channel_id=') + 12
+            end = content.find('&', start)
+            if end == -1:
+                end = content.find('"', start)
+            if end == -1:
+                end = content.find("'", start)
+            if end == -1:
+                end = len(content)
+            return content[start:end]
+        return None
     except Exception as e:
-        logger.error(f"Error fetching channel details for {channel_id}: {e}")
-    return 'N/A'
+        print(f"Error getting channel ID: {e}")
+        return None
 
-
-def get_channel_id(handle: str, api_key: str) -> Optional[str]:
-    """チャンネルハンドルからチャンネルIDを取得する"""
-    logger.info("Fetching channel ID for handle: %s", handle)
-    url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={handle}&type=channel&key={api_key}"
-
+def get_channel_details(channel_id):
+    """チャンネルIDからチャンネルの詳細情報を取得"""
+    api_key = os.getenv('API_KEY')
+    if not api_key:
+        return 'N/A'
+    
+    url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}&key={api_key}"
+    
     try:
         response = requests.get(url)
-        response.raise_for_status()  # ステータスコードがエラーの場合例外を発生
-
+        response.raise_for_status()
         data = response.json()
-        for item in data.get('items', []):
-            channel_id = item['id']['channelId']
-            logger.info("Channel ID found: %s", channel_id)
-            return channel_id
-
-        logger.warning("No channel ID found for handle: %s", handle)
-        return None
-
-    except requests.exceptions.RequestException as e:
-        logger.error("Error fetching channel ID: %s", e)
-        return None
-
-
-# # RUN THIS AS python get_channel_id.py @REGATE
-# if __name__ == '__main__':
-#     load_dotenv()
-#     api_key = os.getenv('API_KEY')
-#
-#     if not api_key:
-#         logger.error("API key is missing. Please set it in the .env file.")
-#     else:
-#         if len(sys.argv) < 2:
-#             logger.error("Please provide a YouTube channel name as a command-line argument.")
-#         else:
-#             channel_name = sys.argv[1]  # コマンドライン引数からチャンネル名を取得
-#             cid = get_channel_id(channel_name, api_key)
-#             if cid:
-#                 logger.info("Channel ID: %s", cid)
-#             else:
-#                 logger.error("Failed to retrieve channel ID.")
+        
+        if data['items']:
+            return data['items'][0]['snippet']['title']
+        return 'N/A'
+    except Exception as e:
+        print(f"Error getting channel details: {e}")
+        return 'N/A'

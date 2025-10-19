@@ -20,7 +20,18 @@ import os
 # contents, category, feedback, cid
 
 # TO .env
-load_dotenv()
+def load_environment():
+    """環境変数を読み込む関数"""
+    # ローカル開発環境用の.envファイルを優先的に読み込み
+    if os.path.exists(".env.local"):
+        load_dotenv(".env.local")
+    elif os.path.exists("../utilities/.env.local"):
+        load_dotenv("../utilities/.env.local")
+    else:
+        load_dotenv()
+
+# 環境変数を読み込み
+load_environment()
 
 # データベース接続情報を環境変数から取得
 # DATABASE_CONFIG = {
@@ -31,10 +42,14 @@ load_dotenv()
 #     'port': os.getenv('DB_PORT', '5432'),
 # }
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+def get_database_url():
+    """データベースURLを取得"""
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url:
+        raise ValueError("DATABASE_URL is not set!")
+    return database_url
 
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL is not set!")
+DATABASE_URL = get_database_url()
 
 # ロガーの設定
 logging.basicConfig(
@@ -49,7 +64,15 @@ logger = logging.getLogger(__name__)
 
 #pool = SimpleConnectionPool(1, 10, **DATABASE_CONFIG)  # 最小1、最大10の接続プール
 
-pool = SimpleConnectionPool(1, 10, dsn=DATABASE_URL)  # 最小1、最大10の接続プール
+# プールは遅延初期化
+pool = None
+
+def get_pool():
+    """接続プールを取得（遅延初期化）"""
+    global pool
+    if pool is None:
+        pool = SimpleConnectionPool(1, 10, dsn=DATABASE_URL)
+    return pool
 
 
 def get_db_connection() -> psycopg2.extensions.connection:
@@ -57,8 +80,8 @@ def get_db_connection() -> psycopg2.extensions.connection:
     if "db" not in g or g.db.closed:
         if "db" in g:
             logger.warning("Stale database connection found. Reacquiring...")
-            pool.putconn(g.pop("db"))  # 古い接続をプールに返却
-        g.db = pool.getconn()
+            get_pool().putconn(g.pop("db"))  # 古い接続をプールに返却
+        g.db = get_pool().getconn()
         logger.info("New database connection acquired")
     return g.db
 
@@ -72,7 +95,7 @@ def use_db_connection() -> Generator[psycopg2.extensions.connection, None, None]
         yield conn
     finally:
         if "db" in g:
-            pool.putconn(g.pop("db"))  # 使い終わったらプールに返却
+            get_pool().putconn(g.pop("db"))  # 使い終わったらプールに返却
             logger.info("Database connection returned to pool")
 
 # def get_db_connection():

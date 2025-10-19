@@ -8,6 +8,7 @@ import unicodedata
 import logging
 import psycopg2
 from typing import Optional, Any
+from dotenv import load_dotenv
 
 
 # ロガーの設定
@@ -60,7 +61,15 @@ def convert_activities(activities: list) -> list:
         # 必要に応じてフォーマットを変換して保存
         activity_dict["upload_date"] = date_obj.strftime("%Y年%m月%d日%H時%M分")
         activity_dict["video_url"] = convert_to_embed_url(activity_dict["video_url"])
-        activity_dict["channel_category"] = get_channel_name_from_id(activity_dict["channel_category"])
+        # チャンネルIDを数値に変換してからチャンネル名を取得
+        try:
+            channel_id = int(activity_dict["channel_category"]) if activity_dict["channel_category"] else None
+            if channel_id:
+                activity_dict["channel_category"] = get_channel_name_from_id(channel_id)
+            else:
+                activity_dict["channel_category"] = "Unknown Channel"
+        except (ValueError, TypeError):
+            activity_dict["channel_category"] = "Unknown Channel"
 
         result.append(activity_dict)
 
@@ -70,19 +79,20 @@ def convert_activities(activities: list) -> list:
 def build_query_with_filters(base_query: str, filters: dict, params: list) -> tuple[str, list]:
     """フィルタに基づいてクエリを構築する補助関数"""
     if filters.get('type_filter'):
-        base_query += " AND category_title = %s"
+        base_query += " AND cat.category_title = %s"
         params.append(filters['type_filter'])
 
     if filters.get('players_filter'):
-        base_query += " AND players = %s"
+        base_query += " AND cat.players = %s"
         params.append(filters['players_filter'])
 
     if filters.get('level_filter'):
-        base_query += " AND level = %s"
+        base_query += " AND cat.level = %s"
         params.append(filters['level_filter'])
 
     if filters.get('channel_filter'):
-        base_query += " AND channel_brand_category = %s"
+        # チャンネルIDで検索
+        base_query += " AND cat.channel_brand_category = %s"
         params.append(filters['channel_filter'])
 
     return base_query, params
@@ -178,7 +188,14 @@ def get_data_by_id(q: str, ids: list, sort: str, offset: int, limit: int = None)
 
 def multi_search_total(q: str, filters: dict) -> int:
     """複数のフィルタ条件に基づいて総データ数を取得"""
-    base_query = "SELECT * FROM category WHERE 1=1"
+    # JOINを使用してより適切な検索を実現
+    base_query = """
+        SELECT DISTINCT c.ID 
+        FROM contents c
+        JOIN category cat ON c.ID = cat.ID
+        JOIN cid ch ON cat.channel_brand_category = ch.id
+        WHERE 1=1
+    """
     params = []
     base_query, params = build_query_with_filters(base_query, filters, params)
 
@@ -189,7 +206,14 @@ def multi_search_total(q: str, filters: dict) -> int:
 
 def multi_search(q: str, filters: dict, sort: str, offset: int, limit: int) -> list:
     """複数のフィルタ条件に基づいてデータを取得"""
-    base_query = "SELECT * FROM category WHERE 1=1"
+    # JOINを使用してより適切な検索を実現
+    base_query = """
+        SELECT DISTINCT c.ID 
+        FROM contents c
+        JOIN category cat ON c.ID = cat.ID
+        JOIN cid ch ON cat.channel_brand_category = ch.id
+        WHERE 1=1
+    """
     params = []
     base_query, params = build_query_with_filters(base_query, filters, params)
 
@@ -319,10 +343,24 @@ def get_levels():
             return []
         
         cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT level FROM category WHERE level IS NOT NULL AND level != ''")
+        # より厳密な重複排除とソート
+        cursor.execute("""
+            SELECT DISTINCT level 
+            FROM category 
+            WHERE level IS NOT NULL AND level != '' 
+            ORDER BY 
+                CASE 
+                    WHEN level = '小学生以上' THEN 1
+                    WHEN level = '中学生' THEN 2
+                    WHEN level = '高校生' THEN 3
+                    WHEN level = 'ユース' THEN 4
+                    ELSE 5
+                END,
+                level
+        """)
         levels = [{"level": row[0]} for row in cursor.fetchall()]
         cursor.close()
-        logger.info(f"Retrieved {len(levels)} levels")
+        logger.info(f"Retrieved {len(levels)} unique levels")
         return levels
     except Exception as e:
         logger.error(f"Error loading level option: {e}")
@@ -343,10 +381,16 @@ def get_channels():
             return []
         
         cursor = conn.cursor()
-        cursor.execute("SELECT id, cname, clink FROM cid WHERE cname IS NOT NULL AND cname != ''")
+        # より厳密な重複排除とソート
+        cursor.execute("""
+            SELECT DISTINCT id, cname, clink 
+            FROM cid 
+            WHERE cname IS NOT NULL AND cname != '' 
+            ORDER BY id
+        """)
         channels = [{"id": row[0], "channel_name": row[1], "channel_link": row[2]} for row in cursor.fetchall()]
         cursor.close()
-        logger.info(f"Retrieved {len(channels)} channels")
+        logger.info(f"Retrieved {len(channels)} unique channels")
         return channels
     except Exception as e:
         logger.error(f"Error loading channel option: {e}")
@@ -1020,5 +1064,13 @@ def sitemap():
 
 
 if __name__ == '__main__':
+    # ローカル開発環境用の.envファイルを優先的に読み込み
+    if os.path.exists("./utilities/.env.local"):
+        load_dotenv("./utilities/.env.local")
+        logger.info("ローカル開発環境の設定を読み込みました")
+    else:
+        load_dotenv("./utilities/.env")
+        logger.info("本番環境の設定を読み込みました")
+    
     port = int(os.environ.get("PORT", 5000))  # PORT環境変数を使用、無ければ5000
     app.run(host="0.0.0.0", port=port, debug=True)  # 0.0.0.0で外部アクセスを許可

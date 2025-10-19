@@ -94,7 +94,13 @@ def update_category(contents):
         logger.info("Fetching contents from the database...")
         contents_data = []
 
-        for content_id, title, *_ in contents:
+        for content in contents:
+            # contentsテーブルの構造に応じてデータを取得
+            if len(content) >= 8:  # channel_categoryカラムを含む場合
+                content_id, title, upload_date, video_url, view_count, like_count, duration, channel_category = content
+            else:  # 古い形式の場合
+                content_id, title, *_ = content
+                channel_category = None
 
             # カテゴリの予測
             category = assign_category(title)
@@ -108,14 +114,13 @@ def update_category(contents):
             level = assign_level(title)
 
             # カテゴリデータをデータベースに挿入
-            #logger.info(f"Inserting data for content ID: {content_id}, Category: {category}, Players: {number_of_players}, Level: {level}")
             contents_data.append({
                 "id": content_id,
                 "category": category,
                 "nop": number_of_players,
-                "level": level
+                "level": level,
+                "channel_id": channel_category
             })
-            #db_access.insert_category_data(content_id, category, number_of_players, level)
 
         logger.info("Category assignment completed successfully.")
     #

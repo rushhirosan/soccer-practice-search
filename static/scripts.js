@@ -46,18 +46,37 @@ function populateSelect(selectId, columnName) {
                 return;
             }
             
-            select.innerHTML = `<option value="">${selectId === "type-input" ? "カテゴリ" : "プレイヤー数"}を選択</option>`; // 初期値をセット
+            // 既存のoptionを完全にクリアしてから初期値をセット
+            select.innerHTML = '';
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = selectId === "type-input" ? "カテゴリを選択" : "プレイヤー数を選択";
+            select.appendChild(defaultOption);
 
             if (!Array.isArray(data) || data.length === 0) {
-                console.warn(`No data received for ${columnName}`);
+                console.warn(`No data received for ${columnName}, using default options`);
+                // データが空の場合はデフォルト値を表示
+                if (selectId === "type-input") {
+                    const defaultOptions = ["対人", "その他"];
+                    defaultOptions.forEach(value => {
+                        const option = document.createElement("option");
+                        option.value = value;
+                        option.textContent = value;
+                        select.appendChild(option);
+                    });
+                }
                 return;
             }
+
+            // 重複を除去したユニークな値のみを処理
+            const uniqueData = [...new Set(data)];
+            console.log(`Unique data for ${columnName}:`, uniqueData);
 
             const n_vs_n = [];
             const n_people = [];
             const others = [];
 
-            data.forEach(value => {
+            uniqueData.forEach(value => {
                 let match;
                 if ((match = value.match(/^(\d+)対(\d+)$/))) {
                     // "n対n" の形式を解析
@@ -103,7 +122,12 @@ function populateSelect(selectId, columnName) {
             // エラー時にデフォルトの選択肢を追加
             const select = document.getElementById(selectId);
             if (select) {
-                select.innerHTML = `<option value="">${selectId === "type-input" ? "カテゴリ" : "プレイヤー数"}を選択</option>`;
+                select.innerHTML = '';
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = selectId === "type-input" ? "カテゴリを選択" : "プレイヤー数を選択";
+                select.appendChild(defaultOption);
+                
                 if (selectId === "type-input") {
                     const defaultOptions = ["対人", "その他"];
                     defaultOptions.forEach(value => {
@@ -138,25 +162,50 @@ function populateLevelSelect() {
                 return;
             }
             
+            // 既存のoptionを完全にクリアしてから初期値をセット
+            select.innerHTML = '';
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "レベルを選択";
+            select.appendChild(defaultOption);
+            
             if (!Array.isArray(data) || data.length === 0) {
-                console.warn("No levels data received");
+                console.warn("No levels data received, using default levels");
+                // データが空の場合はデフォルト値を表示
+                const defaultLevels = ["小学生以上", "中学生", "高校生", "ユース"];
+                defaultLevels.forEach(level => {
+                    const option = document.createElement("option");
+                    option.value = level;
+                    option.textContent = level;
+                    select.appendChild(option);
+                });
                 return;
             }
             
-            data.forEach(level => {
+            // 重複を除去したユニークなレベルのみを処理
+            const uniqueLevels = [...new Set(data.map(level => level.level))];
+            console.log("Unique levels:", uniqueLevels);
+            
+            uniqueLevels.forEach(level => {
                 const option = document.createElement("option");
-                option.value = level.level;
-                option.textContent = level.level;
+                option.value = level;
+                option.textContent = level;
                 select.appendChild(option);
             });
-            console.log(`Successfully populated levels with ${data.length} options`);
+            console.log(`Successfully populated levels with ${uniqueLevels.length} unique options`);
         })
         .catch(error => {
             console.error("レベルデータ取得エラー:", error);
             // エラー時にデフォルトの選択肢を追加
             const select = document.getElementById("level-input");
             if (select) {
-                const defaultLevels = ["初級", "中級", "上級"];
+                select.innerHTML = '';
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "レベルを選択";
+                select.appendChild(defaultOption);
+                
+                const defaultLevels = ["小学生以上", "中学生", "高校生", "ユース"];
                 defaultLevels.forEach(level => {
                     const option = document.createElement("option");
                     option.value = level;
@@ -185,12 +234,25 @@ function populateChannelSelect() {
                 return;
             }
             
+            // 既存のoptionを完全にクリアしてから初期値をセット
+            select.innerHTML = '';
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "チャンネルを選択";
+            select.appendChild(defaultOption);
+            
             if (!Array.isArray(data) || data.length === 0) {
                 console.warn("No channels data received");
                 return;
             }
             
-            data.forEach(channel => {
+            // 重複を除去したユニークなチャンネルのみを処理
+            const uniqueChannels = data.filter((channel, index, self) => 
+                index === self.findIndex(c => c.id === channel.id)
+            );
+            console.log("Unique channels:", uniqueChannels);
+            
+            uniqueChannels.forEach(channel => {
                 const option = document.createElement("option");
                 option.value = channel.id;
                 option.textContent = channel.channel_name;
@@ -219,6 +281,12 @@ function populateChannelSelect() {
             // エラー時にデフォルトの選択肢を追加
             const select = document.getElementById("channel-input");
             if (select) {
+                select.innerHTML = '';
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "チャンネルを選択";
+                select.appendChild(defaultOption);
+                
                 const defaultChannels = ["サッカーチャンネル1", "サッカーチャンネル2"];
                 defaultChannels.forEach((channel, index) => {
                     const option = document.createElement("option");

@@ -132,3 +132,28 @@ https://soccer-practice-search.fly.dev/health
 ## ライセンス
 
 このプロジェクトは MIT ライセンスの下で公開されています。
+
+## フォルダ構成
+
+soccer_practice_search/
+├── app.py                    # メインアプリケーション
+├── main.py                   # データベース初期化
+├── requirements.txt          # 依存関係
+├── README.md                 # プロジェクト説明
+├── todo.md                   # 開発メモ
+├── docs/                     # 📁 ドキュメント
+│   └── LOCAL_DEVELOPMENT.md
+├── scripts/                  # 📁 スクリプト
+│   ├── init_local_db.py
+│   ├── run_local.py
+│   └── reset_env.py
+├── config/                   # 📁 設定ファイル
+│   ├── Dockerfile
+│   ├── fly.toml
+│   ├── Procfile
+│   └── deploy.sh
+├── static/                   # 静的ファイル
+├── templates/                # HTMLテンプレート
+├── tests/                    # テストファイル
+├── utilities/                # ユーティリティ
+└── venv/                     # 仮想環境

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 def setup_local_environment():
     """ローカル環境のセットアップ"""
     # ローカル用の.envファイルを読み込み
-    env_path = os.path.join(os.path.dirname(__file__), 'utilities', '.env.local')
+    env_path = os.path.join(os.path.dirname(__file__), '..', 'utilities', '.env.local')
     load_dotenv(env_path)
     
     # 環境変数を確認
@@ -37,6 +37,10 @@ def run_local_app():
     print("\n=== ローカルアプリケーション起動 ===")
     
     # Flask アプリケーションをインポートして実行
+    # プロジェクトルートディレクトリをPythonパスに追加
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    sys.path.insert(0, project_root)
+    
     from app import app
     
     # ローカル開発用の設定
@@ -59,12 +63,12 @@ def init_local_database():
     print("\n=== ローカルデータベース初期化 ===")
     
     try:
-        from main import app as main_app
-        with main_app.app_context():
-            # main.pyの処理を実行してデータベースを初期化
-            print("データベース初期化を実行中...")
-            # main.pyの処理は直接実行されるので、ここでは何もしない
-            print("データベース初期化完了")
+        # プロジェクトルートディレクトリをPythonパスに追加
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        sys.path.insert(0, project_root)
+        
+        import main
+        print("データベース初期化完了")
     except Exception as e:
         print(f"データベース初期化エラー: {e}")
         return False
@@ -78,12 +82,8 @@ if __name__ == '__main__':
     if not setup_local_environment():
         sys.exit(1)
     
-    # データベース初期化（初回のみ）
-    init_choice = input("\nデータベースを初期化しますか？ (y/n): ").lower().strip()
-    if init_choice == 'y':
-        if not init_local_database():
-            print("データベース初期化に失敗しました")
-            sys.exit(1)
+    # データベース初期化はスキップ（main.pyで既に実行済み）
+    print("\nデータベース初期化をスキップします（main.pyで既に実行済み）")
     
     # アプリケーション起動
     run_local_app()

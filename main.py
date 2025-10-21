@@ -26,14 +26,18 @@ if __name__ == '__main__':
             #########################################################
             # ローカル開発環境用の.envファイルを優先的に読み込み
             if os.path.exists("./utilities/.env.local"):
-                load_dotenv("./utilities/.env.local")
+                load_dotenv("./utilities/.env.local", override=True)
                 logger.info("ローカル開発環境の設定を読み込みました")
+                logger.info(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
             else:
-                load_dotenv("./utilities/.env")
+                load_dotenv("./utilities/.env", override=True)
                 logger.info("本番環境の設定を読み込みました")
+                logger.info(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
             
-            get_db_connection()
             api_key = os.getenv('API_KEY')
+            
+            # データベース接続は環境変数読み込み後に実行
+            get_db_connection()
             
             if not api_key:
                 logger.error("API key is missing. Please set it in the .env file.")

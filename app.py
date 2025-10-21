@@ -100,13 +100,11 @@ def build_query_with_filters(base_query: str, filters: dict, params: list) -> tu
 
 def get_db() -> Optional[psycopg2.extensions.connection]:
     """データベース接続を取得する"""
-    if 'db' not in g:
-        try:
-            g.db = get_db_connection()
-        except Exception as e:
-            logger.error(f"Failed to connect to database: {e}")
-            return None
-    return g.db
+    try:
+        return get_db_connection()
+    except Exception as e:
+        logger.error(f"Failed to connect to database: {e}")
+        return None
 
 
 def execute_query(query: str, params: list = None) -> list:
@@ -342,26 +340,24 @@ def get_levels():
             logger.error("Database connection failed")
             return []
         
-        cursor = conn.cursor()
-        # より厳密な重複排除とソート
-        cursor.execute("""
-            SELECT DISTINCT level 
-            FROM category 
-            WHERE level IS NOT NULL AND level != '' 
-            ORDER BY 
-                CASE 
-                    WHEN level = '小学生以上' THEN 1
-                    WHEN level = '中学生' THEN 2
-                    WHEN level = '高校生' THEN 3
-                    WHEN level = 'ユース' THEN 4
-                    ELSE 5
-                END,
-                level
-        """)
-        levels = [{"level": row[0]} for row in cursor.fetchall()]
-        cursor.close()
-        logger.info(f"Retrieved {len(levels)} unique levels")
-        return levels
+        with conn.cursor() as cursor:
+            # より厳密な重複排除とソート
+            cursor.execute("""
+                SELECT DISTINCT level,
+                    CASE 
+                        WHEN level = '小学生以上' THEN 1
+                        WHEN level = '中学生' THEN 2
+                        WHEN level = '高校生' THEN 3
+                        WHEN level = 'ユース' THEN 4
+                        ELSE 5
+                    END as sort_order
+                FROM category 
+                WHERE level IS NOT NULL AND level != '' 
+                ORDER BY sort_order, level
+            """)
+            levels = [{"level": row[0]} for row in cursor.fetchall()]
+            logger.info(f"Retrieved {len(levels)} unique levels")
+            return levels
     except Exception as e:
         logger.error(f"Error loading level option: {e}")
         return []
@@ -380,18 +376,17 @@ def get_channels():
             logger.error("Database connection failed")
             return []
         
-        cursor = conn.cursor()
-        # より厳密な重複排除とソート
-        cursor.execute("""
-            SELECT DISTINCT id, cname, clink 
-            FROM cid 
-            WHERE cname IS NOT NULL AND cname != '' 
-            ORDER BY id
-        """)
-        channels = [{"id": row[0], "channel_name": row[1], "channel_link": row[2]} for row in cursor.fetchall()]
-        cursor.close()
-        logger.info(f"Retrieved {len(channels)} unique channels")
-        return channels
+        with conn.cursor() as cursor:
+            # より厳密な重複排除とソート
+            cursor.execute("""
+                SELECT DISTINCT id, cname, clink 
+                FROM cid 
+                WHERE cname IS NOT NULL AND cname != '' 
+                ORDER BY id
+            """)
+            channels = [{"id": row[0], "channel_name": row[1], "channel_link": row[2]} for row in cursor.fetchall()]
+            logger.info(f"Retrieved {len(channels)} unique channels")
+            return channels
     except Exception as e:
         logger.error(f"Error loading channel option: {e}")
         return []

@@ -23,15 +23,16 @@ import os
 def load_environment():
     """環境変数を読み込む関数"""
     # ローカル開発環境用の.envファイルを優先的に読み込み
-    if os.path.exists(".env.local"):
-        load_dotenv(".env.local")
+    if os.path.exists("./utilities/.env.local"):
+        load_dotenv("./utilities/.env.local", override=True)
+    elif os.path.exists(".env.local"):
+        load_dotenv(".env.local", override=True)
     elif os.path.exists("../utilities/.env.local"):
-        load_dotenv("../utilities/.env.local")
+        load_dotenv("../utilities/.env.local", override=True)
     else:
-        load_dotenv()
+        load_dotenv(override=True)
 
-# 環境変数を読み込み
-load_environment()
+# 環境変数の読み込みは遅延初期化で行う
 
 # データベース接続情報を環境変数から取得
 # DATABASE_CONFIG = {
@@ -44,12 +45,15 @@ load_environment()
 
 def get_database_url():
     """データベースURLを取得"""
+    # 環境変数を読み込み
+    load_environment()
     database_url = os.getenv('DATABASE_URL')
     if not database_url:
         raise ValueError("DATABASE_URL is not set!")
     return database_url
 
-DATABASE_URL = get_database_url()
+# DATABASE_URLは遅延初期化
+DATABASE_URL = None
 
 # ロガーの設定
 logging.basicConfig(
@@ -71,19 +75,17 @@ def get_pool():
     """接続プールを取得（遅延初期化）"""
     global pool
     if pool is None:
-        pool = SimpleConnectionPool(1, 10, dsn=DATABASE_URL)
+        database_url = get_database_url()
+        pool = SimpleConnectionPool(1, 10, dsn=database_url)
     return pool
 
 
 def get_db_connection() -> psycopg2.extensions.connection:
-    """リクエストごとに同じ接続を再利用する"""
-    if "db" not in g or g.db.closed:
-        if "db" in g:
-            logger.warning("Stale database connection found. Reacquiring...")
-            get_pool().putconn(g.pop("db"))  # 古い接続をプールに返却
-        g.db = get_pool().getconn()
-        logger.info("New database connection acquired")
-    return g.db
+    """新しい接続を毎回作成（プールを使わない）"""
+    database_url = get_database_url()
+    conn = psycopg2.connect(database_url)
+    logger.info("New database connection created")
+    return conn
 
 
 
@@ -94,9 +96,11 @@ def use_db_connection() -> Generator[psycopg2.extensions.connection, None, None]
     try:
         yield conn
     finally:
-        if "db" in g:
-            get_pool().putconn(g.pop("db"))  # 使い終わったらプールに返却
-            logger.info("Database connection returned to pool")
+        try:
+            conn.close()
+            logger.info("Database connection closed")
+        except Exception as e:
+            logger.error(f"Error closing connection: {e}")
 
 # def get_db_connection():
 #     """データベース接続を取得"""

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 def setup_local_environment():
     """ローカル環境のセットアップ"""
     # ローカル用の.envファイルを読み込み
-    env_path = os.path.join(os.path.dirname(__file__), 'utilities', '.env.local')
+    env_path = os.path.join(os.path.dirname(__file__), '..', 'utilities', '.env.local')
     load_dotenv(env_path)
     
     print("=== ローカル開発環境セットアップ ===")
@@ -40,9 +40,12 @@ if __name__ == '__main__':
     # main.pyを実行してデータベース初期化
     print("\nデータベース初期化を実行中...")
     try:
-        from main import app as main_app
-        with main_app.app_context():
-            print("データベース初期化完了")
+        # プロジェクトルートディレクトリをPythonパスに追加
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        sys.path.insert(0, project_root)
+        
+        import main
+        print("データベース初期化完了")
     except Exception as e:
         print(f"データベース初期化エラー: {e}")
         import traceback

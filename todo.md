@@ -1,10 +1,13 @@
 ## ✅ 完了したタスク
 
+2025/10/20
 - [x] 検証環境の確立、postgres
 - [x] チャンネルの整理
 - [x] 整理したチャンネルで再度データベースを構築する
 - [x] プロジェクト構造の整理
 - [x] データベース接続問題の修正
+2025/10/21
+- [x] UI変更
 
 ## 📋 各スクリプトの役割
 
@@ -36,7 +39,7 @@ python scripts/run_local.py
 psql soccer_practice_search_local -c "DROP TABLE IF EXISTS contents, category, cid, feedback CASCADE;"
 
 # 2. 完全再構築
-python main.py
+    python main.py
 
 # 3. アプリケーション起動
 python scripts/run_local.py

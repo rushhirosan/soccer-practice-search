@@ -23,7 +23,12 @@ import os
 def load_environment():
     """環境変数を読み込む関数"""
     # 環境自動判別システム
-    if os.path.exists("./utilities/.env.local"):
+    # 本番環境では環境変数が既に設定されているので、.envファイルの読み込みを優先
+    if os.getenv('FLY_APP_NAME') or os.getenv('DATABASE_URL', '').startswith('postgresql://soccer_user'):
+        # 本番環境
+        load_dotenv("./utilities/.env", override=True)
+    elif os.path.exists("./utilities/.env.local"):
+        # ローカル開発環境
         load_dotenv("./utilities/.env.local", override=True)
     elif os.path.exists(".env.local"):
         load_dotenv(".env.local", override=True)

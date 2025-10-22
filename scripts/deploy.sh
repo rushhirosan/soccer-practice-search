@@ -14,12 +14,7 @@ fly deploy -a soccer-practice-search
 
 # 3. データベース再構築
 echo "🗄️ データベース再構築中..."
-fly ssh console -a soccer-practice-search -C "python -c \"
-import os
-from dotenv import load_dotenv
-load_dotenv('./utilities/.env', override=True)
-import main
-\""
+fly ssh console -a soccer-practice-search -C "python main.py"
 
 echo "✅ デプロイ完了！"
 echo "🌐 サイト: https://soccer-practice-search.fly.dev/"

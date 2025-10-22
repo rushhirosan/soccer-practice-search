@@ -121,6 +121,76 @@ https://soccer-practice-search.fly.dev
 https://soccer-practice-search.fly.dev/health
 ```
 
+## 🚀 データベース更新フロー
+
+### **ローカル環境でのデータ更新**
+
+```bash
+# ワンコマンドでローカル環境構築 + アプリ起動
+./scripts/local.sh
+```
+
+**手動での更新（参考）**
+```bash
+# 1. データベース再構築
+python main.py
+
+# 2. アプリケーション起動
+python app.py
+```
+
+### **本番環境でのデータ更新**
+
+```bash
+# ワンコマンドでデプロイ + データベース再構築
+./scripts/deploy.sh
+```
+
+**手動での更新（参考）**
+```bash
+# 1. デプロイ
+fly deploy -a soccer-practice-search
+
+# 2. データベース再構築
+fly ssh console -a soccer-practice-search -C "python main.py"
+```
+
+## 🔧 環境自動判別システム
+
+### **ローカル環境**
+- `.env.local`ファイルが存在する場合
+- 自動的にローカル設定を読み込み
+- データベース: `postgresql://localhost:5432/soccer_practice_search_local`
+
+### **本番環境**
+- `.env.local`ファイルが存在しない場合
+- 自動的に本番設定を読み込み
+- データベース: Fly.io PostgreSQL
+
+## 📋 各スクリプトの役割
+
+### `main.py`
+- **用途**: 完全なデータベース再構築
+- **内容**: テーブル作成 + YouTube APIからデータ取得 + データ挿入
+- **時間**: 長い（YouTube API制限のため）
+- **環境**: 自動判別（ローカル/本番）
+
+### `app.py`
+- **用途**: Flaskアプリケーション起動
+- **内容**: Webサーバー起動
+- **時間**: 即座
+- **環境**: 自動判別（ローカル/本番）
+
+### `scripts/local.sh`
+- **用途**: ローカル開発環境の完全セットアップ
+- **内容**: データベース再構築 + アプリ起動
+- **時間**: 中程度
+
+### `scripts/deploy.sh`
+- **用途**: 本番環境への完全デプロイ
+- **内容**: コミット + デプロイ + データベース再構築
+- **時間**: 長い
+
 ## 技術スタック
 
 - **バックエンド**: Flask (Python)
@@ -141,19 +211,32 @@ soccer_practice_search/
 ├── requirements.txt          # 依存関係
 ├── README.md                 # プロジェクト説明
 ├── todo.md                   # 開発メモ
+├── Dockerfile                # Docker設定（デプロイ用）
+├── fly.toml                  # Fly.io設定（デプロイ用）
 ├── docs/                     # 📁 ドキュメント
 │   └── LOCAL_DEVELOPMENT.md
 ├── scripts/                  # 📁 スクリプト
-│   ├── init_local_db.py
-│   ├── run_local.py
-│   └── reset_env.py
+│   ├── deploy.sh             # 本番デプロイスクリプト
+│   └── local.sh              # ローカル開発スクリプト
 ├── config/                   # 📁 設定ファイル
-│   ├── Dockerfile
-│   ├── fly.toml
-│   ├── Procfile
-│   └── deploy.sh
+│   ├── Dockerfile            # Docker設定（テンプレート）
+│   ├── fly.toml              # Fly.io設定（テンプレート）
+│   ├── Procfile              # プロセス設定
+│   └── deploy.sh             # デプロイスクリプト（テンプレート）
 ├── static/                   # 静的ファイル
+│   ├── favicon.ico
+│   ├── scripts.js
+│   ├── soccer-og-image.jpg
+│   └── styles.css
 ├── templates/                # HTMLテンプレート
+│   ├── home.html
+│   └── privacy.html
 ├── tests/                    # テストファイル
-├── utilities/                # ユーティリティ
-└── venv/                     # 仮想環境
+│   ├── __init__.py
+│   └── test_get_videos.py
+└── utilities/                # ユーティリティ
+    ├── __init__.py
+    ├── db_access.py
+    ├── get_channel_id.py
+    ├── get_videos.py
+    └── update_category_db.py

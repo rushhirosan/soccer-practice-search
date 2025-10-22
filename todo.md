@@ -1,65 +1,16 @@
 ## ✅ 完了したタスク
 
-2025/10/20
+2025/10
 - [x] 検証環境の確立、postgres
 - [x] チャンネルの整理
 - [x] 整理したチャンネルで再度データベースを構築する
 - [x] プロジェクト構造の整理
 - [x] データベース接続問題の修正
-2025/10/21
 - [x] UI変更
 - [x] 環境自動判別システムの実装
 - [x] デプロイスクリプトの作成
 
-## 🚀 新しい推奨フロー（自動化済み）
 
-### **ローカル開発時**
-```bash
-# ワンコマンドでローカル環境構築 + アプリ起動
-./scripts/local.sh
-```
-
-### **本番更新時**
-```bash
-# ワンコマンドでデプロイ + データベース再構築
-./scripts/deploy.sh
-```
-
-## 📋 各スクリプトの役割
-
-### `main.py`
-- **用途**: 完全なデータベース再構築
-- **内容**: テーブル作成 + YouTube APIからデータ取得 + データ挿入
-- **時間**: 長い（YouTube API制限のため）
-- **環境**: 自動判別（ローカル/本番）
-
-### `app.py`
-- **用途**: Flaskアプリケーション起動
-- **内容**: Webサーバー起動
-- **時間**: 即座
-- **環境**: 自動判別（ローカル/本番）
-
-### `scripts/local.sh`
-- **用途**: ローカル開発環境の完全セットアップ
-- **内容**: データベース再構築 + アプリ起動
-- **時間**: 中程度
-
-### `scripts/deploy.sh`
-- **用途**: 本番環境への完全デプロイ
-- **内容**: コミット + デプロイ + データベース再構築
-- **時間**: 長い
-
-## 🔧 環境自動判別システム
-
-### **ローカル環境**
-- `.env.local`ファイルが存在する場合
-- 自動的にローカル設定を読み込み
-- データベース: `postgresql://localhost:5432/soccer_practice_search_local`
-
-### **本番環境**
-- `.env.local`ファイルが存在しない場合
-- 自動的に本番設定を読み込み
-- データベース: Fly.io PostgreSQL
 
 ## 📊 新しいチャンネル構成
 
@@ -70,27 +21,48 @@
 5. REGATEドリブル塾
 6. ゲキサカ
 
-## 🎯 従来の手動コマンド（参考）
+## 試行チャンネル
 
-### **ローカル開発（手動）**
-```bash
-# 1. データベース再構築
-python main.py
+### Depreciation
 
-# 2. アプリケーション起動
-python app.py
-```
+#### Use
 
-### **本番更新（手動）**
-```bash
-# 1. デプロイ
-fly deploy -a soccer-practice-search
+#1 UCbOAexGZEFnMfgQZAomSrHQ 雑誌『サッカークリニック』, web版 (『サックリ』) https://www.youtube.com/@web7560
+#2 UCjDIumxHAYlytjbTKXRSicA COACH UNITED編集部 https://www.youtube.com/@coachunited5580
+#3 UC4Nrt3aTTnjVAW_ein2nTQQ REGATEドリブル塾 https://www.youtube.com/@REGATE
+#4 UCHHHsRNfUopr6fcFaQbhqHQ SOLUNA Ch https://www.youtube.com/@SOLUNA-FOOTBALL
+#5 UCinpZCQt_IPjmOOnABQp96w サッカーのみちしるべ https://www.youtube.com/@%E3%82%B5%E3%83%83%E3%82%AB%E3%83%BC%E3%81%AE%E3%81%BF%E3%81%A1%E3%81%97%E3%82%8B%E3%81%B9
+#6 UCRwozhdOYYgp2v_UtuRjIbg ゲキサカ https://www.youtube.com/@gekisakafc
 
-# 2. データベース再構築
-fly ssh console -a soccer-practice-search -C "python -c \"
-import os
-from dotenv import load_dotenv
-load_dotenv('./utilities/.env', override=True)
-import main
-\""
-```
+#### Not used
+
+## UC_WCtGlbSkJVg3bgxOPja5g サカサポChannel https://www.youtube.com/@sakasapo
+## UCg2c6yQb47SSeKbg1n9HSOg KSS SOCCER SCHOOL https://www.youtube.com/@570919katoyoshitaka
+## UCuC6lqWJeqBa0I4C4KDgRdw サカイク編集部 https://www.youtube.com/@sakaiku11
+## UC4V5lKucWAYx5m41wfO5s4A Footy14Skills https://www.youtube.com/@Footy14Skills
+## UCq3OMmpMGUFCgTm0UFCtAFQ イースリーショップ https://www.youtube.com/@%E3%82%A4%E3%83%BC%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%83%E3%83%97
+
+#### OTHERS
+
+# CHANNEL_ID=UCq3OMmpMGUFCgTm0UFCtAFQ
+# UCbOAexGZEFnMfgQZAomSrHQ
+# @web7560: UCbOAexGZEFnMfgQZAomSrHQ: https://www.youtube.com/@web7560 (soccer clinic)
+# @coachunited5580: UCjDIumxHAYlytjbTKXRSicA: https://www.youtube.com/@coachunited5580
+# @gekisakafc: UCRwozhdOYYgp2v_UtuRjIbg: https://www.youtube.com/@gekisakafc
+# @sakasapo: UC_WCtGlbSkJVg3bgxOPja5g: https://www.youtube.com/@sakasapo
+# @REGATE: UC4Nrt3aTTnjVAW_ein2nTQQ: https://www.youtube.com/@REGATE
+# @570919katoyoshitaka: https://www.youtube.com/@570919katoyoshitaka (kss)
+# @sakaiku11: UCuC6lqWJeqBa0I4C4KDgRdw: https://www.youtube.com/@sakaiku11
+# @Footy14Skills: UC4V5lKucWAYx5m41wfO5s4A: https://www.youtube.com/@Footy14Skills
+# @イースリーショップ: UCq3OMmpMGUFCgTm0UFCtAFQ: https://www.youtube.com/@%E3%82%A4%E3%83%BC%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%83%E3%83%97
+
+
+#(1, 'UCq3OMmpMGUFCgTm0UFCtAFQ', 'イースリーショップ', 'https://www.youtube.com/@%E3%82%A4%E3%83%BC%E3%82%B9%E3%83%AA%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%83%E3%83%97')
+#(4, 'UCbOAexGZEFnMfgQZAomSrHQ', '雑誌『サッカークリニック』, web版 (『サックリ』)', 'https://www.youtube.com/@web7560')
+#(5, 'UCjDIumxHAYlytjbTKXRSicA', 'COACH UNITED編集部', 'https://www.youtube.com/@coachunited5580')
+#(6, 'UCRwozhdOYYgp2v_UtuRjIbg', 'ゲキサカ', 'https://www.youtube.com/@gekisakafc')
+#(7, 'UC_WCtGlbSkJVg3bgxOPja5g', 'サカサポChannel', 'https://www.youtube.com/@sakasapo')
+#(8, 'UC4Nrt3aTTnjVAW_ein2nTQQ', 'REGATEドリブル塾', 'https://www.youtube.com/@REGATE')
+#(9, 'UCg2c6yQb47SSeKbg1n9HSOg', 'KSS SOCCER SCHOOL', 'https://www.youtube.com/@570919katoyoshitaka')
+#(10, 'UCuC6lqWJeqBa0I4C4KDgRdw', 'サカイク編集部', 'https://www.youtube.com/@sakaiku11')
+#(12, 'UC4V5lKucWAYx5m41wfO5s4A', 'Footy14Skills', 'https://www.youtube.com/@Footy14Skills')

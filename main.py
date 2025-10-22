@@ -24,15 +24,15 @@ if __name__ == '__main__':
             #########################################################
             ## データベース初期化
             #########################################################
-            # ローカル開発環境用の.envファイルを優先的に読み込み
+            # 環境自動判別システム
             if os.path.exists("./utilities/.env.local"):
                 load_dotenv("./utilities/.env.local", override=True)
                 logger.info("ローカル開発環境の設定を読み込みました")
-                logger.info(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
             else:
                 load_dotenv("./utilities/.env", override=True)
                 logger.info("本番環境の設定を読み込みました")
-                logger.info(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
+            
+            logger.info(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
             
             api_key = os.getenv('API_KEY')
             

@@ -22,7 +22,7 @@ import os
 # TO .env
 def load_environment():
     """環境変数を読み込む関数"""
-    # ローカル開発環境用の.envファイルを優先的に読み込み
+    # 環境自動判別システム
     if os.path.exists("./utilities/.env.local"):
         load_dotenv("./utilities/.env.local", override=True)
     elif os.path.exists(".env.local"):

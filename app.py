@@ -1059,7 +1059,7 @@ def sitemap():
 
 
 if __name__ == '__main__':
-    # ローカル開発環境用の.envファイルを優先的に読み込み
+    # 環境自動判別システム
     if os.path.exists("./utilities/.env.local"):
         load_dotenv("./utilities/.env.local")
         logger.info("ローカル開発環境の設定を読み込みました")

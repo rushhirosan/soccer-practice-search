@@ -25,12 +25,19 @@ if __name__ == '__main__':
             ## データベース初期化
             #########################################################
             # 環境自動判別システム
-            if os.path.exists("./utilities/.env.local"):
+            # 本番環境では環境変数が既に設定されているので、.envファイルの読み込みを優先
+            if os.getenv('FLY_APP_NAME') or os.getenv('DATABASE_URL', '').startswith('postgresql://soccer_user'):
+                # 本番環境
+                load_dotenv("./utilities/.env", override=True)
+                logger.info("本番環境の設定を読み込みました")
+            elif os.path.exists("./utilities/.env.local"):
+                # ローカル開発環境
                 load_dotenv("./utilities/.env.local", override=True)
                 logger.info("ローカル開発環境の設定を読み込みました")
             else:
+                # フォールバック
                 load_dotenv("./utilities/.env", override=True)
-                logger.info("本番環境の設定を読み込みました")
+                logger.info("デフォルト環境の設定を読み込みました")
             
             logger.info(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
             

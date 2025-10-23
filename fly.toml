@@ -16,6 +16,7 @@ primary_region = "nrt"
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
+  # コスト削減: アイドル時に自動停止
   processes = ["app"]
 
   [[http_service.checks]]
@@ -28,4 +29,4 @@ primary_region = "nrt"
 [[vm]]
   cpu_kind = "shared"
   cpus = 2
-  memory_mb = 1024 
+  memory_mb = 2048 

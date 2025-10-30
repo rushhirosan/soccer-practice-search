@@ -753,7 +753,7 @@ button:active {
   }
   
   .card-container {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: 1fr !important;
     gap: 0.75rem !important;
     padding-bottom: 6rem !important; /* モバイルでもフッター分のパディングを追加 */
     width: 100% !important;
@@ -770,6 +770,63 @@ button:active {
   
   .tab-button {
     border-radius: 0;
+  }
+
+  /* モバイル: 入力とボタンの可読性/タップ領域を改善 */
+  input[type="text"], select, button {
+    font-size: 16px; /* iOSのズーム防止 */
+    padding: 0.6rem 0.8rem;
+  }
+
+  .feedback-form input,
+  .feedback-form textarea,
+  .feedback-form select {
+    font-size: 16px;
+    padding: 0.75rem 1rem;
+  }
+
+  .feedback-form button,
+  .pagination button,
+  button {
+    padding: 0.75rem 1rem;
+  }
+
+  header h1 {
+    font-size: 1rem;
+  }
+
+  .card .info {
+    grid-template-columns: 1fr; /* 情報ブロックを縦並びに */
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .video-container iframe {
+    height: auto !important;
+    aspect-ratio: 16 / 9; /* モバイルでの埋め込み比率を維持 */
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs .tab-button {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .search-container h2 {
+    font-size: 0.95rem;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .pagination #video-count {
+    font-size: 0.85rem;
   }
 }
 

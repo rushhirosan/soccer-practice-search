@@ -426,14 +426,12 @@ button:active {
 
 /* カードコンテナ */
 .card-container {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  padding-bottom: 6rem; /* フッターの高さ分のマージンを追加 */
-  width: 100%;
-  max-width: 100%;
-  align-items: stretch;
-  justify-items: stretch;
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem !important;
+  padding-bottom: 6rem !important; /* フッターの高さ分のマージンを追加 */
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* カード */
@@ -522,13 +520,12 @@ button:active {
 }
 
 .video-container iframe {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  height: auto;
+  width: 100% !important;
+  height: 300px !important;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  min-width: 0;
-  max-width: 100%;
+  min-width: 0 !important;
+  max-width: none !important;
 }
 
 /* ページネーション */
@@ -743,8 +740,9 @@ button:active {
   }
   
   .card-container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    width: 100% !important;
+    max-width: none !important;
   }
   
   .split-container {
@@ -765,9 +763,11 @@ button:active {
   }
   
   .card-container {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding-bottom: 6rem; /* モバイルでもフッター分のパディングを追加 */
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+    padding-bottom: 6rem !important; /* モバイルでもフッター分のパディングを追加 */
+    width: 100% !important;
+    max-width: none !important;
   }
   
   .search-container {
@@ -815,6 +815,11 @@ button:active {
     grid-template-columns: 1fr; /* 情報ブロックを縦並びに */
     gap: 0.5rem;
     padding: 0.75rem;
+  }
+
+  .video-container iframe {
+    height: auto !important;
+    aspect-ratio: 16 / 9; /* モバイルでの埋め込み比率を維持 */
   }
 }
 
@@ -870,7 +875,7 @@ button:active {
 }
 
 /* プライバシーポリシーページ用スタイル */
-.content-wrapper .privacy-section {
+.content-wrapper section {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
@@ -879,7 +884,7 @@ button:active {
   box-shadow: var(--shadow-md);
 }
 
-.content-wrapper .privacy-section h2 {
+.content-wrapper h2 {
   color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 600;
@@ -888,34 +893,34 @@ button:active {
   border-bottom: 2px solid var(--border-color);
 }
 
-.content-wrapper .privacy-section h2:first-child {
+.content-wrapper h2:first-child {
   margin-top: 0;
 }
 
-.content-wrapper .privacy-section p {
+.content-wrapper p {
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 1rem;
 }
 
-.content-wrapper .privacy-section ul {
+.content-wrapper ul {
   margin: 1rem 0;
   padding-left: 2rem;
 }
 
-.content-wrapper .privacy-section li {
+.content-wrapper li {
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 0.5rem;
 }
 
-.content-wrapper .privacy-section a {
+.content-wrapper a {
   color: var(--primary-color);
   text-decoration: none;
   transition: var(--transition);
 }
 
-.content-wrapper .privacy-section a:hover {
+.content-wrapper a:hover {
   color: var(--primary-hover);
   text-decoration: underline;
 }

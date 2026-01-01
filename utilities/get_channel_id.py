@@ -27,9 +27,10 @@ def get_channel_id(channel_link):
         print(f"Error getting channel ID: {e}")
         return None
 
-def get_channel_details(channel_id):
+def get_channel_details(channel_id, api_key=None):
     """チャンネルIDからチャンネルの詳細情報を取得"""
-    api_key = os.getenv('API_KEY')
+    if not api_key:
+        api_key = os.getenv('API_KEY')
     if not api_key:
         return 'N/A'
     

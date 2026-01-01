@@ -620,6 +620,46 @@ def init_database():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/create-indexes', methods=['POST'])
+def create_indexes_endpoint():
+    """検索パフォーマンス向上のためのインデックスを作成するエンドポイント"""
+    try:
+        from utilities.create_indexes import (
+            check_pg_trgm_extension, check_existing_indexes, create_indexes
+        )
+        
+        conn = get_db()
+        if conn is None:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        # 既存インデックスの確認
+        existing_indexes = check_existing_indexes(conn)
+        
+        # pg_trgm拡張機能の確認・作成
+        pg_trgm_available = check_pg_trgm_extension(conn)
+        
+        # インデックスの作成
+        created, skipped, errors = create_indexes(conn)
+        
+        # 作成後のインデックス確認
+        final_indexes = check_existing_indexes(conn)
+        
+        return jsonify({
+            "message": "Index creation completed",
+            "pg_trgm_available": pg_trgm_available,
+            "created": created,
+            "skipped": skipped,
+            "errors": errors,
+            "existing_indexes_count": len(existing_indexes),
+            "final_indexes_count": len(final_indexes)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creating indexes: {e}")
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
 @app.route('/test-simple', methods=['GET'])
 def test_simple():
     """シンプルなテストエンドポイント"""

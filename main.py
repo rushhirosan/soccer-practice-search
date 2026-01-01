@@ -25,15 +25,15 @@ if __name__ == '__main__':
             ## データベース初期化
             #########################################################
             # 環境自動判別システム
-            # 本番環境では環境変数が既に設定されているので、.envファイルの読み込みを優先
-            if os.getenv('FLY_APP_NAME') or os.getenv('DATABASE_URL', '').startswith('postgresql://soccer_user'):
-                # 本番環境
-                load_dotenv("./utilities/.env", override=True)
-                logger.info("本番環境の設定を読み込みました")
-            elif os.path.exists("./utilities/.env.local"):
-                # ローカル開発環境
+            # ローカル環境を最優先でチェック
+            if os.path.exists("./utilities/.env.local"):
+                # ローカル開発環境（最優先）
                 load_dotenv("./utilities/.env.local", override=True)
                 logger.info("ローカル開発環境の設定を読み込みました")
+            elif os.getenv('FLY_APP_NAME'):
+                # 本番環境（FLY_APP_NAMEが設定されている場合）
+                load_dotenv("./utilities/.env", override=True)
+                logger.info("本番環境の設定を読み込みました")
             else:
                 # フォールバック
                 load_dotenv("./utilities/.env", override=True)
@@ -76,7 +76,7 @@ if __name__ == '__main__':
                 try:
                     logger.info(f"Processing channel {c_num}/{len(channels)}: {cid}")
                     
-                    channel_name = get_channel_details(cid)
+                    channel_name = get_channel_details(cid, api_key)
                     if channel_name == "N/A":
                         logger.error(f"Failed to retrieve channel name for {cid}")
                         continue  # エラーが発生しても次のチャンネルを処理

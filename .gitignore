@@ -3,6 +3,7 @@ venv/
 misc/
 utilities/todolist
 utilities/.env
+utilities/.env.local
 utilities/__pycache__/
 tests/__pycache__/
 *.db

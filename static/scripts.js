@@ -1,6 +1,29 @@
+// セキュリティ: CSRFトークンを保持する変数
+let csrfToken = null;
+
+// CSRFトークンを取得する関数
+async function getCsrfToken() {
+    if (csrfToken) {
+        return csrfToken;
+    }
+    try {
+        const response = await fetch('/get-csrf-token');
+        const data = await response.json();
+        csrfToken = data.csrf_token;
+        return csrfToken;
+    } catch (error) {
+        console.error('CSRFトークンの取得に失敗しました:', error);
+        return null;
+    }
+}
+
 // 初期化
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log("DOM Content Loaded - Starting initialization");
+    
+    // セキュリティ: CSRFトークンを事前に取得
+    await getCsrfToken();
+    
     displayCards([]); // 初期状態で「検索してください」を表示
     updatePaginationButtons(); // 初期化時にボタンを更新
     initTabSwitching(); // タブ切り替え処理の初期化
@@ -261,12 +284,19 @@ function populateChannelSelect() {
             
             const ul = document.querySelector(".right-half ul");
             if (ul) {
+                // セキュリティ: innerHTML = "" は空文字列なので安全
                 ul.innerHTML = ""; // リストをクリア
                 data.forEach(channel => {
                     const li = document.createElement("li");
                     const a = document.createElement("a");
-                    a.textContent = channel.channel_name;
-                    a.href = channel.channel_link; // URLをセット（DBから取得）
+                    a.textContent = channel.channel_name || '';
+                    // セキュリティ: URLの検証（http/httpsのみ許可）
+                    const channelLink = channel.channel_link || '';
+                    if (channelLink.startsWith('http://') || channelLink.startsWith('https://')) {
+                        a.href = channelLink;
+                    } else {
+                        a.href = '#'; // 無効なURLの場合は#に設定
+                    }
                     a.target = "_blank"; // 新しいタブで開く
                     a.rel = "noopener noreferrer"; // セキュリティ対策
                     li.appendChild(a);
@@ -318,19 +348,57 @@ function displayCards(data, limit = 10) {
 function createCard(activity) {
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `
-        <div><strong>${activity.title}</strong></div>
-        <div class="video-container">
-            <iframe src="${activity.video_url}" frameborder="0" allowfullscreen></iframe>
-        </div>
-        <div class="info">
-            <div>アップロード日: ${activity.upload_date}</div>
-            <div>再生回数: ${activity.view_count}</div>
-            <div>いいね: ${activity.like_count}</div>
-            <div>動画時間: ${activity.duration}</div>
-            <div>チャネル名: ${activity.channel_category}</div>
-        </div>
-    `;
+    
+    // セキュリティ: XSS対策 - innerHTMLの代わりにtextContentとcreateElementを使用
+    const titleDiv = document.createElement('div');
+    const titleStrong = document.createElement('strong');
+    titleStrong.textContent = activity.title || '';
+    titleDiv.appendChild(titleStrong);
+    
+    const videoContainer = document.createElement('div');
+    videoContainer.className = 'video-container';
+    const iframe = document.createElement('iframe');
+    // セキュリティ: video_urlの検証（YouTubeの埋め込みURLのみ許可）
+    const videoUrl = activity.video_url || '';
+    if (videoUrl.startsWith('https://www.youtube.com/embed/') || 
+        videoUrl.startsWith('https://youtube.com/embed/')) {
+        iframe.src = videoUrl;
+    } else {
+        // 無効なURLの場合は空にするか、デフォルト値を設定
+        iframe.src = '';
+    }
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', '');
+    videoContainer.appendChild(iframe);
+    
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'info';
+    
+    const uploadDateDiv = document.createElement('div');
+    uploadDateDiv.textContent = `アップロード日: ${activity.upload_date || ''}`;
+    
+    const viewCountDiv = document.createElement('div');
+    viewCountDiv.textContent = `再生回数: ${activity.view_count || 0}`;
+    
+    const likeCountDiv = document.createElement('div');
+    likeCountDiv.textContent = `いいね: ${activity.like_count || 0}`;
+    
+    const durationDiv = document.createElement('div');
+    durationDiv.textContent = `動画時間: ${activity.duration || ''}`;
+    
+    const channelDiv = document.createElement('div');
+    channelDiv.textContent = `チャネル名: ${activity.channel_category || ''}`;
+    
+    infoDiv.appendChild(uploadDateDiv);
+    infoDiv.appendChild(viewCountDiv);
+    infoDiv.appendChild(likeCountDiv);
+    infoDiv.appendChild(durationDiv);
+    infoDiv.appendChild(channelDiv);
+    
+    card.appendChild(titleDiv);
+    card.appendChild(videoContainer);
+    card.appendChild(infoDiv);
+    
     document.querySelector('.card-container').appendChild(card);
 }
 
@@ -368,13 +436,32 @@ function togglePaginationVisibility(totalResults) {
 function search(resetPage = true) {
     if (resetPage) currentPage = 1;
 
+    // セキュリティ: 入力値の取得と基本的な検証
+    const searchInput = document.getElementById('search-input');
+    const typeInput = document.getElementById('type-input');
+    const playersInput = document.getElementById('players-input');
+    const levelInput = document.getElementById('level-input');
+    const channelInput = document.getElementById('channel-input');
+    const sortInput = document.getElementById('sort-input');
+
+    // セキュリティ: 入力値の長さ制限（クライアント側検証）
+    const query = (searchInput.value || '').trim().substring(0, 200); // 最大200文字
+    const type = (typeInput.value || '').trim().substring(0, 100);
+    const players = (playersInput.value || '').trim().substring(0, 100);
+    const level = (levelInput.value || '').trim().substring(0, 100);
+    const channel = (channelInput.value || '').trim().substring(0, 100);
+    
+    // セキュリティ: sortパラメータのホワイトリスト検証（クライアント側）
+    const allowedSorts = ['upload_date', 'view_count', 'like_count'];
+    const sort = allowedSorts.includes(sortInput.value) ? sortInput.value : 'upload_date';
+
     const queryParams = new URLSearchParams({
-        q: document.getElementById('search-input').value,
-        type: document.getElementById('type-input').value,
-        players: document.getElementById('players-input').value,
-        level: document.getElementById('level-input').value,
-        channel: document.getElementById('channel-input').value,
-        sort: document.getElementById('sort-input').value,
+        q: query,
+        type: type,
+        players: players,
+        level: level,
+        channel: channel,
+        sort: sort,
         limit: getLimit(),
         offset: (currentPage - 1) * getLimit(),
     }).toString();
@@ -477,11 +564,19 @@ function setupSearchHandler() {
 }
 
 // フィードバック送信処理
-function submitFeedback(formData) {
+async function submitFeedback(formData) {
+    // セキュリティ: CSRFトークンを取得
+    const token = await getCsrfToken();
+    if (!token) {
+        alert('セキュリティトークンの取得に失敗しました。ページを再読み込みしてください。');
+        return;
+    }
+    
     fetch('/submit-feedback', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': token  // セキュリティ: CSRFトークンをヘッダーに含める
         },
         body: JSON.stringify(formData)
     })
@@ -489,11 +584,23 @@ function submitFeedback(formData) {
         if (response.ok) {
             document.getElementById('responseMessage').classList.remove('hidden');
             document.getElementById('feedbackForm').reset();
+            // トークンを再取得（次の送信に備えて）
+            csrfToken = null;
+            getCsrfToken();
         } else {
-            alert('送信に失敗しました。もう一度お試しください。');
+            if (response.status === 400) {
+                // CSRFエラーの可能性がある場合はトークンを再取得
+                csrfToken = null;
+                alert('送信に失敗しました。もう一度お試しください。');
+            } else {
+                alert('送信に失敗しました。もう一度お試しください。');
+            }
         }
     })
-    .catch(error => console.error('エラー:', error));
+    .catch(error => {
+        console.error('エラー:', error);
+        alert('送信に失敗しました。もう一度お試しください。');
+    });
 }
 
 // タブボタンのフォーカス無効化

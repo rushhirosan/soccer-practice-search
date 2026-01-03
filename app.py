@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, g
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from datetime import datetime
 from utilities.db_access import get_db_connection, pool, get_channel_name_from_id
 from contextlib import closing
@@ -23,6 +24,17 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 DATABASE = 'soccer_content.db'
+
+# セキュリティ: CSRF保護の設定
+# SECRET_KEYは環境変数から取得、なければランダムに生成（本番環境では必ず環境変数で設定すること）
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(32).hex())
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # トークンの有効期限（秒）
+# JSONリクエストでもCSRFトークンを検証するための設定
+app.config['WTF_CSRF_HEADERS'] = ['X-CSRFToken', 'X-CSRF-Token']
+
+# CSRF保護を有効化
+csrf = CSRFProtect(app)
 
 
 def convert_to_embed_url(video_url: str) -> str:
@@ -162,6 +174,11 @@ def get_data_by_id(q: str, ids: list, sort: str, offset: int, limit: int = None)
     if not ids:
         return []
 
+    # セキュリティ: sortパラメータのホワイトリスト検証
+    allowed_sort_columns = ['upload_date', 'view_count', 'like_count']
+    if sort not in allowed_sort_columns:
+        sort = 'upload_date'  # デフォルト値にフォールバック
+
     # PostgreSQL では %s を使う
     placeholders = ', '.join(['%s'] * len(ids))
     q_like = f"%{q}%" if q else None
@@ -177,6 +194,7 @@ def get_data_by_id(q: str, ids: list, sort: str, offset: int, limit: int = None)
         query += " AND title LIKE %s"
         params.append(q_like)
 
+    # セキュリティ: ホワイトリスト検証済みのsortカラムのみ使用
     query += f" ORDER BY {sort} DESC LIMIT %s OFFSET %s"
     params.extend([limit, offset])
 
@@ -229,8 +247,24 @@ def search_activities():
     level_filter = request.args.get('level', '')
     channel_filter = request.args.get('channel', '')
     sort = request.args.get('sort', 'upload_date')
-    limit = int(request.args.get('limit', 10))
-    offset = int(request.args.get('offset', 0))
+    
+    # セキュリティ: sortパラメータのホワイトリスト検証
+    allowed_sort_columns = ['upload_date', 'view_count', 'like_count']
+    if sort not in allowed_sort_columns:
+        sort = 'upload_date'  # デフォルト値にフォールバック
+    
+    # セキュリティ: limitとoffsetの値検証
+    try:
+        limit = int(request.args.get('limit', 10))
+        limit = max(1, min(limit, 100))  # 1-100の範囲に制限
+    except (ValueError, TypeError):
+        limit = 10
+    
+    try:
+        offset = int(request.args.get('offset', 0))
+        offset = max(0, offset)  # 0以上に制限
+    except (ValueError, TypeError):
+        offset = 0
 
     filters = {
         'type_filter': type_filter,
@@ -253,6 +287,7 @@ def search_activities():
 
                     total = c.fetchone()[0]
 
+                    # セキュリティ: sortパラメータは既にホワイトリスト検証済み
                     c.execute(f'''
                         SELECT * FROM contents
                         WHERE title ILIKE %s
@@ -303,12 +338,19 @@ def save_feedback_to_db(feedback):
 # DBからユニークな値を取得する関数
 def get_unique_values(column_name):
     try:
+        # セキュリティ: カラム名のホワイトリスト検証
+        allowed_columns = ['category_title', 'players']
+        if column_name not in allowed_columns:
+            logger.error(f"Invalid column name: {column_name}")
+            return []
+        
         conn = get_db()
         if conn is None:
             logger.error("Database connection failed")
             return []
         
         cursor = conn.cursor()
+        # セキュリティ: ホワイトリスト検証済みのカラム名のみ使用
         query = f"""
             SELECT DISTINCT {column_name} 
             FROM category 
@@ -408,11 +450,13 @@ def debug_database_status():
         cursor = conn.cursor()
         
         # 各テーブルのレコード数を確認
-        tables = ['cid', 'contents', 'category']
+        # セキュリティ: テーブル名のホワイトリスト検証
+        allowed_tables = ['cid', 'contents', 'category', 'feedback']
         table_counts = {}
         
-        for table in tables:
+        for table in allowed_tables:
             try:
+                # セキュリティ: ホワイトリスト検証済みのテーブル名のみ使用
                 cursor.execute(f"SELECT COUNT(*) FROM {table}")
                 count = cursor.fetchone()[0]
                 table_counts[table] = count
@@ -446,18 +490,46 @@ def debug_database_status():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/get-csrf-token', methods=['GET'])
+def get_csrf_token():
+    """CSRFトークンを取得するエンドポイント"""
+    return jsonify({'csrf_token': generate_csrf()})
+
+
 @app.route('/submit-feedback', methods=['POST'])
 def submit_feedback():
     data = request.json
 
+    if not data:
+        return jsonify({'error': 'Invalid request'}), 400
+
     logger.info(f"Received feedback submission: {data}")
+
+    # セキュリティ: 入力値の検証とサニタイゼーション
+    name = (data.get('name') or '').strip()[:100]  # 最大100文字
+    email = (data.get('email') or '').strip()[:255]  # 最大255文字
+    category = (data.get('category') or '').strip()[:50]  # 最大50文字
+    message = (data.get('message') or '').strip()[:5000]  # 最大5000文字
+
+    # 必須項目の検証
+    if not message:
+        return jsonify({'error': 'Message is required'}), 400
+
+    # カテゴリのホワイトリスト検証
+    allowed_categories = ['general', 'bug', 'suggestion']
+    if category and category not in allowed_categories:
+        category = 'general'  # デフォルト値にフォールバック
+
+    # メールアドレスの形式検証（簡易版）
+    if email and '@' not in email:
+        email = ''  # 無効なメールアドレスは空文字に
 
     # フィードバックの詳細を抽出
     feedback_details = {
-        'name': data.get('name'),
-        'email': data.get('email'),
-        'category': data.get('category'),
-        'message': data.get('message')
+        'name': name,
+        'email': email,
+        'category': category,
+        'message': message
     }
 
     # フィードバックをデータベースに保存
@@ -506,8 +578,10 @@ def database_stats():
             stats = {"tables": tables, "counts": {}}
             
             # 各テーブルの件数を取得
+            # セキュリティ: テーブル名は既にinformation_schemaから取得した安全な値のみ
             for table in tables:
                 try:
+                    # セキュリティ: information_schemaから取得したテーブル名のみ使用
                     c.execute(f"SELECT COUNT(*) FROM {table}")
                     count = c.fetchone()[0]
                     stats["counts"][table] = count

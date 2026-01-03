@@ -1,4 +1,5 @@
 Flask
+Flask-WTF
 pandas
 python-dotenv
 psycopg2-binary

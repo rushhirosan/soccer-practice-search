@@ -116,10 +116,17 @@ def use_db_connection() -> Generator[psycopg2.extensions.connection, None, None]
 
 def delete_table(tbl_name: str) -> None:
     """テーブルを削除して、データを削除"""
+    # セキュリティ: テーブル名のホワイトリスト検証
+    allowed_tables = {'cid', 'contents', 'category', 'feedback'}
+    if tbl_name not in allowed_tables:
+        logger.error(f"Invalid table name: {tbl_name}")
+        raise ValueError(f"Invalid table name: {tbl_name}")
+    
     logger.info(f"Deleting data and dropping {tbl_name} table if it exists...")
     with use_db_connection() as conn:
         with conn.cursor() as c:
             try:
+                # セキュリティ: ホワイトリスト検証済みのテーブル名のみ使用
                 c.execute(f"DROP TABLE IF EXISTS {tbl_name} CASCADE")
                 conn.commit()
                 logger.info(f"{tbl_name} table deleted successfully.")
@@ -393,9 +400,16 @@ def search_term_in_table(table: str) -> List[tuple]:
 
 def temp_func(tbl_name: str) -> List[tuple]:
     """一時的な関数 - 特定のIDを持つレコードを検索"""
+    # セキュリティ: テーブル名のホワイトリスト検証
+    allowed_tables = {'cid', 'contents', 'category', 'feedback'}
+    if tbl_name not in allowed_tables:
+        logger.error(f"Invalid table name: {tbl_name}")
+        raise ValueError(f"Invalid table name: {tbl_name}")
+    
     with use_db_connection() as conn:
         with conn.cursor() as c:
             try:
+                # セキュリティ: ホワイトリスト検証済みのテーブル名のみ使用
                 query = f"""
                     SELECT ID FROM {tbl_name} 
                     WHERE ID IN (

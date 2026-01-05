@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 質問・サポート
+    url: https://github.com/rushhirosan/soccer-practice-search/issues/new
+    about: 質問やサポートが必要な場合はこちらからIssueを作成してください
+

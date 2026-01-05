@@ -4,8 +4,14 @@ misc/
 utilities/todolist
 utilities/.env
 utilities/.env.local
+utilities/.env*.bak
 utilities/__pycache__/
 tests/__pycache__/
 *.db
 __pycache__/
 reset_env.py
+# バックアップファイル
+*.bak
+*.backup
+.env*.bak
+.env*.backup

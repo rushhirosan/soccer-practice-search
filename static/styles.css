@@ -35,17 +35,29 @@ html {
   width: 100%;
 }
 
-/* フォーカススタイルの無効化 */
-button:focus,
-.tab-button:focus,
-.tab-button:focus-visible,
+/* アクセシビリティ: キーボード操作を考慮したフォーカススタイル */
+/* タブボタンは特別な処理（タブ切り替え専用のため、フォーカススタイルを最小限に） */
+.tab-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* 通常のボタンと入力欄は標準のフォーカススタイルを使用 */
 button:focus-visible,
-.tab-button:focus-within {
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* 検索ボタンはより目立つフォーカススタイル */
+#search-button:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
 }
 
 /* タブボタン専用の強力なフォーカス無効化 */
@@ -423,6 +435,114 @@ button:active {
   display: block;
   margin-bottom: 0.5rem;
   opacity: 0.5;
+}
+
+/* ローディングインジケーター */
+.loading-indicator {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.loading-indicator.hidden {
+  display: none;
+}
+
+.spinner {
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* エラーメッセージ */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid var(--danger-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin: 1rem 0;
+  color: var(--danger-color);
+  text-align: center;
+}
+
+.error-message.hidden {
+  display: none;
+}
+
+.error-message p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.error-message .error-details {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* フィードバック送信成功メッセージ */
+.response-message {
+  background-color: #f0fdf4;
+  border: 1px solid var(--success-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin: 1rem 0;
+  color: var(--success-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideIn 0.3s ease-out;
+}
+
+.response-message.hidden {
+  display: none;
+}
+
+.response-message p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.response-message button {
+  background: none;
+  border: none;
+  color: var(--success-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.response-message button:hover {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* カードコンテナ */

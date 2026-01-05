@@ -17,6 +17,55 @@ async function getCsrfToken() {
     }
 }
 
+// キーボードショートカットの設定
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        // Ctrl/Cmd + K で検索入力欄にフォーカス
+        if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+            event.preventDefault();
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select(); // 既存のテキストを選択
+            }
+        }
+        
+        // Esc キーで検索結果をクリア（検索入力欄にフォーカスがある場合）
+        if (event.key === 'Escape') {
+            const searchInput = document.getElementById('search-input');
+            if (document.activeElement === searchInput) {
+                searchInput.value = '';
+                searchInput.blur();
+            }
+        }
+    });
+}
+
+// フォーカス管理の改善
+function setupFocusManagement() {
+    // 検索入力欄でEnterキーを処理
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                search();
+            }
+        });
+    }
+    
+    // 検索ボタンにフォーカスがある場合のEnterキー処理
+    const searchButton = document.getElementById('search-button');
+    if (searchButton) {
+        searchButton.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                search();
+            }
+        });
+    }
+}
+
 // 初期化
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("DOM Content Loaded - Starting initialization");
@@ -28,6 +77,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     updatePaginationButtons(); // 初期化時にボタンを更新
     initTabSwitching(); // タブ切り替え処理の初期化
     setupSearchHandler(); // 検索の初期設定
+    setupKeyboardShortcuts(); // キーボードショートカットの設定
+    setupFocusManagement(); // フォーカス管理の設定
     
     // ドロップダウンの選択肢を設定（少し遅延させて確実に実行）
     setTimeout(() => {
@@ -328,15 +379,66 @@ function populateChannelSelect() {
         });
 }
 
+// 数値フォーマット関数（例: 1000 → 1,000）
+function formatNumber(num) {
+    if (!num && num !== 0) return '0';
+    return Number(num).toLocaleString('ja-JP');
+}
+
+// エラーメッセージを表示する関数
+function showError(message, details = '') {
+    const errorMessage = document.getElementById('error-message');
+    const errorContent = errorMessage.querySelector('p') || document.createElement('p');
+    errorContent.textContent = message;
+    errorMessage.innerHTML = '';
+    errorMessage.appendChild(errorContent);
+    
+    if (details) {
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'error-details';
+        detailsDiv.textContent = details;
+        errorMessage.appendChild(detailsDiv);
+    }
+    
+    errorMessage.classList.remove('hidden');
+}
+
+// エラーメッセージを非表示にする関数
+function hideError() {
+    const errorMessage = document.getElementById('error-message');
+    errorMessage.classList.add('hidden');
+}
+
+// ローディング状態を表示する関数
+function showLoading() {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const searchPrompt = document.getElementById('search-prompt');
+    const cardContainer = document.querySelector('.card-container');
+    
+    loadingIndicator.classList.remove('hidden');
+    searchPrompt.style.display = 'none';
+    cardContainer.innerHTML = '';
+    hideError();
+}
+
+// ローディング状態を非表示にする関数
+function hideLoading() {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    loadingIndicator.classList.add('hidden');
+}
+
 // カード表示用関数
 function displayCards(data, limit = 10) {
     const cardContainer = document.querySelector('.card-container');
     const searchPrompt = document.getElementById('search-prompt');
 
     cardContainer.innerHTML = ''; // 既存のカードをクリア
+    hideLoading();
+    hideError();
 
     if (!data || data.length === 0) {
         searchPrompt.style.display = 'block';
+        searchPrompt.textContent = '検索結果が見つかりませんでした。検索条件を変更してお試しください。';
         return;
     }
 
@@ -363,6 +465,8 @@ function createCard(activity) {
     if (videoUrl.startsWith('https://www.youtube.com/embed/') || 
         videoUrl.startsWith('https://youtube.com/embed/')) {
         iframe.src = videoUrl;
+        // パフォーマンス: 遅延読み込み（lazy loading）
+        iframe.setAttribute('loading', 'lazy');
     } else {
         // 無効なURLの場合は空にするか、デフォルト値を設定
         iframe.src = '';
@@ -378,10 +482,10 @@ function createCard(activity) {
     uploadDateDiv.textContent = `アップロード日: ${activity.upload_date || ''}`;
     
     const viewCountDiv = document.createElement('div');
-    viewCountDiv.textContent = `再生回数: ${activity.view_count || 0}`;
+    viewCountDiv.textContent = `再生回数: ${formatNumber(activity.view_count || 0)}`;
     
     const likeCountDiv = document.createElement('div');
-    likeCountDiv.textContent = `いいね: ${activity.like_count || 0}`;
+    likeCountDiv.textContent = `いいね: ${formatNumber(activity.like_count || 0)}`;
     
     const durationDiv = document.createElement('div');
     durationDiv.textContent = `動画時間: ${activity.duration || ''}`;
@@ -412,9 +516,28 @@ function updateVideoCount(currentCount, totalCount) {
 
 // データ取得処理
 function fetchData(endpoint, queryParams, limit) {
-    fetch(`${endpoint}?${queryParams}`)
-        .then(response => response.json())
+    showLoading();
+    
+    return fetch(`${endpoint}?${queryParams}`)
+        .then(response => {
+            if (!response.ok) {
+                // HTTPエラーの処理
+                if (response.status === 500) {
+                    throw new Error('サーバーエラーが発生しました。しばらくしてから再度お試しください。');
+                } else if (response.status === 400) {
+                    throw new Error('リクエストが無効です。検索条件を確認してください。');
+                } else {
+                    throw new Error(`エラーが発生しました（ステータスコード: ${response.status}）`);
+                }
+            }
+            return response.json();
+        })
         .then(data => {
+            // エラーレスポンスのチェック
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
             displayCards(data.activities, limit);
             totalPages = Math.ceil(data.total / limit); // 総ページ数を計算
             updatePaginationButtons(); // ボタンの状態を更新
@@ -422,7 +545,29 @@ function fetchData(endpoint, queryParams, limit) {
 
             updateVideoCount(data.current_display_count, data.total);
         })
-        .catch(error => console.error('エラー:', error));
+        .catch(error => {
+            hideLoading();
+            console.error('エラー:', error);
+            
+            // ユーザー向けエラーメッセージを表示
+            let errorMessage = '検索中にエラーが発生しました。';
+            let errorDetails = '';
+            
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage = 'ネットワークエラーが発生しました。';
+                errorDetails = 'インターネット接続を確認してください。';
+            } else {
+                errorDetails = 'しばらくしてから再度お試しください。';
+            }
+            
+            showError(errorMessage, errorDetails);
+            
+            // 検索プロンプトを表示
+            const searchPrompt = document.getElementById('search-prompt');
+            searchPrompt.style.display = 'block';
+        });
 }
 
 // ページング表示制御
@@ -435,6 +580,12 @@ function togglePaginationVisibility(totalResults) {
 // 検索処理
 function search(resetPage = true) {
     if (resetPage) currentPage = 1;
+
+    // 検索ボタンを無効化（重複リクエスト防止）
+    const searchButton = document.getElementById('search-button');
+    const originalButtonText = searchButton.textContent;
+    searchButton.disabled = true;
+    searchButton.textContent = '検索中...';
 
     // セキュリティ: 入力値の取得と基本的な検証
     const searchInput = document.getElementById('search-input');
@@ -466,7 +617,12 @@ function search(resetPage = true) {
         offset: (currentPage - 1) * getLimit(),
     }).toString();
 
-    fetchData('/search', queryParams, getLimit());
+    fetchData('/search', queryParams, getLimit())
+        .finally(() => {
+            // 検索完了後にボタンを再有効化
+            searchButton.disabled = false;
+            searchButton.textContent = originalButtonText;
+        });
 }
 
 // 入力されたリミットを取得
@@ -572,6 +728,12 @@ async function submitFeedback(formData) {
         return;
     }
     
+    // 送信ボタンを無効化
+    const submitButton = document.querySelector('#feedbackForm button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.textContent = '送信中...';
+    
     fetch('/submit-feedback', {
         method: 'POST',
         headers: {
@@ -582,8 +744,15 @@ async function submitFeedback(formData) {
     })
     .then(response => {
         if (response.ok) {
-            document.getElementById('responseMessage').classList.remove('hidden');
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.classList.remove('hidden');
             document.getElementById('feedbackForm').reset();
+            
+            // 5秒後に自動で非表示
+            setTimeout(() => {
+                responseMessage.classList.add('hidden');
+            }, 5000);
+            
             // トークンを再取得（次の送信に備えて）
             csrfToken = null;
             getCsrfToken();
@@ -600,6 +769,11 @@ async function submitFeedback(formData) {
     .catch(error => {
         console.error('エラー:', error);
         alert('送信に失敗しました。もう一度お試しください。');
+    })
+    .finally(() => {
+        // 送信完了後にボタンを再有効化
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
     });
 }
 

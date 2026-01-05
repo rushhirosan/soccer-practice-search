@@ -115,7 +115,7 @@
                         <!-- サイドペイン -->
                         <aside class="search-container" aria-label="検索条件">
                             <h2>検索ワード</h2>
-                            <input type="text" id="search-input" placeholder="キーワードで検索" aria-label="検索キーワード">
+                            <input type="text" id="search-input" placeholder="キーワードで検索 (Ctrl/Cmd+Kでフォーカス)" aria-label="検索キーワード">
                             <h2>選択</h2>
                             <label for="type-input">目的を選択:</label>
                             <select id="type-input" aria-label="目的を選択">
@@ -148,12 +148,19 @@
                                     <option value="{{ i }}">{{ i }}</option>
                                 {% endfor %}
                             </select>
-                            <button onclick="search()" aria-label="検索を実行">検索</button>
+                            <button id="search-button" onclick="search()" aria-label="検索を実行">検索</button>
                         </aside>
                         <!-- メインコンテンツ -->
                         <section class="main-content" aria-label="検索結果">
                             <div id="search-prompt" class="search-prompt">
                                 左の検索ボタンで条件を指定してサッカーのトレーニングを検索してみてください。</div>
+                            <div id="loading-indicator" class="loading-indicator hidden" aria-live="polite" aria-label="検索中">
+                                <div class="spinner"></div>
+                                <p>検索中...</p>
+                            </div>
+                            <div id="error-message" class="error-message hidden" role="alert" aria-live="assertive">
+                                <!-- エラーメッセージがここに表示される -->
+                            </div>
                             <div class="card-container" aria-live="polite" aria-atomic="true">
                                 <!-- カードがここに表示される -->
                             </div>
@@ -198,7 +205,10 @@
                                     <textarea id="message" name="message" rows="5" placeholder="ここにご意見を入力してください" required></textarea>
                                     <button type="submit">送信</button>
                                 </form>
-                                <p id="responseMessage" class="hidden">ご意見ありがとうございます！</p>
+                                <div id="responseMessage" class="response-message hidden" role="alert" aria-live="polite">
+                                    <p>ご意見ありがとうございます！</p>
+                                    <button type="button" onclick="document.getElementById('responseMessage').classList.add('hidden')" aria-label="メッセージを閉じる">×</button>
+                                </div>
                             </div>
                         </section>
 

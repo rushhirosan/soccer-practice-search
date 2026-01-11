@@ -1120,6 +1120,12 @@ Crawl-delay: 1'''
     response.headers['Content-Type'] = 'text/plain'
     return response
 
+@app.route('/about')
+def about():
+    """このサイトについてページ"""
+    channels = get_channels()
+    return render_template('about.html', channels=channels)
+
 @app.route('/privacy')
 def privacy():
     """プライバシーポリシーページ"""

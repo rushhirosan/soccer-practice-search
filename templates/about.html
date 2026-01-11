@@ -71,15 +71,26 @@
                             <textarea id="message" name="message" rows="5" placeholder="ここにご意見を入力してください" required></textarea>
                             <button type="submit">送信</button>
                         </form>
-                        <p id="responseMessage" class="hidden">ご意見ありがとうございます！</p>
+                        <div id="responseMessage" class="response-message hidden" role="alert" aria-live="polite">
+                            <p>ご意見ありがとうございます！</p>
+                            <button type="button" onclick="document.getElementById('responseMessage').classList.add('hidden')" aria-label="メッセージを閉じる">×</button>
+                        </div>
                     </div>
                 </section>
 
-                <!-- 右半分: テキスト -->
+                <!-- 右半分: 参考チャネル -->
                 <section class="right-half">
                     <h2>参考チャネル</h2>
                     <p>参考にしているチャネルは以下です。</p>
-                    <ul></ul>
+                    <ul>
+                        {% for channel in channels %}
+                        <li>
+                            <a href="{{ channel.channel_link or '#' }}" target="_blank" rel="noopener noreferrer">
+                                {{ channel.channel_name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </section>
             </div>
         </div>
@@ -87,43 +98,26 @@
     
     <footer>
         <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
-        <p><a href="/privacy">プライバシーポリシー</a></p>
+        <p><a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
     <script>
-        // aboutページ用の初期化処理
-        document.addEventListener('DOMContentLoaded', () => {
-            // チャネル一覧を取得して表示
-            populateChannelSelect();
-            
-            // フィードバックフォームの送信処理
-            document.getElementById('feedbackForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-                const formData = {
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value,
-                    category: document.getElementById('category').value,
-                    message: document.getElementById('message').value
-                };
-
-                fetch('/submit-feedback', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => {
-                    if (response.ok) {
-                        document.getElementById('responseMessage').classList.remove('hidden');
-                        document.getElementById('feedbackForm').reset();
-                    } else {
-                        alert('送信に失敗しました。もう一度お試しください。');
-                    }
-                })
-                .catch(error => console.error('エラー:', error));
-            });
+        // フィードバックフォームの初期化（aboutページ用）
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackForm = document.getElementById('feedbackForm');
+            if (feedbackForm) {
+                feedbackForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        category: document.getElementById('category').value,
+                        message: document.getElementById('message').value
+                    };
+                    submitFeedback(formData);
+                });
+            }
         });
     </script>
 </body>

@@ -1088,14 +1088,16 @@ header nav li {
 }
 
 header nav a {
-  color: var(--primary-color);
+  color: white;
   text-decoration: none;
   font-weight: 500;
   transition: var(--transition);
+  position: relative;
+  z-index: 1;
 }
 
 header nav a:hover {
-  color: var(--primary-hover);
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: underline;
 }
 

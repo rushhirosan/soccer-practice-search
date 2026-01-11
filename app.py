@@ -1131,11 +1131,6 @@ def privacy():
     """プライバシーポリシーページ"""
     return render_template('privacy.html')
 
-@app.route('/about')
-def about():
-    """このサイトについてページ"""
-    return render_template('about.html')
-
 @app.route('/google-search-console.html')
 def google_search_console():
     """Google Search Console所有権確認ページ"""

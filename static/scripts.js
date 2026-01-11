@@ -706,17 +706,20 @@ function handleTabVisibility(targetTab, searchContainer, mainContent, paragraphC
 
 // フォームの初期化処理
 function setupSearchHandler() {
-    document.getElementById('feedbackForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const formData = {
-            name: document.getElementById('name').value,
-            email: document.getElementById('email').value,
-            category: document.getElementById('category').value,
-            message: document.getElementById('message').value
-        };
+    const feedbackForm = document.getElementById('feedbackForm');
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                category: document.getElementById('category').value,
+                message: document.getElementById('message').value
+            };
 
-        submitFeedback(formData);
-    });
+            submitFeedback(formData);
+        });
+    }
 }
 
 // フィードバック送信処理

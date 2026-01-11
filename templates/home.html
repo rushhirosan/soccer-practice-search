@@ -105,7 +105,7 @@
             <!-- タブメニュー -->
             <div class="tabs" role="tablist" aria-label="メインコンテンツ">
                 <div class="tab-button active" data-tab="tab1" role="tab" aria-selected="true" aria-controls="tab1">トレーニング検索 ⚽</div>
-                <div class="tab-button" data-tab="tab2" role="tab" aria-selected="false" aria-controls="tab2">このサイトについて 📄</div>
+                <a href="/about" class="tab-button" role="tab">このサイトについて 📄</a>
             </div>
             <!-- タブの内容 -->
             <div class="tab-content">
@@ -176,56 +176,12 @@
                     </div>
                 </div>
             </div>
-
-                <div id="tab2" class="tab-panel" role="tabpanel" aria-labelledby="tab2" hidden>
-                    <!-- tab2 の内容 -->
-                    <div class="split-container">
-                        <!-- 左半分: フォーム -->
-                        <section class="left-half">
-                            <h2>このサイトについて</h2>
-                            <p>こんにちは。このサイトはサッカートレーニングを検索するサイトです。</p>
-                            <p>サイト作成者自身が小学生のサッカーコーチをしていますが、
-                                練習メニューに困った時や他のチーム・配信者の練習メニューを参考にしたいと思い検索用途で作りました。
-                                </p>
-                            <p>参考にしているチャネルは⇨の通りです。</p>
-                            <p>ご意見・ご要望・ご感想等々以下のフォームから送信ください。</p>
-                            <div class="feedback-form">
-                                <form id="feedbackForm" aria-label="フィードバックフォーム">
-                                    <label for="name">名前（任意）:</label>
-                                    <input type="text" id="name" name="name" placeholder="お名前">
-                                    <label for="email">メールアドレス（任意）:</label>
-                                    <input type="email" id="email" name="email" placeholder="example@example.com">
-                                    <label for="category">カテゴリ:</label>
-                                    <select id="category" name="category">
-                                        <option value="general">一般的な意見</option>
-                                        <option value="bug">バグ報告</option>
-                                        <option value="suggestion">改善提案</option>
-                                    </select>
-                                    <label for="message">ご意見:</label>
-                                    <textarea id="message" name="message" rows="5" placeholder="ここにご意見を入力してください" required></textarea>
-                                    <button type="submit">送信</button>
-                                </form>
-                                <div id="responseMessage" class="response-message hidden" role="alert" aria-live="polite">
-                                    <p>ご意見ありがとうございます！</p>
-                                    <button type="button" onclick="document.getElementById('responseMessage').classList.add('hidden')" aria-label="メッセージを閉じる">×</button>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- 右半分: テキスト -->
-                        <section class="right-half">
-                            <h2>参考チャネル</h2>
-                            <p>参考にしているチャネルは以下です。</p>
-                            <ul></ul>
-                        </section>
-                    </div>
-                </div>
         </div>
     </main>
 
     <footer>
         <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
-        <p><a href="/privacy">プライバシーポリシー</a></p>
+        <p><a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>

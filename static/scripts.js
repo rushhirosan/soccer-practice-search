@@ -583,7 +583,7 @@ function search(resetPage = true) {
 
     // 検索ボタンを無効化（重複リクエスト防止）
     const searchButton = document.getElementById('search-button');
-    const originalButtonText = searchButton.textContent;
+    const originalButtonText = '検索'; // 常に「検索」に戻す
     searchButton.disabled = true;
     searchButton.textContent = '検索中...';
 

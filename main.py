@@ -1,6 +1,6 @@
 from utilities.get_videos import get_youtube_video_data
 from utilities.get_channel_id import get_channel_id, get_channel_details
-from utilities.db_access import create_cid_table, get_db_connection, insert_cid_data, create_contents_table, insert_contents_data, create_category_table, search_content_table, insert_category_data, create_feedback_table, delete_table
+from utilities.db_access import create_cid_table, get_db_connection, insert_cid_data, get_cid_id_by_cid, create_contents_table, insert_contents_data, create_category_table, search_content_table, insert_category_data, create_feedback_table, delete_table
 from utilities.update_category_db import update_category
 from flask import Flask
 import os
@@ -83,11 +83,15 @@ if __name__ == '__main__':
                     
                     # チャンネル情報を挿入
                     insert_cid_data(cid, channel_name, channel_links[c_num-1])
-                    
+                    cid_id = get_cid_id_by_cid(cid)
+                    if not cid_id:
+                        logger.error(f"Failed to get cid id for channel {cid}")
+                        continue
+
                     # 動画データを取得
                     video_data = get_youtube_video_data(cid, api_key)
                     if video_data:
-                        insert_contents_data(video_data, c_num)
+                        insert_contents_data(video_data, cid_id)
                         logger.info(f"Inserted {len(video_data)} videos for channel {c_num}")
                         
 

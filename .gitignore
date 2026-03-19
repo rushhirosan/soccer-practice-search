@@ -1,5 +1,6 @@
 venv/
 .idea/
+cookies*.txt
 misc/
 utilities/todolist
 utilities/.env

@@ -215,6 +215,19 @@ def create_feedback_table() -> None:
     # id INTEGER PRIMARY KEY AUTOINCREMENT, < for sqlite
 
 
+def get_cid_id_by_cid(youtube_channel_id: str) -> Optional[int]:
+    """YouTubeチャンネルIDからcidテーブルのidを取得する"""
+    with use_db_connection() as conn:
+        with conn.cursor() as c:
+            try:
+                c.execute("SELECT id FROM cid WHERE cid = %s", (youtube_channel_id,))
+                row = c.fetchone()
+                return row[0] if row else None
+            except psycopg2.Error as e:
+                logger.error("Error while getting cid id: %s", e)
+                return None
+
+
 def insert_cid_data(cid: str, cname: str, clink: str) -> None:
     """`cid`テーブルにデータを挿入"""
     logger.info("Inserting data into 'cid' table...")

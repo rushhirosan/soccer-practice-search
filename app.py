@@ -778,7 +778,7 @@ def fetch_youtube_data():
         # インポート
         try:
             from utilities.get_videos import get_youtube_video_data
-            from utilities.db_access import insert_cid_data, insert_contents_data, insert_category_data
+            from utilities.db_access import insert_cid_data, get_cid_id_by_cid, insert_contents_data, insert_category_data
             logger.info("Successfully imported required modules")
         except ImportError as e:
             logger.error(f"Import error: {e}")
@@ -837,26 +837,35 @@ def fetch_youtube_data():
                     channel_link = f"https://www.youtube.com/channel/{channel_id}"
                     insert_cid_data(channel_id, channel_name, channel_link)
                     logger.info(f"Inserted channel data for {channel_id} with name: {channel_name}")
-                    
-                    # 動画データを挿入
-                    insert_contents_data(videos, i+1)  # channel_category = i+1
+
+                    cid_id = get_cid_id_by_cid(channel_id)
+                    if not cid_id:
+                        logger.error(f"Failed to get cid id for channel {channel_id}")
+                        continue
+
+                    # 動画データを挿入（DBの実際のcid.idを使用）
+                    insert_contents_data(videos, cid_id)
                     logger.info(f"Inserted {len(videos)} videos to contents table")
-                    
-                                                # カテゴリデータを挿入（main.pyと同じ処理）
+
+                    # カテゴリデータを挿入（main.pyと同じ処理）
                     from utilities.update_category_db import update_category
                     from utilities.db_access import search_content_table, create_category_table
-                    
+
                     # カテゴリテーブルを作成
                     create_category_table()
-                    
+
                     # contentsテーブルからデータを取得
                     contents = search_content_table()
-                    
+
                     # update_category関数でカテゴリを自動判定
                     contents_data = update_category(contents)
-                    
-                    # カテゴリデータを挿入
-                    insert_category_data(contents_data, i+1)
+
+                    # 各動画に正しいチャンネルIDを割り当ててカテゴリ挿入
+                    for content in contents_data:
+                        if content.get("channel_id"):
+                            insert_category_data([content], content["channel_id"])
+                        else:
+                            logger.warning(f"No channel_id found for content {content['id']}")
                     logger.info(f"Inserted category data for {len(videos)} videos")
                     
                     processed_channels += 1
@@ -1131,6 +1140,13 @@ def privacy():
     """プライバシーポリシーページ"""
     return render_template('privacy.html')
 
+
+@app.route('/board')
+@app.route('/tactical-board')
+def tactical_board():
+    """ボードページ"""
+    return render_template('tactical_board.html')
+
 @app.route('/google-search-console.html')
 def google_search_console():
     """Google Search Console所有権確認ページ"""
@@ -1158,6 +1174,12 @@ def sitemap():
         <lastmod>{current_time}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/board</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
     </url>
     <url>
         <loc>https://soccer-practice-search.fly.dev/about</loc>

@@ -6,6 +6,7 @@ utilities/todolist
 utilities/.env
 utilities/.env.local
 utilities/.env*.bak
+utilities/.env.local.bak
 utilities/__pycache__/
 tests/__pycache__/
 *.db

@@ -85,7 +85,10 @@
     }
     </script>
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=35">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=37">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -99,6 +102,12 @@
 <body>
     <header>
         <h1>サッカートレーニング検索サイト Beta</h1>
+        <nav aria-label="ナビゲーション">
+            <ul>
+                <li><a href="/board">ボード</a></li>
+                <li><a href="/about">このサイトについて</a></li>
+            </ul>
+        </nav>
     </header>
     <main>
         <div class="tab-container">
@@ -111,48 +120,58 @@
                 <div id="tab1" class="tab-panel active" role="tabpanel" aria-labelledby="tab1">
                 <!-- tab1コンテンツ -->
                     <div class="content-wrapper">
-                        <!-- サイドペイン -->
+                        <!-- サイドペイン - Google風2段構成 -->
                         <aside class="search-container" aria-label="検索条件">
-                            <h2>検索ワード</h2>
-                            <input type="text" id="search-input" placeholder="キーワードで検索" aria-label="検索キーワード">
-                            <h2>選択</h2>
-                            <label for="type-input">目的を選択:</label>
-                            <select id="type-input" aria-label="目的を選択">
-                                <option value="">目的を選択</option>
-                            </select>
-                            <label for="players-input">人数を選択:</label>
-                            <select id="players-input" aria-label="人数を選択">
-                                <option value="">人数を選択</option>
-                            </select>
-                            <label for="level-input">レベルを選択:</label>
-                            <select id="level-input" aria-label="レベルを選択">
-                                <option value="">レベルを選択</option>
-                            </select>
-                            <label for="channel-input">チャネルを選択:</label>
-                            <select id="channel-input" aria-label="チャネルを選択">
-                                <option value="">チャネルを選択</option>
-                            </select>
-                            <script src="scripts.js"></script>
-                            <h2>並び替え/表示数</h2>
-                            <label for="sort-input">並び替え:</label>
-                            <select id="sort-input" aria-label="並び替え方法">
-                                <option value="upload_date">アップロード日</option>
-                                <option value="view_count">再生回数</option>
-                                <option value="like_count">いいね数</option>
-                            </select>
-                            <label for="limit-input">表示数:</label>
-                            <select id="limit-input" aria-label="表示数">
-                                <option value="">制限なし</option>
-                                {% for i in range(1, 11) %}
-                                    <option value="{{ i }}">{{ i }}</option>
-                                {% endfor %}
-                            </select>
-                            <button id="search-button" onclick="search()" aria-label="検索を実行">検索</button>
+                            <!-- 検索バー（常に表示・Above the Fold） -->
+                            <div class="search-primary">
+                                <input type="text" id="search-input" placeholder="キーワードで検索（Ctrl+K）" aria-label="検索キーワード" autocomplete="off">
+                                <button type="button" id="search-button" onclick="search()" aria-label="検索を実行" class="search-primary-btn">検索</button>
+                            </div>
+                            <!-- 詳細条件（折りたたみ） -->
+                            <details class="search-details" id="search-details">
+                                <summary class="search-details-toggle">
+                                    <span class="search-details-label">詳細条件で絞り込む</span>
+                                    <span class="search-details-icon" aria-hidden="true">▼</span>
+                                </summary>
+                                <div class="search-details-content">
+                                    <h2>選択</h2>
+                                    <label for="type-input">目的を選択</label>
+                                    <select id="type-input" aria-label="目的を選択">
+                                        <option value="">目的を選択</option>
+                                    </select>
+                                    <label for="players-input">人数を選択</label>
+                                    <select id="players-input" aria-label="人数を選択">
+                                        <option value="">人数を選択</option>
+                                    </select>
+                                    <label for="level-input">レベルを選択</label>
+                                    <select id="level-input" aria-label="レベルを選択">
+                                        <option value="">レベルを選択</option>
+                                    </select>
+                                    <label for="channel-input">チャネルを選択</label>
+                                    <select id="channel-input" aria-label="チャネルを選択">
+                                        <option value="">チャネルを選択</option>
+                                    </select>
+                                    <h2>並び替え / 表示数</h2>
+                                    <label for="sort-input">並び替え</label>
+                                    <select id="sort-input" aria-label="並び替え方法">
+                                        <option value="upload_date">アップロード日</option>
+                                        <option value="view_count">再生回数</option>
+                                        <option value="like_count">いいね数</option>
+                                    </select>
+                                    <label for="limit-input">表示数</label>
+                                    <select id="limit-input" aria-label="表示数">
+                                        <option value="">制限なし</option>
+                                        {% for i in range(1, 11) %}
+                                            <option value="{{ i }}">{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </details>
                         </aside>
                         <!-- メインコンテンツ -->
                         <section class="main-content" aria-label="検索結果">
                             <div id="search-prompt" class="search-prompt">
-                                左の検索ボタンで条件を指定してサッカーのトレーニングを検索してみてください。</div>
+                                キーワードを入力して検索ボタンを押すか、Enterキーでサッカーのトレーニングを検索できます。</div>
                             <div id="loading-indicator" class="loading-indicator hidden" aria-live="polite" aria-label="検索中">
                                 <div class="spinner"></div>
                                 <p>検索中...</p>
@@ -180,7 +199,7 @@
 
     <footer>
         <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
-        <p><a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p><a href="/board">ボード</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>

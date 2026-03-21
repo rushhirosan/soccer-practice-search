@@ -11,9 +11,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Fly.ioにデプロイ
-echo "🌐 本番環境にデプロイ中..."
-fly deploy -a soccer-practice-search
+# Fly.ioにデプロイ（1インスタンスのみ、コスト削減）
+echo "🌐 本番環境にデプロイ中（1インスタンス）..."
+fly scale count 1 -a soccer-practice-search --yes 2>/dev/null || true
+fly deploy -a soccer-practice-search --ha=false
 if [ $? -ne 0 ]; then
     echo "❌ デプロイに失敗しました。デプロイを中止します。"
     exit 1

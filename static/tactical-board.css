@@ -1,0 +1,504 @@
+/* 戦術ボード専用スタイル */
+
+.tactical-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color, #16a34a);
+  color: white;
+}
+
+.tactical-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.tactical-header nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 1rem;
+  opacity: 0.9;
+}
+
+.tactical-header nav a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.tactical-main {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+/* ツールバー（左） */
+.toolbar {
+  width: 200px;
+  min-width: 200px;
+  padding: 1rem;
+  background: var(--surface-color, #fff);
+  border-right: 1px solid var(--border-color, #e2e8f0);
+  overflow-y: auto;
+}
+
+.tool-group {
+  margin-bottom: 1.25rem;
+}
+
+.tool-group h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tool-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tool-buttons-compact {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.tool-buttons-compact .tool-btn {
+  flex: 1;
+  min-width: 2.5rem;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.tool-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  margin-top: 0.4rem;
+  min-height: 1.2em;
+}
+
+.tool-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-color, #1e293b);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition, all 0.2s);
+}
+
+.tool-btn[data-tool="line"] {
+  font-weight: 700;
+}
+
+.tool-btn:hover {
+  background: var(--background-color, #f8fafc);
+  border-color: var(--primary-color, #16a34a);
+}
+
+.tool-btn.active {
+  background: var(--primary-color, #16a34a);
+  color: white;
+  border-color: var(--primary-color, #16a34a);
+}
+
+.tool-group select {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+}
+
+.tool-group-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.tool-group-row > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 保存・読込ドロップダウン */
+.save-dropdown-group {
+  position: relative;
+}
+
+.save-dropdown {
+  position: relative;
+}
+
+.save-dropdown .dropdown-trigger {
+  margin-bottom: 0;
+}
+
+.save-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  margin-top: 0.25rem;
+  background: white;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+  z-index: 100;
+  overflow: hidden;
+}
+
+.save-dropdown-menu[aria-hidden="true"] {
+  display: none;
+}
+
+.save-dropdown-menu[aria-hidden="false"] {
+  display: block;
+}
+
+.save-dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-color, #1e293b);
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.save-dropdown-menu button:hover {
+  background: var(--background-color, #f8fafc);
+}
+
+
+.action-btn {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.action-btn:hover {
+  background: var(--primary-color, #16a34a);
+  color: white;
+  border-color: var(--primary-color, #16a34a);
+}
+
+.action-btn.small {
+  padding: 0.4rem;
+  font-size: 0.8rem;
+  margin-bottom: 0;
+}
+
+/* キャンバスエリア */
+.canvas-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--background-color, #f8fafc);
+  overflow: auto;
+  position: relative;
+}
+
+.canvas-section.place-mode::after,
+.canvas-section.draw-mode::after {
+  content: attr(data-hint);
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  background: rgba(255,255,255,0.9);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-md, 6px);
+  pointer-events: none;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgb(0 0 0 / 0.05));
+}
+
+#tactical-container {
+  background: #2d5016;
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+}
+
+/* ショートカットヒント */
+.shortcut-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 0.5rem;
+  line-height: 1.3;
+}
+
+/* アニメーションパネル（右・PowerPoint風） */
+.scene-panel.animation-panel {
+  width: 196px;
+  min-width: 196px;
+  padding: 0.75rem;
+  background: var(--surface-color, #fff);
+  border-left: 1px solid var(--border-color, #e2e8f0);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.animation-panel-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color, #1e293b);
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.animation-list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.animation-section-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+.add-effect-btn {
+  width: auto;
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  background: var(--primary-color, #16a34a) !important;
+  color: white !important;
+  border-color: var(--primary-color, #16a34a) !important;
+  font-weight: 600;
+}
+
+.add-effect-btn:hover {
+  filter: brightness(1.1);
+}
+
+.animation-list-group {
+  flex: 1;
+  min-height: 56px;
+  margin-bottom: 0.75rem;
+}
+
+.animation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.animation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.4rem;
+  font-size: 0.78rem;
+  background: var(--background-color, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.animation-item:hover {
+  background: #f1f5f9;
+  border-color: var(--primary-color, #16a34a);
+}
+
+.animation-item.active {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: var(--primary-color, #16a34a);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+
+.animation-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.animation-item.drag-over {
+  border-top: 2px solid var(--primary-color, #16a34a);
+  margin-top: 2px;
+}
+
+.animation-item-drag {
+  cursor: grab;
+  color: var(--text-muted, #94a3b8);
+  padding: 0 0.15rem;
+  font-size: 0.85rem;
+}
+
+.animation-item-drag:active {
+  cursor: grabbing;
+}
+
+.animation-item-num {
+  min-width: 1em;
+  font-weight: 700;
+  color: var(--primary-color, #16a34a);
+}
+
+.animation-item-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.animation-item-delete {
+  padding: 0.1rem 0.25rem;
+  font-size: 0.8rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted, #94a3b8);
+  border-radius: 2px;
+}
+
+.animation-item-delete:hover {
+  color: var(--danger-color, #dc2626);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* 再生コントロール（PowerPoint風） */
+.animation-playback-group {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.animation-controls-row {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.anim-btn {
+  flex: 1;
+  padding: 0.42rem 0.5rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.anim-btn:hover {
+  background: var(--background-color, #f8fafc);
+  border-color: var(--primary-color, #16a34a);
+}
+
+.anim-btn.play-btn {
+  background: var(--primary-color, #16a34a) !important;
+  color: white !important;
+  border-color: var(--primary-color, #16a34a) !important;
+}
+
+.anim-btn.play-btn:hover {
+  filter: brightness(1.1);
+}
+
+.anim-btn.play-btn.playing {
+  background: #64748b !important;
+  border-color: #64748b !important;
+}
+
+.anim-btn.stop-btn {
+  color: var(--text-color, #1e293b);
+}
+
+.timing-group {
+  margin-bottom: 0.4rem;
+}
+
+.timing-group label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 0.25rem;
+}
+
+.timing-group select {
+  width: 100%;
+  padding: 0.35rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+}
+
+.shortcut-hint {
+  font-size: 0.66rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0.25rem 0 0 0;
+  line-height: 1.3;
+}
+
+
+.tactical-footer {
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #64748b);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.tactical-footer a {
+  color: var(--primary-color, #16a34a);
+  text-decoration: none;
+}
+
+.tactical-footer a:hover {
+  text-decoration: underline;
+}
+
+/* レスポンシブ */
+@media (max-width: 900px) {
+  .tactical-main {
+    flex-direction: column;
+  }
+
+  .toolbar,
+  .scene-panel,
+  .scene-panel.animation-panel {
+    width: 100%;
+    min-width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+  }
+
+  .tool-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .tool-btn {
+    flex: 1;
+    min-width: 80px;
+  }
+}

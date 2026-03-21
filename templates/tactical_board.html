@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ボード - サッカートレーニング検索サイト</title>
+    <meta name="description" content="少年サッカーコーチ向けボード。戦術ボードと練習ボードを切り替えながら、フォーメーション作成、練習人数に応じた配置、動きのアニメーションができます。">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=35">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=9">
+</head>
+<body>
+    <header class="tactical-header">
+        <h1>ボード</h1>
+        <nav aria-label="ナビゲーション">
+            <a href="/">← ホームに戻る</a>
+            <a href="/about">このサイトについて</a>
+        </nav>
+    </header>
+
+    <main class="tactical-main">
+        <aside class="toolbar" aria-label="ツール">
+            <div class="tool-group">
+                <h3>配置</h3>
+                <div class="tool-buttons tool-buttons-compact">
+                    <button type="button" class="tool-btn active" data-tool="select" title="選択・移動 (V)">👆</button>
+                    <button type="button" class="tool-btn" data-tool="player" title="選手を追加 (P)">👤</button>
+                    <button type="button" class="tool-btn" data-tool="ball" title="ボールを置く (B)">⚽</button>
+                    <button type="button" class="tool-btn" data-tool="arrow" title="矢印 (A)">➡️</button>
+                    <button type="button" class="tool-btn" data-tool="line" title="ライン (L)">／</button>
+                    <button type="button" class="tool-btn" data-tool="delete" title="削除 (D)">🗑️</button>
+                </div>
+                <p class="tool-hint" id="tool-hint">ピッチをクリックで配置</p>
+            </div>
+
+            <div class="tool-group">
+                <h3>ボード</h3>
+                <select id="board-type-select" aria-label="ボード種別">
+                    <option value="tactical" selected>戦術ボード</option>
+                    <option value="practice">練習ボード</option>
+                </select>
+            </div>
+
+            <div class="tool-group">
+                <h3 id="formation-label">フォーメーション</h3>
+                <select id="formation-select" aria-label="フォーメーション選択">
+                    <option value="">フォーメーションを選択</option>
+                    <optgroup label="11人制">
+                        <option value="4-4-2">4-4-2</option>
+                        <option value="4-3-3">4-3-3</option>
+                        <option value="3-5-2">3-5-2</option>
+                        <option value="4-2-3-1">4-2-3-1</option>
+                    </optgroup>
+                    <optgroup label="8人制（少年）">
+                        <option value="3-3-1" selected>3-3-1</option>
+                        <option value="2-3-2">2-3-2</option>
+                        <option value="3-2-2">3-2-2</option>
+                        <option value="2-2-3">2-2-3</option>
+                    </optgroup>
+                </select>
+                <p class="tool-hint" id="formation-hint">戦術ボード用のフォーメーションを選択</p>
+            </div>
+
+            <div class="tool-group tool-group-row">
+                <div>
+                    <h3>コート</h3>
+                    <select id="court-mode" aria-label="コートモード">
+                        <option value="8">8人制</option>
+                        <option value="11">11人制</option>
+                    </select>
+                </div>
+                <div>
+                    <h3>編集</h3>
+                    <button type="button" id="btn-clear" class="action-btn small" title="現在の状態をクリア">🗑 クリア</button>
+                </div>
+            </div>
+
+            <div class="tool-group save-dropdown-group">
+                <h3>保存・読込</h3>
+                <div class="save-dropdown">
+                    <button type="button" id="save-dropdown-btn" class="action-btn dropdown-trigger">保存・読込 ▾</button>
+                    <div class="save-dropdown-menu" id="save-dropdown-menu" aria-hidden="true">
+                        <button type="button" data-action="save" title="ブラウザに保存（次回自動読込）">💾 保存</button>
+                        <button type="button" data-action="load" title="保存したデータを読込">📂 読込</button>
+                        <button type="button" data-action="export-json" title="JSONファイルでダウンロード">📄 JSON保存</button>
+                        <button type="button" data-action="import" title="JSONファイルから読込">📁 ファイル読込</button>
+                        <button type="button" data-action="export-png" title="画像としてダウンロード">🖼️ PNG保存</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="canvas-section" id="canvas-section">
+            <div id="tactical-container"></div>
+        </section>
+
+        <aside class="scene-panel animation-panel" aria-label="場面と再生">
+            <h2 class="animation-panel-title">場面</h2>
+            <div class="animation-list-toolbar">
+                <span class="animation-section-title">一覧</span>
+                <button type="button" id="btn-add-effect" class="action-btn add-effect-btn" title="現在の配置を場面として追加">+ 追加</button>
+            </div>
+            <div class="animation-list-group">
+                <div id="animation-list" class="animation-list" role="list"></div>
+            </div>
+
+            <div class="animation-playback-group">
+                <div class="animation-section-title">再生</div>
+                <div class="animation-controls-row">
+                    <button type="button" id="btn-play" class="anim-btn play-btn" title="再生 (Space)">再生</button>
+                    <button type="button" id="btn-stop" class="anim-btn stop-btn" title="停止">⏹ 停止</button>
+                </div>
+                <div class="timing-group">
+                    <label for="anim-speed">表示時間:</label>
+                    <select id="anim-speed" aria-label="フレーム間の表示時間">
+                        <option value="0.5">0.5秒</option>
+                        <option value="1" selected>1秒</option>
+                        <option value="1.5">1.5秒</option>
+                        <option value="2">2秒</option>
+                        <option value="3">3秒</option>
+                    </select>
+                </div>
+                <p class="shortcut-hint">Space: 再生/一時停止</p>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="tactical-footer">
+        <p><a href="/">ホーム</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+    </footer>
+
+    <input type="file" id="file-input" accept=".json" style="display: none">
+
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=11"></script>
+</body>
+</html>

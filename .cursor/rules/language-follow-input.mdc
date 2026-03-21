@@ -1,0 +1,12 @@
+---
+description: Follow the user's current conversation language
+alwaysApply: true
+---
+
+# Follow Conversation Language
+
+- Use the language the user is currently using as the main response language.
+- If the user is speaking Japanese, interpret the conversation in Japanese and respond in Japanese.
+- Apply the same behavior to voice input and spoken-style text.
+- If short English phrases appear inside an otherwise Japanese message, keep the overall response in Japanese.
+- Switch to English only when the user clearly changes the conversation language to English.

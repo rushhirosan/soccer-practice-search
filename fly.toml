@@ -1,6 +1,9 @@
 # fly.toml app configuration file generated for soccer-practice-search on 2024-01-01T00:00:00Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+# インスタンス数: 1台に制限（コスト削減）
+# デプロイ時は fly deploy --ha=false を推奨
 
 app = "soccer-practice-search"
 primary_region = "nrt"

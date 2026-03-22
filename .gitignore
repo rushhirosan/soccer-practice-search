@@ -15,5 +15,8 @@ reset_env.py
 # バックアップファイル
 *.bak
 *.backup
+
+# favicon 生成用参照画像（icon-pit 等から取得、再配布不可のためリポジトリに含めない）
+static/soccer_ref.png
 .env*.bak
 .env*.backup

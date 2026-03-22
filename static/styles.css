@@ -43,13 +43,6 @@ html {
 }
 
 /* アクセシビリティ: キーボード操作を考慮したフォーカススタイル */
-/* タブボタンは特別な処理（タブ切り替え専用のため、フォーカススタイルを最小限に） */
-.tab-button:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
 /* 通常のボタンと入力欄は標準のフォーカススタイルを使用 */
 button:focus-visible,
 input:focus-visible,
@@ -67,80 +60,11 @@ textarea:focus-visible {
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
 }
 
-/* タブボタン専用の強力なフォーカス無効化 */
-.tabs .tab-button:focus,
-.tabs .tab-button:focus-visible,
-.tabs .tab-button:focus-within {
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-/* tabindex="-1" によるフォーカス無効化 */
-.tab-button[tabindex="-1"] {
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  overflow: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-.tab-button[tabindex="-1"]:focus {
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  overflow: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* タブボタンのスクロールバー無効化 */
-.tab-button::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.tab-button {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
-}
-
-/* タブボタンの境界線完全無効化 */
-.tab-button,
-.tab-button:focus,
-.tab-button:hover,
-.tab-button:active {
-  border: none !important;
-  border-bottom: none !important;
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
-}
-
-/* タブコンテナとタブの境界線完全無効化 */
-.tab-container,
-.tab-container:focus,
-.tabs,
-.tabs:focus {
-  border: none !important;
-  border-bottom: none !important;
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
+/* タブボタン: キーボード操作時のフォーカス表示 */
+.tab-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 body {
@@ -258,15 +182,6 @@ header h1 {
   display: none;
 }
 
-.tab-button:focus,
-.tab-button:focus-visible {
-  outline: none !important;
-  -webkit-outline: none !important;
-  -moz-outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
 /* タブパネル */
 .tab-panel {
     display: none;
@@ -327,6 +242,51 @@ header h1 {
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
+  position: relative;
+}
+
+/* 検索履歴ドロップダウン */
+.search-history-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.search-history-dropdown.hidden {
+  display: none;
+}
+
+.search-history-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  text-align: left;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-history-item:hover,
+.search-history-item:focus {
+  background: var(--primary-light);
+}
+
+.search-history-item:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
 }
 
 .search-primary input {
@@ -1034,6 +994,24 @@ button:active {
   
   .split-container {
     grid-template-columns: 1fr;
+  }
+}
+
+/* モバイル: タッチ操作の最適化（300ms遅延解消・タップ領域） */
+@media (max-width: 768px) {
+  .search-primary input,
+  .search-primary-btn,
+  .tab-button,
+  .pagination button,
+  .search-history-item {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(13, 148, 136, 0.2);
+  }
+
+  .search-primary-btn,
+  .tab-button,
+  .pagination button {
+    min-height: 44px;
   }
 }
 

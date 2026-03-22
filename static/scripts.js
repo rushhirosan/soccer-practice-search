@@ -73,6 +73,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // セキュリティ: CSRFトークンを事前に取得
     await getCsrfToken();
     
+    // ショートカット表記を OS に合わせて設定（Mac: Cmd+K、Windows等: Ctrl+K）
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        const isMac = /Mac|iPhone|iPad/.test(navigator.platform || '');
+        searchInput.placeholder = isMac ? 'キーワードで検索（Cmd+K）' : 'キーワードで検索（Ctrl+K）';
+    }
     displayCards([]); // 初期状態で「検索してください」を表示
     updatePaginationButtons(); // 初期化時にボタンを更新
     initTabSwitching(); // タブ切り替え処理の初期化
@@ -89,7 +95,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         populateSelect("players-input", "players");  // プレイヤー数の選択肢を設定
     }, 100);
     
-    disableTabFocus(); // タブボタンのフォーカス無効化
+    setupRealtimeSearch(); // リアルタイム検索（debounce付き）
+    setupSearchHistory();  // 検索履歴の表示・選択
     
     // 5秒後に再度実行（フォールバック）
     setTimeout(() => {
@@ -567,6 +574,7 @@ function fetchData(endpoint, queryParams, limit) {
             // 検索プロンプトを表示
             const searchPrompt = document.getElementById('search-prompt');
             searchPrompt.style.display = 'block';
+            throw error; // エラーを伝播させ、履歴保存をスキップ
         });
 }
 
@@ -618,6 +626,7 @@ function search(resetPage = true) {
     }).toString();
 
     fetchData('/search', queryParams, getLimit())
+        .then(() => addToSearchHistory(query))
         .finally(() => {
             // 検索完了後にボタンを再有効化
             searchButton.disabled = false;
@@ -780,26 +789,121 @@ async function submitFeedback(formData) {
     });
 }
 
-// タブボタンのフォーカス無効化
-function disableTabFocus() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-        button.addEventListener('focus', function(e) {
-            e.target.style.outline = 'none';
-            e.target.style.webkitOutline = 'none';
-            e.target.style.mozOutline = 'none';
-            e.target.style.boxShadow = 'none';
-            e.target.style.border = 'none';
-        });
-        
-        button.addEventListener('focusin', function(e) {
-            e.target.style.outline = 'none';
-            e.target.style.webkitOutline = 'none';
-            e.target.style.mozOutline = 'none';
-            e.target.style.boxShadow = 'none';
-            e.target.style.border = 'none';
-        });
+// リアルタイム検索（debounce 400ms）
+function setupRealtimeSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+    
+    let debounceTimer = null;
+    const DEBOUNCE_MS = 400;
+    
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = (searchInput.value || '').trim();
+        if (query.length === 0) {
+            const searchPrompt = document.querySelector('.search-prompt');
+            const cardContainer = document.querySelector('.card-container');
+            if (searchPrompt && cardContainer) {
+                cardContainer.innerHTML = '';
+                searchPrompt.style.display = 'block';
+                searchPrompt.textContent = 
+                    'キーワードを入力して検索ボタンを押すか、Enterキーでサッカーのトレーニングを検索できます。';
+            }
+            hideLoading();
+            hideError();
+            return;
+        }
+        debounceTimer = setTimeout(() => {
+            search(true);
+        }, DEBOUNCE_MS);
     });
+}
+
+// 検索履歴（localStorage、最大10件）
+const SEARCH_HISTORY_KEY = 'soccer_search_history';
+const SEARCH_HISTORY_MAX = 10;
+
+function getSearchHistory() {
+    try {
+        const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveSearchHistory(query) {
+    if (!query || query.length < 2) return;
+    let history = getSearchHistory().filter(q => q !== query);
+    history.unshift(query);
+    history = history.slice(0, SEARCH_HISTORY_MAX);
+    try {
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    } catch (e) {
+        console.warn('検索履歴の保存に失敗:', e);
+    }
+}
+
+function setupSearchHistory() {
+    const searchInput = document.getElementById('search-input');
+    const searchPrimary = document.querySelector('.search-primary');
+    if (!searchInput || !searchPrimary) return;
+    
+    let historyEl = document.getElementById('search-history-dropdown');
+    if (!historyEl) {
+        historyEl = document.createElement('div');
+        historyEl.id = 'search-history-dropdown';
+        historyEl.className = 'search-history-dropdown hidden';
+        historyEl.setAttribute('aria-label', '検索履歴');
+        searchPrimary.appendChild(historyEl);
+    }
+    
+    function showHistory() {
+        const history = getSearchHistory();
+        if (history.length === 0) {
+            historyEl.classList.add('hidden');
+            return;
+        }
+        historyEl.innerHTML = history.map(q => 
+            `<button type="button" class="search-history-item" data-query="${q.replace(/"/g, '&quot;')}">${escapeHtml(q)}</button>`
+        ).join('');
+        historyEl.classList.remove('hidden');
+    }
+    
+    function hideHistory() {
+        setTimeout(() => historyEl.classList.add('hidden'), 150);
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    searchInput.addEventListener('focus', showHistory);
+    searchInput.addEventListener('blur', hideHistory);
+    searchInput.addEventListener('input', () => {
+        if ((searchInput.value || '').trim().length === 0) showHistory();
+        else historyEl.classList.add('hidden');
+    });
+    
+    historyEl.addEventListener('mousedown', (e) => {
+        const btn = e.target.closest('.search-history-item');
+        if (btn) {
+            e.preventDefault();
+            searchInput.value = btn.dataset.query || '';
+            searchInput.focus();
+            search(true);
+            hideHistory();
+        }
+    });
+}
+
+// 検索成功時に履歴へ保存（search関数内で呼ぶ）
+function addToSearchHistory(query) {
+    if (query && query.trim().length >= 2) {
+        saveSearchHistory(query.trim());
+    }
 }
 
 

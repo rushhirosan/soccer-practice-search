@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         const isMac = /Mac|iPhone|iPad/.test(navigator.platform || '');
-        searchInput.placeholder = isMac ? 'キーワードで検索（Cmd+K）' : 'キーワードで検索（Ctrl+K）';
+        searchInput.placeholder = isMac ? 'キーワードで検索（Cmd+K・クリックで履歴）' : 'キーワードで検索（Ctrl+K・クリックで履歴）';
     }
     displayCards([]); // 初期状態で「検索してください」を表示
     updatePaginationButtons(); // 初期化時にボタンを更新

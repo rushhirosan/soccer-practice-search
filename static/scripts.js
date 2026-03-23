@@ -97,7 +97,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     setupRealtimeSearch(); // リアルタイム検索（debounce付き）
     setupSearchHistory();  // 検索履歴の表示・選択
-    
+    updateSelectedMenusBadge(); // 練習メモ帳バッジの初期表示
+
     // 5秒後に再度実行（フォールバック）
     setTimeout(() => {
         console.log("Fallback: Re-populating dropdowns...");
@@ -457,19 +458,20 @@ function displayCards(data, limit = 10) {
 function createCard(activity) {
     const card = document.createElement('div');
     card.className = 'card';
-    
+    card.dataset.activityId = activity.id;
+
     // セキュリティ: XSS対策 - innerHTMLの代わりにtextContentとcreateElementを使用
     const titleDiv = document.createElement('div');
     const titleStrong = document.createElement('strong');
     titleStrong.textContent = activity.title || '';
     titleDiv.appendChild(titleStrong);
-    
+
     const videoContainer = document.createElement('div');
     videoContainer.className = 'video-container';
     const iframe = document.createElement('iframe');
     // セキュリティ: video_urlの検証（YouTubeの埋め込みURLのみ許可）
     const videoUrl = activity.video_url || '';
-    if (videoUrl.startsWith('https://www.youtube.com/embed/') || 
+    if (videoUrl.startsWith('https://www.youtube.com/embed/') ||
         videoUrl.startsWith('https://youtube.com/embed/')) {
         iframe.src = videoUrl;
         // パフォーマンス: 遅延読み込み（lazy loading）
@@ -481,35 +483,57 @@ function createCard(activity) {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', '');
     videoContainer.appendChild(iframe);
-    
+
     const infoDiv = document.createElement('div');
     infoDiv.className = 'info';
-    
+
     const uploadDateDiv = document.createElement('div');
     uploadDateDiv.textContent = `アップロード日: ${activity.upload_date || ''}`;
-    
+
     const viewCountDiv = document.createElement('div');
     viewCountDiv.textContent = `再生回数: ${formatNumber(activity.view_count || 0)}`;
-    
+
     const likeCountDiv = document.createElement('div');
     likeCountDiv.textContent = `いいね: ${formatNumber(activity.like_count || 0)}`;
-    
+
     const durationDiv = document.createElement('div');
     durationDiv.textContent = `動画時間: ${activity.duration || ''}`;
-    
+
     const channelDiv = document.createElement('div');
     channelDiv.textContent = `チャネル名: ${activity.channel_category || ''}`;
-    
+
     infoDiv.appendChild(uploadDateDiv);
     infoDiv.appendChild(viewCountDiv);
     infoDiv.appendChild(likeCountDiv);
     infoDiv.appendChild(durationDiv);
     infoDiv.appendChild(channelDiv);
-    
+
+    const addToMemoBtn = document.createElement('button');
+    addToMemoBtn.type = 'button';
+    addToMemoBtn.className = 'card-add-memo-btn';
+    addToMemoBtn.setAttribute('aria-label', 'メモ帳に追加');
+    addToMemoBtn.title = 'メモ帳に追加';
+    addToMemoBtn.textContent = '📝 メモ帳に追加';
+    addToMemoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (addToSelectedMenus(activity)) {
+            addToMemoBtn.textContent = '✓ 追加済み';
+            addToMemoBtn.disabled = true;
+            addToMemoBtn.classList.add('added');
+        }
+    });
+    const selected = getSelectedMenus().some(it => it.id === activity.id);
+    if (selected) {
+        addToMemoBtn.textContent = '✓ 追加済み';
+        addToMemoBtn.disabled = true;
+        addToMemoBtn.classList.add('added');
+    }
+
     card.appendChild(titleDiv);
     card.appendChild(videoContainer);
     card.appendChild(infoDiv);
-    
+    card.appendChild(addToMemoBtn);
+
     document.querySelector('.card-container').appendChild(card);
 }
 
@@ -789,15 +813,39 @@ async function submitFeedback(formData) {
     });
 }
 
-// リアルタイム検索（debounce 400ms）
+// リアルタイム検索（debounce 400ms、オプションでオフ可能）
+const REALTIME_SEARCH_KEY = 'soccer_realtime_search';
+
+function isRealtimeSearchEnabled() {
+    try {
+        const stored = localStorage.getItem(REALTIME_SEARCH_KEY);
+        return stored === 'true'; // 明示的に有効にしたときだけON
+    } catch {
+        return false;
+    }
+}
+
 function setupRealtimeSearch() {
     const searchInput = document.getElementById('search-input');
+    const toggleEl = document.getElementById('realtime-search-toggle');
     if (!searchInput) return;
+
+    if (toggleEl) {
+        toggleEl.checked = isRealtimeSearchEnabled();
+        toggleEl.addEventListener('change', () => {
+            try {
+                localStorage.setItem(REALTIME_SEARCH_KEY, String(toggleEl.checked));
+            } catch (e) {
+                console.warn('設定の保存に失敗:', e);
+            }
+        });
+    }
     
     let debounceTimer = null;
     const DEBOUNCE_MS = 400;
     
     searchInput.addEventListener('input', () => {
+        if (toggleEl && !toggleEl.checked) return;
         clearTimeout(debounceTimer);
         const query = (searchInput.value || '').trim();
         if (query.length === 0) {
@@ -817,6 +865,53 @@ function setupRealtimeSearch() {
             search(true);
         }, DEBOUNCE_MS);
     });
+}
+
+// 練習メモ帳: 選んだメニュー（localStorage）
+const SELECTED_MENUS_KEY = 'soccer_selected_menus';
+
+function getSelectedMenus() {
+    try {
+        const stored = localStorage.getItem(SELECTED_MENUS_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveSelectedMenus(items) {
+    try {
+        localStorage.setItem(SELECTED_MENUS_KEY, JSON.stringify(items));
+        return true;
+    } catch (e) {
+        console.warn('選んだメニューの保存に失敗:', e);
+        return false;
+    }
+}
+
+function addToSelectedMenus(activity) {
+    const items = getSelectedMenus();
+    const exists = items.some(it => it.id === activity.id);
+    if (exists) return false;
+    items.push({ ...activity, memo: '' });
+    saveSelectedMenus(items);
+    updateSelectedMenusBadge();
+    return true;
+}
+
+function removeFromSelectedMenus(activityId) {
+    const items = getSelectedMenus().filter(it => it.id !== activityId);
+    saveSelectedMenus(items);
+    updateSelectedMenusBadge();
+}
+
+function updateSelectedMenusBadge() {
+    const count = getSelectedMenus().length;
+    const badge = document.getElementById('practice-notes-badge');
+    if (badge) {
+        badge.textContent = count > 0 ? count : '';
+        badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
 }
 
 // 検索履歴（localStorage、最大10件）
@@ -844,6 +939,15 @@ function saveSearchHistory(query) {
     }
 }
 
+function removeFromSearchHistory(query) {
+    let history = getSearchHistory().filter(q => q !== query);
+    try {
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    } catch (e) {
+        console.warn('検索履歴の削除に失敗:', e);
+    }
+}
+
 function setupSearchHistory() {
     const searchInput = document.getElementById('search-input');
     const searchPrimary = document.querySelector('.search-primary');
@@ -864,8 +968,11 @@ function setupSearchHistory() {
             historyEl.classList.add('hidden');
             return;
         }
-        historyEl.innerHTML = history.map(q => 
-            `<button type="button" class="search-history-item" data-query="${q.replace(/"/g, '&quot;')}">${escapeHtml(q)}</button>`
+        historyEl.innerHTML = history.map(q =>
+            `<div class="search-history-row" data-query="${q.replace(/"/g, '&quot;')}">
+                <button type="button" class="search-history-item">${escapeHtml(q)}</button>
+                <button type="button" class="search-history-delete" aria-label="この履歴を削除">×</button>
+            </div>`
         ).join('');
         historyEl.classList.remove('hidden');
     }
@@ -880,18 +987,38 @@ function setupSearchHistory() {
         return div.innerHTML;
     }
     
+    let ignoreNextBlur = false;
     searchInput.addEventListener('focus', showHistory);
-    searchInput.addEventListener('blur', hideHistory);
+    searchInput.addEventListener('blur', () => {
+        if (ignoreNextBlur) { ignoreNextBlur = false; return; }
+        hideHistory();
+    });
     searchInput.addEventListener('input', () => {
         if ((searchInput.value || '').trim().length === 0) showHistory();
         else historyEl.classList.add('hidden');
     });
     
     historyEl.addEventListener('mousedown', (e) => {
-        const btn = e.target.closest('.search-history-item');
-        if (btn) {
+        const deleteBtn = e.target.closest('.search-history-delete');
+        if (deleteBtn) {
             e.preventDefault();
-            searchInput.value = btn.dataset.query || '';
+            e.stopPropagation();
+            ignoreNextBlur = true;
+            const row = deleteBtn.closest('.search-history-row');
+            const query = row ? row.dataset.query : '';
+            if (query) {
+                removeFromSearchHistory(query);
+                showHistory();
+                searchInput.focus();
+            }
+            return;
+        }
+        const itemBtn = e.target.closest('.search-history-item');
+        const row = itemBtn ? itemBtn.closest('.search-history-row') : null;
+        if (row) {
+            e.preventDefault();
+            const query = row.dataset.query || '';
+            searchInput.value = query;
             searchInput.focus();
             search(true);
             hideHistory();

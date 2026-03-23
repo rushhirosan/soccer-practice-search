@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>練習メモ帳 - サッカートレーニング検索サイト</title>
+    <meta name="description" content="検索した練習メニューを選んでメモを付け、印刷できるメニュー帳。練習計画の記録・保存も可能です。">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=40">
+    <style>
+        .practice-notes-page { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+        .practice-notes-page h1 { margin-bottom: 0.5rem; }
+        .practice-notes-page .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+        .notes-section { background: var(--surface-color); border-radius: var(--radius-xl); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+        .notes-section h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+        .menu-item { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; background: var(--background-color); border-radius: var(--radius-md); margin-bottom: 0.75rem; border: 1px solid var(--border-subtle); }
+        .menu-item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+        .menu-item-title { font-weight: 600; flex: 1; }
+        .menu-item-remove { padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--danger-color); background: transparent; border: 1px solid var(--danger-color); border-radius: var(--radius-sm); cursor: pointer; }
+        .menu-item-memo { width: 100%; min-height: 60px; padding: 0.5rem; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); resize: vertical; }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); }
+        .empty-state a { color: var(--primary-color); }
+        .action-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+        .action-buttons button { padding: 0.6rem 1.2rem; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; border: none; transition: var(--transition); }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--background-color); }
+        .plans-list { list-style: none; padding: 0; margin: 0; }
+        .plan-card { padding: 1rem; margin-bottom: 0.75rem; background: var(--background-color); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+        .plan-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .plan-card-title { font-weight: 600; }
+        .plan-card-date { font-size: 0.85rem; color: var(--text-secondary); }
+        .plan-card-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .board-preview { max-width: 100%; max-height: 200px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-top: 0.5rem; }
+        @media print {
+            .no-print { display: none !important; }
+            .practice-notes-page { max-width: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>練習メモ帳</h1>
+        <nav aria-label="ナビゲーション">
+            <a href="/">← ホームに戻る</a>
+            <a href="/board">ボード</a>
+            <a href="/about">このサイトについて</a>
+        </nav>
+    </header>
+
+    <main class="practice-notes-page">
+        <h1>練習メモ・メニュー帳</h1>
+        <p class="subtitle">検索結果を選んでメモを付け、印刷できます。メニューと練習ボード図をセットで記録・保存も可能です。</p>
+
+        <section class="notes-section" id="selected-menus-section">
+            <h2>選んだメニュー</h2>
+            <div id="selected-menus-list"></div>
+            <div id="empty-selected" class="empty-state">
+                <p>まだメニューが選ばれていません。</p>
+                <p><a href="/">ホームで検索</a>して、気になる練習メニューを「メモ帳に追加」で選んでください。</p>
+            </div>
+            <div id="selected-actions" class="action-buttons no-print" style="display:none;">
+                <a href="/board" target="_blank" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;">ボードで図を描く</a>
+                <button type="button" id="btn-import-board" class="btn-secondary">ボード図を取り込む</button>
+                <button type="button" id="btn-save-plan" class="btn-primary">練習計画として保存</button>
+                <button type="button" id="btn-print" class="btn-secondary">印刷</button>
+            </div>
+        </section>
+
+        <section class="notes-section">
+            <h2>保存した練習計画</h2>
+            <ul id="saved-plans-list" class="plans-list"></ul>
+            <div id="empty-plans" class="empty-state">
+                <p>保存した練習計画はありません。</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="/">ホーム</a> | <a href="/board">ボード</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+    </footer>
+
+    <!-- 練習計画保存用モーダル -->
+    <div id="save-plan-modal" class="no-print" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center;">
+        <div style="background:white;padding:1.5rem;border-radius:var(--radius-xl);max-width:400px;width:90%;">
+            <h3 style="margin-bottom:1rem;">練習計画を保存</h3>
+            <label style="display:block;margin-bottom:0.5rem;">タイトル</label>
+            <input type="text" id="plan-title-input" placeholder="例: 3月第2週 パス練習" style="width:100%;padding:0.5rem;margin-bottom:1rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button type="button" id="btn-cancel-save" class="btn-secondary">キャンセル</button>
+                <button type="button" id="btn-confirm-save" class="btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='practice-notes.js') }}"></script>
+</body>
+</html>

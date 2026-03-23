@@ -1147,6 +1147,12 @@ def tactical_board():
     """ボードページ"""
     return render_template('tactical_board.html')
 
+
+@app.route('/practice-notes')
+def practice_notes():
+    """練習メモ・メニュー帳ページ"""
+    return render_template('practice_notes.html')
+
 @app.route('/google-search-console.html')
 def google_search_console():
     """Google Search Console所有権確認ページ"""
@@ -1180,6 +1186,12 @@ def sitemap():
         <lastmod>{current_time}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/practice-notes</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
     </url>
     <url>
         <loc>https://soccer-practice-search.fly.dev/about</loc>

@@ -1169,6 +1169,7 @@
         else if (a === 'export-json') exportJSON();
         else if (a === 'import') document.getElementById('file-input').click();
         else if (a === 'export-png') exportPNG();
+        else if (a === 'add-to-notes') addToPracticeNotes();
       });
     });
     document.addEventListener('click', (e) => {
@@ -1336,6 +1337,19 @@
   function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert('読込ました'); } catch (err) { alert('読込失敗'); } }; r.readAsText(f); e.target.value = ''; }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
   function exportPNG() { const a = document.createElement('a'); a.href = stage.toDataURL({ pixelRatio: 2 }); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.png'; a.click(); }
+
+  function addToPracticeNotes() {
+    try {
+      const imageDataUrl = stage.toDataURL({ pixelRatio: 2 });
+      const boardData = getData();
+      const payload = { imageDataUrl, boardData, savedAt: new Date().toISOString() };
+      localStorage.setItem('soccer_pending_board_for_plan', JSON.stringify(payload));
+      alert('メニュー帳に追加する準備ができました。\n練習メモ帳ページで「ボード図を取り込む」をクリックしてください。');
+      window.location.href = '/practice-notes';
+    } catch (e) {
+      alert('エラー: ' + (e.message || '処理に失敗しました'));
+    }
+  }
 
   function playAnimation() {
     if (scenes.length === 0) return;

@@ -265,9 +265,20 @@ header h1 {
   display: none;
 }
 
+.search-history-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-history-row:last-child {
+  border-bottom: none;
+}
+
 .search-history-item {
-  display: block;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 0.5rem 0.85rem;
   text-align: left;
   border: none;
@@ -285,6 +296,31 @@ header h1 {
 }
 
 .search-history-item:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.search-history-delete {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  margin-right: 0.25rem;
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+
+.search-history-delete:hover {
+  color: var(--danger-color);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.search-history-delete:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -2px;
 }
@@ -332,6 +368,22 @@ header h1 {
 
 .search-primary-btn:active {
   transform: translateY(0);
+}
+
+.search-option-realtime {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.search-option-realtime input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary-color);
 }
 
 /* 詳細条件 - 折りたたみ */
@@ -1271,5 +1323,55 @@ header nav a {
 header nav a:hover {
   color: rgba(255, 255, 255, 0.9);
   text-decoration: underline;
+}
+
+/* ナビバッジ（メモ帳の選んだメニュー数） */
+header nav a.nav-with-badge {
+  position: relative;
+}
+
+.nav-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  background: var(--accent-color);
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* カード「メモ帳に追加」ボタン */
+.card-add-memo-btn {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.card-add-memo-btn:hover:not(:disabled) {
+  background: rgba(13, 148, 136, 0.15);
+  border-color: var(--primary-color);
+}
+
+.card-add-memo-btn.added,
+.card-add-memo-btn:disabled {
+  color: var(--text-muted);
+  background: var(--border-subtle);
+  border-color: var(--border-color);
+  cursor: default;
 }
 

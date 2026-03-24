@@ -73,40 +73,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     // セキュリティ: CSRFトークンを事前に取得
     await getCsrfToken();
     
-    // ショートカット表記を OS に合わせて設定（Mac: Cmd+K、Windows等: Ctrl+K）
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         const isMac = /Mac|iPhone|iPad/.test(navigator.platform || '');
         searchInput.placeholder = isMac ? 'キーワードで検索（Cmd+K・クリックで履歴）' : 'キーワードで検索（Ctrl+K・クリックで履歴）';
-    }
-    displayCards([]); // 初期状態で「検索してください」を表示
-    updatePaginationButtons(); // 初期化時にボタンを更新
-    initTabSwitching(); // タブ切り替え処理の初期化
-    setupSearchHandler(); // 検索の初期設定
-    setupKeyboardShortcuts(); // キーボードショートカットの設定
-    setupFocusManagement(); // フォーカス管理の設定
-    
-    // ドロップダウンの選択肢を設定（少し遅延させて確実に実行）
-    setTimeout(() => {
-        console.log("Populating dropdowns...");
-        populateChannelSelect(); // チャネル選択肢を設定
-        populateLevelSelect();
-        populateSelect("type-input", "category_title");  // カテゴリの選択肢を設定
-        populateSelect("players-input", "players");  // プレイヤー数の選択肢を設定
-    }, 100);
-    
-    setupRealtimeSearch(); // リアルタイム検索（debounce付き）
-    setupSearchHistory();  // 検索履歴の表示・選択
-    updateSelectedMenusBadge(); // 練習メモ帳バッジの初期表示
+        displayCards([]); // 初期状態で「検索してください」を表示
+        updatePaginationButtons(); // 初期化時にボタンを更新
+        initTabSwitching(); // タブ切り替え処理の初期化
+        setupSearchHandler(); // 検索の初期設定
+        setupKeyboardShortcuts(); // キーボードショートカットの設定
+        setupFocusManagement(); // フォーカス管理の設定
 
-    // 5秒後に再度実行（フォールバック）
-    setTimeout(() => {
-        console.log("Fallback: Re-populating dropdowns...");
-        populateChannelSelect();
-        populateLevelSelect();
-        populateSelect("type-input", "category_title");
-        populateSelect("players-input", "players");
-    }, 5000);
+        setTimeout(() => {
+            console.log("Populating dropdowns...");
+            populateChannelSelect();
+            populateLevelSelect();
+            populateSelect("type-input", "category_title");
+            populateSelect("players-input", "players");
+        }, 100);
+
+        setupRealtimeSearch();
+        setupSearchHistory();
+
+        setTimeout(() => {
+            console.log("Fallback: Re-populating dropdowns...");
+            populateChannelSelect();
+            populateLevelSelect();
+            populateSelect("type-input", "category_title");
+            populateSelect("players-input", "players");
+        }, 5000);
+    }
+
+    updateSelectedMenusBadge();
+    updateFavoritesBadge();
 });
 
 // ユニークな選択肢を取得・設定する関数
@@ -422,7 +421,8 @@ function showLoading() {
     const loadingIndicator = document.getElementById('loading-indicator');
     const searchPrompt = document.getElementById('search-prompt');
     const cardContainer = document.querySelector('.card-container');
-    
+    if (!loadingIndicator || !searchPrompt || !cardContainer) return;
+
     loadingIndicator.classList.remove('hidden');
     searchPrompt.style.display = 'none';
     cardContainer.innerHTML = '';
@@ -432,13 +432,14 @@ function showLoading() {
 // ローディング状態を非表示にする関数
 function hideLoading() {
     const loadingIndicator = document.getElementById('loading-indicator');
-    loadingIndicator.classList.add('hidden');
+    if (loadingIndicator) loadingIndicator.classList.add('hidden');
 }
 
 // カード表示用関数
 function displayCards(data, limit = 10) {
     const cardContainer = document.querySelector('.card-container');
     const searchPrompt = document.getElementById('search-prompt');
+    if (!cardContainer || !searchPrompt) return;
 
     cardContainer.innerHTML = ''; // 既存のカードをクリア
     hideLoading();
@@ -451,16 +452,23 @@ function displayCards(data, limit = 10) {
     }
 
     searchPrompt.style.display = 'none';
-    data.slice(0, limit).forEach(createCard);
+    data.slice(0, limit).forEach((activity) => {
+        const card = buildVideoCard(activity, { listContext: 'search' });
+        document.querySelector('.card-container').appendChild(card);
+    });
 }
 
-// カード作成
-function createCard(activity) {
+/**
+ * 検索結果カードまたはお気に入り一覧用のカードを組み立てる
+ * @param {object} activity
+ * @param {{ listContext?: 'search'|'favorites' }} options
+ */
+function buildVideoCard(activity, options = {}) {
+    const listContext = options.listContext || 'search';
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.activityId = activity.id;
 
-    // セキュリティ: XSS対策 - innerHTMLの代わりにtextContentとcreateElementを使用
     const titleDiv = document.createElement('div');
     const titleStrong = document.createElement('strong');
     titleStrong.textContent = activity.title || '';
@@ -469,15 +477,12 @@ function createCard(activity) {
     const videoContainer = document.createElement('div');
     videoContainer.className = 'video-container';
     const iframe = document.createElement('iframe');
-    // セキュリティ: video_urlの検証（YouTubeの埋め込みURLのみ許可）
     const videoUrl = activity.video_url || '';
     if (videoUrl.startsWith('https://www.youtube.com/embed/') ||
         videoUrl.startsWith('https://youtube.com/embed/')) {
         iframe.src = videoUrl;
-        // パフォーマンス: 遅延読み込み（lazy loading）
         iframe.setAttribute('loading', 'lazy');
     } else {
-        // 無効なURLの場合は空にするか、デフォルト値を設定
         iframe.src = '';
     }
     iframe.setAttribute('frameborder', '0');
@@ -508,6 +513,49 @@ function createCard(activity) {
     infoDiv.appendChild(durationDiv);
     infoDiv.appendChild(channelDiv);
 
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'card-actions';
+
+    const favoriteBtn = document.createElement('button');
+    favoriteBtn.type = 'button';
+    favoriteBtn.className = 'card-favorite-btn';
+
+    function syncFavoriteBtn() {
+        const fav = isFavorite(activity.id);
+        favoriteBtn.classList.toggle('is-favorite', fav);
+        favoriteBtn.setAttribute('aria-pressed', fav ? 'true' : 'false');
+        if (listContext === 'favorites') {
+            favoriteBtn.setAttribute('aria-label', 'お気に入りから外す');
+            favoriteBtn.textContent = '★ お気に入りから外す';
+        } else {
+            favoriteBtn.setAttribute('aria-label', fav ? 'お気に入りから外す' : 'お気に入りに追加');
+            favoriteBtn.textContent = fav ? '★ お気に入り済み' : '☆ お気に入り';
+        }
+    }
+    syncFavoriteBtn();
+
+    favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (listContext === 'favorites') {
+            removeFavorite(activity.id);
+            card.remove();
+            updateFavoritesBadge();
+            const list = document.getElementById('favorites-list');
+            const empty = document.getElementById('favorites-empty');
+            if (list && empty && list.children.length === 0) {
+                empty.style.display = 'block';
+            }
+        } else {
+            if (isFavorite(activity.id)) {
+                removeFavorite(activity.id);
+            } else {
+                addFavorite(activity);
+            }
+            syncFavoriteBtn();
+            updateFavoritesBadge();
+        }
+    });
+
     const addToMemoBtn = document.createElement('button');
     addToMemoBtn.type = 'button';
     addToMemoBtn.className = 'card-add-memo-btn';
@@ -529,12 +577,15 @@ function createCard(activity) {
         addToMemoBtn.classList.add('added');
     }
 
+    actionsRow.appendChild(favoriteBtn);
+    actionsRow.appendChild(addToMemoBtn);
+
     card.appendChild(titleDiv);
     card.appendChild(videoContainer);
     card.appendChild(infoDiv);
-    card.appendChild(addToMemoBtn);
+    card.appendChild(actionsRow);
 
-    document.querySelector('.card-container').appendChild(card);
+    return card;
 }
 
 // 表示中の動画数 / 総動画数を更新
@@ -595,9 +646,8 @@ function fetchData(endpoint, queryParams, limit) {
             
             showError(errorMessage, errorDetails);
             
-            // 検索プロンプトを表示
             const searchPrompt = document.getElementById('search-prompt');
-            searchPrompt.style.display = 'block';
+            if (searchPrompt) searchPrompt.style.display = 'block';
             throw error; // エラーを伝播させ、履歴保存をスキップ
         });
 }
@@ -611,16 +661,19 @@ function togglePaginationVisibility(totalResults) {
 
 // 検索処理
 function search(resetPage = true) {
+    const searchButton = document.getElementById('search-button');
+    const searchInputEl = document.getElementById('search-input');
+    if (!searchButton || !searchInputEl) return;
+
     if (resetPage) currentPage = 1;
 
     // 検索ボタンを無効化（重複リクエスト防止）
-    const searchButton = document.getElementById('search-button');
     const originalButtonText = '検索'; // 常に「検索」に戻す
     searchButton.disabled = true;
     searchButton.textContent = '検索中...';
 
     // セキュリティ: 入力値の取得と基本的な検証
-    const searchInput = document.getElementById('search-input');
+    const searchInput = searchInputEl;
     const typeInput = document.getElementById('type-input');
     const playersInput = document.getElementById('players-input');
     const levelInput = document.getElementById('level-input');
@@ -702,6 +755,7 @@ function initTabSwitching() {
 
     const typeInput = document.getElementById("type-input");
     const playersInput = document.getElementById("players-input");
+    if (!typeInput || !playersInput) return;
 
     typeInput.addEventListener("change", () => {
         playersInput.disabled = typeInput.value !== "対人";
@@ -910,6 +964,56 @@ function updateSelectedMenusBadge() {
     const badge = document.getElementById('practice-notes-badge');
     if (badge) {
         badge.textContent = count > 0 ? count : '';
+        badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+}
+
+// お気に入り動画（localStorage）
+const FAVORITES_KEY = 'soccer_favorite_videos';
+
+function getFavorites() {
+    try {
+        const stored = localStorage.getItem(FAVORITES_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveFavorites(items) {
+    try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(items));
+        return true;
+    } catch (e) {
+        console.warn('お気に入りの保存に失敗:', e);
+        return false;
+    }
+}
+
+function isFavorite(activityId) {
+    return getFavorites().some(it => it.id === activityId);
+}
+
+function addFavorite(activity) {
+    const items = getFavorites();
+    if (items.some(it => it.id === activity.id)) return false;
+    items.push({ ...activity });
+    saveFavorites(items);
+    updateFavoritesBadge();
+    return true;
+}
+
+function removeFavorite(activityId) {
+    const items = getFavorites().filter(it => it.id !== activityId);
+    saveFavorites(items);
+    updateFavoritesBadge();
+}
+
+function updateFavoritesBadge() {
+    const count = getFavorites().length;
+    const badge = document.getElementById('favorites-badge');
+    if (badge) {
+        badge.textContent = count > 0 ? String(count) : '';
         badge.style.display = count > 0 ? 'inline-flex' : 'none';
     }
 }

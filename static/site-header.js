@@ -1,11 +1,26 @@
 (function () {
   var STORAGE_KEY = 'soccer_selected_menus';
+  var FAVORITES_KEY = 'soccer_favorite_videos';
 
   function syncMemoBadge() {
     var badge = document.getElementById('practice-notes-badge');
     if (!badge) return;
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
+      var items = raw ? JSON.parse(raw) : [];
+      var count = Array.isArray(items) ? items.length : 0;
+      badge.textContent = count > 0 ? String(count) : '';
+      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function syncFavoritesBadge() {
+    var badge = document.getElementById('favorites-badge');
+    if (!badge) return;
+    try {
+      var raw = localStorage.getItem(FAVORITES_KEY);
       var items = raw ? JSON.parse(raw) : [];
       var count = Array.isArray(items) ? items.length : 0;
       badge.textContent = count > 0 ? String(count) : '';
@@ -48,10 +63,12 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     syncMemoBadge();
+    syncFavoritesBadge();
     setupMobileNav();
   });
 
   window.addEventListener('storage', function (e) {
     if (e.key === STORAGE_KEY) syncMemoBadge();
+    if (e.key === FAVORITES_KEY) syncFavoritesBadge();
   });
 })();

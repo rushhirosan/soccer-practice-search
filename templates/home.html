@@ -88,7 +88,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=42">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=43">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -105,7 +105,7 @@
     <main>
         <div class="tab-container">
             <div class="home-screen-hint" role="region" aria-label="この画面でできること">
-                <p class="home-screen-hint__text">キーワードや目的・人数・レベルで練習動画を検索し、一覧から動画を開けます。気に入ったメニューはメモ帳に追加して整理できます。</p>
+                <p class="home-screen-hint__text">キーワードや目的・人数・レベルで練習動画を検索し、一覧から動画を開けます。☆ お気に入りに保存するか、メモ帳に追加して整理できます。</p>
             </div>
             <div class="tab-content">
                 <div id="tab1" class="tab-panel active" role="region" aria-label="検索と結果">
@@ -193,7 +193,7 @@
 
     <footer>
         <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
-        <p><a href="/board">ボード</a> | <a href="/practice-notes">メモ帳</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p><a href="/board">ボード</a> | <a href="/favorites">お気に入り</a> | <a href="/practice-notes">メモ帳</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>

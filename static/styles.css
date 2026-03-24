@@ -1443,6 +1443,47 @@ footer a:hover {
   justify-content: center;
 }
 
+/* カード: お気に入り + メモ帳 */
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+.card-favorite-btn {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.card-favorite-btn:hover {
+  border-color: rgba(180, 83, 9, 0.45);
+  color: var(--text-primary);
+}
+
+.card-favorite-btn.is-favorite {
+  color: #b45309;
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.card-actions .card-add-memo-btn {
+  flex: 1;
+  min-width: 8rem;
+  margin-top: 0;
+  width: auto;
+}
+
 /* カード「メモ帳に追加」ボタン */
 .card-add-memo-btn {
   margin-top: 0.75rem;

@@ -1148,6 +1148,12 @@ def tactical_board():
     return render_template('tactical_board.html')
 
 
+@app.route('/favorites')
+def favorites_page():
+    """お気に入りに保存した動画一覧（クライアント側ストレージ用のページ）"""
+    return render_template('favorites.html')
+
+
 @app.route('/practice-notes')
 def practice_notes():
     """練習メモ・メニュー帳ページ"""
@@ -1186,6 +1192,12 @@ def sitemap():
         <lastmod>{current_time}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://soccer-practice-search.fly.dev/favorites</loc>
+        <lastmod>{current_time}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.75</priority>
     </url>
     <url>
         <loc>https://soccer-practice-search.fly.dev/practice-notes</loc>

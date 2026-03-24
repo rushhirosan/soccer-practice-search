@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お気に入りの動画 - サッカートレーニング検索サイト</title>
+    <meta name="description" content="検索でお気に入りに保存した練習動画の一覧。ブラウザに保存されます。">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=43">
+    <style>
+        .favorites-page { max-width: 1400px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+        .favorites-page h1 { margin-bottom: 0.35rem; font-size: 1.35rem; }
+        .favorites-page .subtitle { color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.9rem; line-height: 1.5; }
+        .favorites-empty { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); background: var(--surface-color); border-radius: var(--radius-xl); border: 1px dashed var(--border-color); }
+        .favorites-empty a { color: var(--primary-color); font-weight: 600; }
+    </style>
+</head>
+<body>
+    {% set active_nav = 'favorites' %}
+    {% include 'partials/site_header.html' %}
+
+    <main class="favorites-page">
+        <h1>お気に入りの動画</h1>
+        <p class="subtitle">検索結果の各カードで「☆ お気に入り」を押すとここに保存されます（このブラウザ内のみ。他の端末とは同期しません）。</p>
+
+        <div id="favorites-empty" class="favorites-empty">
+            <p>まだお気に入りはありません。</p>
+            <p><a href="/">ホームで練習動画を検索</a>して、気に入った動画に ☆ を付けてみてください。</p>
+        </div>
+
+        <div id="favorites-list" class="card-container" aria-live="polite"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
+        <p><a href="/">ホーム</a> | <a href="/board">ボード</a> | <a href="/practice-notes">メモ帳</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}"></script>
+    <script src="{{ url_for('static', filename='favorites.js') }}"></script>
+</body>
+</html>

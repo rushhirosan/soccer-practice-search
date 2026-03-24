@@ -1,4 +1,4 @@
-{# active_nav: home | board | notes | about | privacy（その他は未選択） #}
+{# active_nav: home | board | favorites | notes | about | privacy（その他は未選択） #}
 {% set nav = active_nav|default('') %}
 <header class="site-header">
   <div class="site-header__inner">
@@ -19,6 +19,9 @@
         </li>
         <li>
           <a href="/board" class="site-header__link{% if nav == 'board' %} is-active{% endif %}"{% if nav == 'board' %} aria-current="page"{% endif %}>ボード</a>
+        </li>
+        <li>
+          <a href="/favorites" class="site-header__link nav-with-badge{% if nav == 'favorites' %} is-active{% endif %}"{% if nav == 'favorites' %} aria-current="page"{% endif %}>お気に入り<span id="favorites-badge" class="nav-badge" aria-label="お気に入りの動画数" style="display:none;"></span></a>
         </li>
         <li>
           <a href="/practice-notes" id="practice-notes-link" class="site-header__link nav-with-badge{% if nav == 'notes' %} is-active{% endif %}"{% if nav == 'notes' %} aria-current="page"{% endif %}>メモ帳<span id="practice-notes-badge" class="nav-badge" aria-label="選んだメニュー数" style="display:none;"></span></a>

@@ -8,17 +8,12 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=35">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=41">
     <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=9">
 </head>
 <body>
-    <header class="tactical-header">
-        <h1>ボード</h1>
-        <nav aria-label="ナビゲーション">
-            <a href="/">← ホームに戻る</a>
-            <a href="/about">このサイトについて</a>
-        </nav>
-    </header>
+    {% set active_nav = 'board' %}
+    {% include 'partials/site_header.html' %}
 
     <main class="tactical-main">
         <aside class="toolbar" aria-label="ツール">
@@ -135,6 +130,7 @@
     <input type="file" id="file-input" accept=".json" style="display: none">
 
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}"></script>
     <script src="{{ url_for('static', filename='tactical-board.js') }}?v=11"></script>
 </body>
 </html>

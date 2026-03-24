@@ -88,7 +88,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=39">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=42">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -100,29 +100,15 @@
     </script>
 </head>
 <body>
-    <header>
-        <h1>サッカートレーニング検索サイト Beta</h1>
-        <nav aria-label="ナビゲーション">
-            <ul>
-                <li><a href="/board">ボード</a></li>
-                <li>
-                    <a href="/practice-notes" id="practice-notes-link" class="nav-with-badge">メモ帳
-                        <span id="practice-notes-badge" class="nav-badge" aria-label="選んだメニュー数" style="display:none;"></span>
-                    </a>
-                </li>
-                <li><a href="/about">このサイトについて</a></li>
-            </ul>
-        </nav>
-    </header>
+    {% set active_nav = 'home' %}
+    {% include 'partials/site_header.html' %}
     <main>
         <div class="tab-container">
-            <!-- タブメニュー -->
-            <div class="tabs" role="tablist" aria-label="メインコンテンツ">
-                <div class="tab-button active" data-tab="tab1" role="tab" aria-selected="true" aria-controls="tab1">トレーニング検索 ⚽</div>
+            <div class="home-screen-hint" role="region" aria-label="この画面でできること">
+                <p class="home-screen-hint__text">キーワードや目的・人数・レベルで練習動画を検索し、一覧から動画を開けます。気に入ったメニューはメモ帳に追加して整理できます。</p>
             </div>
-            <!-- タブの内容 -->
             <div class="tab-content">
-                <div id="tab1" class="tab-panel active" role="tabpanel" aria-labelledby="tab1">
+                <div id="tab1" class="tab-panel active" role="region" aria-label="検索と結果">
                 <!-- tab1コンテンツ -->
                     <div class="content-wrapper">
                         <!-- サイドペイン - Google風2段構成 -->
@@ -211,5 +197,6 @@
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}"></script>
 </body>
 </html>

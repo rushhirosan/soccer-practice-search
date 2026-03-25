@@ -33,9 +33,141 @@
         .plan-card-date { font-size: 0.85rem; color: var(--text-secondary); }
         .plan-card-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
         .board-preview { max-width: 100%; max-height: 200px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-top: 0.5rem; }
+
+        /* 記録（試合結果/気づき）UI */
+        .notes-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .notes-tab {
+            padding: 0.65rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+        .notes-tab.is-active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .notes-tab-panels {
+            width: 100%;
+        }
+        .notes-tab-panel {
+            display: none;
+        }
+        .notes-tab-panel.is-active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+        .form-field {
+            display: block;
+        }
+        .form-field > span {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            color: var(--text-primary);
+        }
+        .form-field input,
+        .form-field textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface-color);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        .form-field textarea.memo-textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        #saved-records-container {
+            margin-top: 1rem;
+        }
+        .record-date-group {
+            margin-top: 1.25rem;
+            padding-top: 0.25rem;
+        }
+        .record-date-group:first-child {
+            margin-top: 0.5rem;
+        }
+        .record-date {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+        .record-card {
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--background-color);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+        .record-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .record-type-badge {
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background: rgba(13, 148, 136, 0.12);
+            color: var(--primary-color);
+            border: 1px solid rgba(13, 148, 136, 0.25);
+            flex-shrink: 0;
+        }
+        .record-title {
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+        .record-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .record-actions button {
+            padding: 0.45rem 0.9rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .record-actions button:hover {
+            border-color: rgba(13, 148, 136, 0.35);
+        }
+        .record-summary {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+        }
+
         @media print {
             .no-print { display: none !important; }
             .practice-notes-page { max-width: none; }
+            #record-input-section { display: none !important; }
         }
     </style>
 </head>
@@ -44,49 +176,90 @@
     {% include 'partials/site_header.html' %}
 
     <main class="practice-notes-page">
-        <h1>練習メモ・メニュー帳</h1>
-        <p class="subtitle">検索結果を選んでメモを付け、印刷できます。メニューと練習ボード図をセットで記録・保存も可能です。</p>
+        <h1>練習メモ・記録帳</h1>
+        <p class="subtitle">練習試合の結果と、日々の練習で思ったこと（気づき）を保存・印刷できます。</p>
 
-        <section class="notes-section" id="selected-menus-section">
-            <h2>選んだメニュー</h2>
-            <div id="selected-menus-list"></div>
-            <div id="empty-selected" class="empty-state">
-                <p>まだメニューが選ばれていません。</p>
-                <p><a href="/">ホームで検索</a>して、気になる練習メニューを「メモ帳に追加」で選んでください。</p>
+        <section class="notes-section" id="record-input-section">
+            <div class="notes-tabs no-print" role="tablist" aria-label="記録の種類">
+                <button type="button" class="notes-tab is-active" id="tab-btn-match" data-target="tab-match" role="tab" aria-selected="true" aria-controls="tab-match">
+                    試合結果
+                </button>
+                <button type="button" class="notes-tab" id="tab-btn-daily" data-target="tab-daily" role="tab" aria-selected="false" aria-controls="tab-daily">
+                    日々の気づき
+                </button>
             </div>
-            <div id="selected-actions" class="action-buttons no-print" style="display:none;">
-                <a href="/board" target="_blank" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;">ボードで図を描く</a>
-                <button type="button" id="btn-import-board" class="btn-secondary">ボード図を取り込む</button>
-                <button type="button" id="btn-save-plan" class="btn-primary">練習計画として保存</button>
-                <button type="button" id="btn-print" class="btn-secondary">印刷</button>
+
+            <div class="notes-tab-panels">
+                <div id="tab-match" class="notes-tab-panel is-active" role="tabpanel" aria-labelledby="tab-btn-match">
+                    <h2>試合結果</h2>
+                    <div class="form-grid">
+                        <label class="form-field">
+                            <span>日付</span>
+                            <input type="date" id="match-date" />
+                        </label>
+
+                        <label class="form-field">
+                            <span>対戦相手</span>
+                            <input type="text" id="match-opponent" placeholder="例: ○○SC" />
+                        </label>
+
+                        <label class="form-field">
+                            <span>勝敗/スコア</span>
+                            <input type="text" id="match-score" placeholder="例: 2-1（勝ち）" />
+                        </label>
+
+                        <label class="form-field">
+                            <span>得点者・失点者 / 主な出来事</span>
+                            <textarea id="match-events" class="memo-textarea" placeholder="例：
+得点者: ...
+失点者: ...
+主な出来事: ..."></textarea>
+                        </label>
+                    </div>
+
+                    <div class="action-buttons no-print">
+                        <button type="button" id="btn-save-match" class="btn-primary">保存</button>
+                        <button type="button" id="btn-clear-match" class="btn-secondary">クリア</button>
+                    </div>
+                </div>
+
+                <div id="tab-daily" class="notes-tab-panel" role="tabpanel" aria-labelledby="tab-btn-daily">
+                    <h2>日々の気づき</h2>
+                    <div class="form-grid">
+                        <label class="form-field">
+                            <span>日付</span>
+                            <input type="date" id="daily-date" />
+                        </label>
+
+                        <label class="form-field">
+                            <span>メモ</span>
+                            <textarea id="daily-content" class="memo-textarea" placeholder="例：
+・今日の狙い
+・うまくいった点
+・次回への改善"></textarea>
+                        </label>
+                    </div>
+
+                    <div class="action-buttons no-print">
+                        <button type="button" id="btn-save-daily" class="btn-primary">保存</button>
+                        <button type="button" id="btn-clear-daily" class="btn-secondary">クリア</button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="notes-section">
-            <h2>保存した練習計画</h2>
-            <ul id="saved-plans-list" class="plans-list"></ul>
-            <div id="empty-plans" class="empty-state">
-                <p>保存した練習計画はありません。</p>
+        <section class="notes-section" id="saved-records-section">
+            <h2>保存した記録</h2>
+            <div id="empty-records" class="empty-state">
+                <p>保存した記録はありません。</p>
             </div>
+            <div id="saved-records-container"></div>
         </section>
     </main>
 
     <footer>
-        <p><a href="/">ホーム</a> | <a href="/board">ボード</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p><a href="/">ホーム</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
-
-    <!-- 練習計画保存用モーダル -->
-    <div id="save-plan-modal" class="no-print" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center;">
-        <div style="background:white;padding:1.5rem;border-radius:var(--radius-xl);max-width:400px;width:90%;">
-            <h3 style="margin-bottom:1rem;">練習計画を保存</h3>
-            <label style="display:block;margin-bottom:0.5rem;">タイトル</label>
-            <input type="text" id="plan-title-input" placeholder="例: 3月第2週 パス練習" style="width:100%;padding:0.5rem;margin-bottom:1rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);">
-            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
-                <button type="button" id="btn-cancel-save" class="btn-secondary">キャンセル</button>
-                <button type="button" id="btn-confirm-save" class="btn-primary">保存</button>
-            </div>
-        </div>
-    </div>
 
     <script src="{{ url_for('static', filename='site-header.js') }}"></script>
     <script src="{{ url_for('static', filename='practice-notes.js') }}"></script>

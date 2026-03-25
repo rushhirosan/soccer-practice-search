@@ -1512,3 +1512,19 @@ footer a:hover {
   cursor: default;
 }
 
+/* 記録（試合結果/気づき）印刷最適化 */
+@media print {
+  #record-input-section {
+    display: none !important;
+  }
+
+  .record-actions {
+    display: none !important;
+  }
+
+  .record-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+

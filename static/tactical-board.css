@@ -190,7 +190,8 @@
   justify-content: center;
   padding: 1rem;
   background: var(--background-color, #f8fafc);
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -476,5 +477,45 @@
   .tool-btn {
     flex: 1;
     min-width: 80px;
+  }
+}
+
+/* 小さめのスマホ向け（タッチ領域を確保しつつ縦に詰める） */
+@media (max-width: 600px) {
+  .toolbar {
+    padding: 0.75rem;
+  }
+
+  .scene-panel.animation-panel {
+    padding: 0.65rem;
+  }
+
+  .tool-hint {
+    font-size: 0.8rem;
+  }
+
+  .shortcut-hint {
+    font-size: 0.75rem;
+  }
+
+  .tool-btn {
+    min-height: 44px;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .anim-btn {
+    min-height: 44px;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.5rem;
+  }
+
+  .timing-group label {
+    font-size: 0.8rem;
+  }
+
+  .timing-group select {
+    font-size: 0.85rem;
+    padding: 0.45rem;
   }
 }

@@ -49,6 +49,37 @@
   let marqueeStart = null;
   let marqueeRect = null;
 
+  // Konva のステージ（キャンバス）を画面幅に合わせてスケールする（モバイル横溢れ防止）
+  let stageFitScale = 1;
+  let stageFitRafId = null;
+
+  function fitStageToCanvasSection() {
+    if (!stage) return;
+    const canvasSection = document.getElementById('canvas-section');
+    if (!canvasSection) return;
+
+    const rect = canvasSection.getBoundingClientRect();
+    const width = rect.width;
+    if (!width || width <= 0) return;
+
+    const scale = Math.min(1, width / pitchWidth);
+    const nextScale = Math.max(0.35, scale);
+
+    if (Math.abs(nextScale - stageFitScale) < 0.001) return;
+    stageFitScale = nextScale;
+
+    stage.width(pitchWidth * stageFitScale);
+    stage.height(pitchHeight * stageFitScale);
+    stage.scale({ x: stageFitScale, y: stageFitScale });
+
+    stage.draw();
+  }
+
+  function scheduleFitStageToCanvasSection() {
+    if (stageFitRafId) cancelAnimationFrame(stageFitRafId);
+    stageFitRafId = requestAnimationFrame(fitStageToCanvasSection);
+  }
+
   function getCurrentTool() {
     const btn = document.querySelector('.tool-btn.active');
     return btn?.dataset?.tool || 'select';
@@ -288,6 +319,9 @@
       draggable: false,
     });
 
+    // 生成直後に初期スケールを当てる（スマホの横溢れ/操作しづらさを軽減）
+    fitStageToCanvasSection();
+
     pitchLayer = new Konva.Layer();
     playersLayer = new Konva.Layer();
     drawLayer = new Konva.Layer();
@@ -312,6 +346,10 @@
     if (hint) hint.textContent = 'ドラッグで移動';
     const canvasSection = document.getElementById('canvas-section');
     if (canvasSection) canvasSection.classList.remove('place-mode');
+
+    // 画面サイズ変更/回転に追従
+    window.addEventListener('resize', scheduleFitStageToCanvasSection, { passive: true });
+    window.addEventListener('orientationchange', scheduleFitStageToCanvasSection, { passive: true });
   }
 
   function drawPitch() {

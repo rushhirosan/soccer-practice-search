@@ -1293,6 +1293,24 @@ button:active {
     font-size: 0.85rem;
   }
 
+  /* 2カラム系ページのモバイル余白最適化（about/privacy等） */
+  .split-container {
+    gap: 1rem;
+    margin: 1rem 0 4rem 0;
+  }
+
+  .left-half,
+  .right-half,
+  .feedback-form {
+    padding: 1rem;
+  }
+
+  /* 表示崩れ回避（長いURL/文字列） */
+  a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   .card .info {
     grid-template-columns: 1fr; /* 情報ブロックを縦並びに */
     gap: 0.5rem;

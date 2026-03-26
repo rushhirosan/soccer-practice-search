@@ -164,6 +164,86 @@
             font-size: 0.95rem;
         }
 
+        /* モバイル最適化（タップ領域・余白・崩れ回避） */
+        @media (max-width: 768px) {
+            .practice-notes-page {
+                max-width: 100%;
+                padding: 1rem;
+            }
+
+            .notes-section {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .subtitle {
+                margin-bottom: 1rem;
+            }
+
+            .notes-tabs {
+                gap: 0.35rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .notes-tab {
+                flex: 1;
+                text-align: center;
+                padding: 0.65rem 0.4rem;
+                font-size: 0.95rem;
+            }
+
+            .form-grid {
+                gap: 0.6rem;
+            }
+
+            .form-field textarea.memo-textarea {
+                min-height: 120px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.6rem;
+            }
+
+            .action-buttons button {
+                width: 100%;
+                min-height: 44px;
+            }
+
+            .record-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .record-actions {
+                width: 100%;
+            }
+
+            .record-actions button {
+                width: 100%;
+                min-height: 44px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .practice-notes-page {
+                padding: 0.75rem;
+            }
+
+            .notes-section {
+                padding: 0.9rem;
+            }
+
+            .notes-tab {
+                padding: 0.6rem 0.3rem;
+            }
+
+            .record-card {
+                padding: 0.9rem;
+            }
+        }
+
         @media print {
             .no-print { display: none !important; }
             .practice-notes-page { max-width: none; }

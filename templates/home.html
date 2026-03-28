@@ -88,7 +88,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=43">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=44">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -115,7 +115,10 @@
                         <aside class="search-container" aria-label="検索条件">
                             <!-- 検索バー（常に表示・Above the Fold） -->
                             <div class="search-primary">
-                                <input type="text" id="search-input" placeholder="キーワードで検索（Cmd+K・クリックで履歴）" aria-label="検索キーワード" autocomplete="off">
+                                <div class="search-primary-field">
+                                    <input type="text" id="search-input" class="search-primary-input" placeholder="キーワードで検索" aria-label="検索キーワード" autocomplete="off">
+                                    <kbd class="search-primary-kbd" id="search-shortcut-kbd" aria-hidden="true">⌘K</kbd>
+                                </div>
                                 <button type="button" id="search-button" onclick="search()" aria-label="検索を実行" class="search-primary-btn">検索</button>
                                 <label class="search-option-realtime">
                                     <input type="checkbox" id="realtime-search-toggle" aria-label="入力中に自動検索"> 入力中に自動検索

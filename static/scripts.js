@@ -76,7 +76,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         const isMac = /Mac|iPhone|iPad/.test(navigator.platform || '');
-        searchInput.placeholder = isMac ? 'キーワードで検索（Cmd+K・クリックで履歴）' : 'キーワードで検索（Ctrl+K・クリックで履歴）';
+        searchInput.placeholder = 'キーワードで検索';
+        searchInput.title = isMac ? 'Cmd+K でフォーカス、クリックで履歴' : 'Ctrl+K でフォーカス、クリックで履歴';
+        const shortcutKbd = document.getElementById('search-shortcut-kbd');
+        if (shortcutKbd) {
+            shortcutKbd.textContent = isMac ? '⌘K' : 'Ctrl+K';
+        }
         displayCards([]); // 初期状態で「検索してください」を表示
         updatePaginationButtons(); // 初期化時にボタンを更新
         initTabSwitching(); // タブ切り替え処理の初期化
@@ -1055,15 +1060,17 @@ function removeFromSearchHistory(query) {
 function setupSearchHistory() {
     const searchInput = document.getElementById('search-input');
     const searchPrimary = document.querySelector('.search-primary');
+    const searchField = document.querySelector('.search-primary-field');
     if (!searchInput || !searchPrimary) return;
-    
+    const historyParent = searchField || searchPrimary;
+
     let historyEl = document.getElementById('search-history-dropdown');
     if (!historyEl) {
         historyEl = document.createElement('div');
         historyEl.id = 'search-history-dropdown';
         historyEl.className = 'search-history-dropdown hidden';
         historyEl.setAttribute('aria-label', '検索履歴');
-        searchPrimary.appendChild(historyEl);
+        historyParent.appendChild(historyEl);
     }
     
     function showHistory() {

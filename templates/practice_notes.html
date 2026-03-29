@@ -83,12 +83,18 @@
         .form-field input,
         .form-field textarea {
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
             padding: 0.6rem 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             background: var(--surface-color);
             color: var(--text-primary);
             font-size: 0.95rem;
+        }
+        /* ネイティブ日付UIの最小幅でモバイルで親からはみ出すのを防ぐ */
+        .form-field input[type="date"]::-webkit-datetime-edit {
+            min-width: 0;
         }
         .form-field textarea.memo-textarea {
             min-height: 140px;
@@ -110,6 +116,9 @@
             font-weight: 800;
             color: var(--text-secondary);
             margin-bottom: 0.75rem;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
         .record-card {
             padding: 1rem;

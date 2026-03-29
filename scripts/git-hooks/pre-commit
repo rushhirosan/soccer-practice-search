@@ -14,9 +14,10 @@ NC='\033[0m'
 
 echo "🔍 コミット前チェックを実行中..."
 
-ENV_FILES=$(git diff --cached --name-only | grep -E '\.(env|bak|backup)$' || true)
+# 削除（git rm）のみのステージは許可（追跡解除・リポジトリから秘密ファイルを除くため）
+ENV_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(env|bak|backup)$' || true)
 if [ -n "$ENV_FILES" ]; then
-    echo "${RED}❌ エラー: 環境変数ファイルまたはバックアップファイルが含まれています${NC}"
+    echo "${RED}❌ エラー: 環境変数ファイルまたはバックアップファイルが追加・更新として含まれています${NC}"
     echo "$ENV_FILES"
     echo ""
     echo "${YELLOW}これらのファイルはコミットしないでください${NC}"
@@ -24,7 +25,12 @@ if [ -n "$ENV_FILES" ]; then
     exit 1
 fi
 
-if git diff --cached | grep -qE 'AIza[0-9A-Za-z_-]{35}'; then
+# ステージされた差分の「追加行」のみを検査（秘密ファイルの削除コミットで - 行のキーが誤検出されないようにする）
+diff_added_lines() {
+  git diff --cached | grep -E '^\+' | grep -v '^+++' || true
+}
+
+if diff_added_lines | grep -qE 'AIza[0-9A-Za-z_-]{35}'; then
     echo "${RED}❌ エラー: Google APIキーが検出されました${NC}"
     echo ""
     echo "${YELLOW}APIキーをコミットしないでください${NC}"
@@ -39,7 +45,7 @@ SECRET_REGEX=(
 )
 
 for pattern in "${SECRET_REGEX[@]}"; do
-    if git diff --cached | grep -qE -- "$pattern"; then
+    if diff_added_lines | grep -qE -- "$pattern"; then
         echo "${RED}❌ エラー: 秘密情報のパターンが検出されました${NC}"
         echo "${YELLOW}パターン: $pattern${NC}"
         echo ""

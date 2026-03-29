@@ -1,5 +1,5 @@
 ---
-description: Follow the user's current conversation language
+description: Follow the user's conversation language (Japanese vs English)
 alwaysApply: true
 ---
 

@@ -898,26 +898,30 @@ button:active {
 
 .card .info {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 1rem;
   background: var(--background-color);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
+  min-width: 0;
 }
 
 .card .info div {
   font-size: 0.8rem;
   color: var(--text-secondary);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   padding: 0.5rem 0.6rem;
   background: var(--surface-color);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
   font-weight: 500;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .card .info div::before {

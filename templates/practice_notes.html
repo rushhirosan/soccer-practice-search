@@ -6,9 +6,18 @@
     <title>練習メモ帳 - サッカートレーニング検索サイト</title>
     <meta name="description" content="検索した練習メニューを選んでメモを付け、印刷できるメニュー帳。練習計画の記録・保存も可能です。">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=45">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=46">
     <style>
-        .practice-notes-page { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+        /* main に加えてセーフエリア＋最低限の横インデント（iPhone 等） */
+        .practice-notes-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+            padding-left: max(1.25rem, calc(env(safe-area-inset-left, 0px) + 1rem));
+            padding-right: max(1.25rem, calc(env(safe-area-inset-right, 0px) + 1rem));
+            box-sizing: border-box;
+        }
         .practice-notes-page h1 { margin-bottom: 0.5rem; }
         .practice-notes-page .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
         .notes-section { background: var(--surface-color); border-radius: var(--radius-xl); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
@@ -70,9 +79,12 @@
         .form-grid {
             display: grid;
             gap: 0.75rem;
+            min-width: 0;
         }
         .form-field {
             display: block;
+            min-width: 0;
+            max-width: 100%;
         }
         .form-field > span {
             display: block;
@@ -92,9 +104,16 @@
             color: var(--text-primary);
             font-size: 0.95rem;
         }
-        /* ネイティブ日付UIの最小幅でモバイルで親からはみ出すのを防ぐ */
-        .form-field input[type="date"]::-webkit-datetime-edit {
+        /* iOS / WebKit: 日付コントロールの内側最小幅で親からはみ出すのを防ぐ */
+        .form-field input[type="date"] {
+            display: block;
+            box-sizing: border-box;
+            font-size: 16px; /* iOS のフォーカス時ズーム緩和・レイアウト安定 */
+        }
+        .form-field input[type="date"]::-webkit-datetime-edit,
+        .form-field input[type="date"]::-webkit-datetime-edit-fields-wrapper {
             min-width: 0;
+            width: 100%;
         }
         .form-field textarea.memo-textarea {
             min-height: 140px;
@@ -177,12 +196,16 @@
         @media (max-width: 768px) {
             .practice-notes-page {
                 max-width: 100%;
-                padding: 1rem;
+                padding-top: 1.1rem;
+                padding-bottom: 1.1rem;
+                padding-left: max(1.35rem, calc(env(safe-area-inset-left, 0px) + 1.1rem));
+                padding-right: max(1.35rem, calc(env(safe-area-inset-right, 0px) + 1.1rem));
             }
 
             .notes-section {
-                padding: 1rem;
+                padding: 1.1rem;
                 margin-bottom: 1rem;
+                min-width: 0;
             }
 
             .subtitle {
@@ -237,11 +260,14 @@
 
         @media (max-width: 480px) {
             .practice-notes-page {
-                padding: 0.75rem;
+                padding-top: 0.9rem;
+                padding-bottom: 0.9rem;
+                padding-left: max(1.2rem, calc(env(safe-area-inset-left, 0px) + 0.95rem));
+                padding-right: max(1.2rem, calc(env(safe-area-inset-right, 0px) + 0.95rem));
             }
 
             .notes-section {
-                padding: 0.9rem;
+                padding: 1rem;
             }
 
             .notes-tab {

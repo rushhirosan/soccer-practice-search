@@ -561,29 +561,7 @@ function buildVideoCard(activity, options = {}) {
         }
     });
 
-    const addToMemoBtn = document.createElement('button');
-    addToMemoBtn.type = 'button';
-    addToMemoBtn.className = 'card-add-memo-btn';
-    addToMemoBtn.setAttribute('aria-label', 'メモ帳に追加');
-    addToMemoBtn.title = 'メモ帳に追加';
-    addToMemoBtn.textContent = '📝 メモ帳に追加';
-    addToMemoBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (addToSelectedMenus(activity)) {
-            addToMemoBtn.textContent = '✓ 追加済み';
-            addToMemoBtn.disabled = true;
-            addToMemoBtn.classList.add('added');
-        }
-    });
-    const selected = getSelectedMenus().some(it => it.id === activity.id);
-    if (selected) {
-        addToMemoBtn.textContent = '✓ 追加済み';
-        addToMemoBtn.disabled = true;
-        addToMemoBtn.classList.add('added');
-    }
-
     actionsRow.appendChild(favoriteBtn);
-    actionsRow.appendChild(addToMemoBtn);
 
     card.appendChild(titleDiv);
     card.appendChild(videoContainer);

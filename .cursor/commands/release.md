@@ -20,7 +20,7 @@ description: >-
 
 ## 一発リリース（おすすめ）：自動コミット文 + push main + Fly.io
 
-変更内容から英語の1行メッセージを自動生成（例: `chore: update 3 file(s) (static, templates)`）。`tests/` のみなら `test:`、`.md` のみなら `docs:`。
+変更内容から英語の1行メッセージを自動生成。**変更ファイルのパス**を並べる（例: `ui: templates/practice_notes.html, static/styles.css` や `chore: app.py, scripts/release.sh +1 more`）。プレフィックス: `templates/`+`static/` のみ → `ui:`、`tests/` のみ → `test:`、`.md` のみ → `docs:`、それ以外 → `chore:`。
 
 ```bash
 ./scripts/release.sh --ship

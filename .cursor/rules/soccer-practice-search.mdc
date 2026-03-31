@@ -80,6 +80,11 @@ alwaysApply: true
 
 ---
 
+## Git commits
+- **Conventional-style prefixes** (English, one line): `feat`, `fix`, `ui`, `test`, `docs`, `chore` — match team habits; see `scripts/release.sh` auto messages below.
+- **`./scripts/release.sh --ship`** generates a message from **changed paths** (not `update N file(s) (dirs)`): e.g. `ui: templates/practice_notes.html, static/styles.css` or `chore: app.py, utilities/db_access.py +1 more`. Prefer **meaningful manual messages** with `--commit "fix: …"` when the change needs more context than paths.
+- Before commit: `git status` / `git diff`; no secrets (see Security).
+
 ## Testing
 - Run `./scripts/release.sh` (or `.venv/bin/python -m pytest tests/ -q`) before shipping; full ship: `./scripts/release.sh --ship`
 - Mock HTTP in tests (see `tests/test_get_videos.py`)

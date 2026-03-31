@@ -20,7 +20,16 @@
         }
         .practice-notes-page h1 { margin-bottom: 0.5rem; }
         .practice-notes-page .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
-        .notes-section { background: var(--surface-color); border-radius: var(--radius-xl); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+        .notes-section {
+            background: var(--surface-color);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            min-width: 0;
+            overflow-x: clip;
+        }
         .notes-section h2 { font-size: 1.1rem; margin-bottom: 1rem; }
         .menu-item { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; background: var(--background-color); border-radius: var(--radius-md); margin-bottom: 0.75rem; border: 1px solid var(--border-subtle); }
         .menu-item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
@@ -87,15 +96,28 @@
             display: flex;
             flex-direction: column;
             align-items: stretch;
+            width: 100%;
             min-width: 0;
             max-width: 100%;
-            width: 100%;
+            box-sizing: border-box;
         }
-        .form-field > span {
+        .form-field > span:first-of-type {
             display: block;
             font-weight: 700;
             margin-bottom: 0.35rem;
             color: var(--text-primary);
+        }
+        /* 入力欄を同じ幅の箱に入れる（iOS の date がテキストより右に食い出すのを防ぐ） */
+        .form-field-control {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .form-field-control--date {
+            overflow-x: clip;
+            border-radius: var(--radius-md);
         }
         .form-field input,
         .form-field textarea {
@@ -108,35 +130,23 @@
             background: var(--surface-color);
             color: var(--text-primary);
             font-size: 0.95rem;
-        }
-        /* 日付: ネイティブ UI の最小幅で横にはみ出さないようラッパーで拘束 */
-        .form-field-date-shell {
-            display: flex;
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
             box-sizing: border-box;
         }
-        /* iOS / WebKit: 日付コントロールの内側最小幅で親からはみ出すのを防ぐ */
+        /* iOS / WebKit: ネイティブ日付 UI の最小幅をやめ、テキスト入力と同じボックス幅に揃える */
         .form-field input[type="date"] {
             display: block;
-            flex: 1 1 auto;
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            box-sizing: border-box;
-            font-size: 16px; /* iOS のフォーカス時ズーム緩和・レイアウト安定 */
+            -webkit-appearance: none;
+            appearance: none;
+            font-size: 16px;
+            min-height: calc(1.25em + 1.2rem);
+            line-height: 1.25;
         }
-        .form-field-date-shell input[type="date"] {
+        .form-field input[type="date"]::-webkit-datetime-edit {
             min-width: 0;
+            padding: 0;
         }
-        .form-field input[type="date"]::-webkit-datetime-edit,
         .form-field input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-            min-width: 0 !important;
-            max-width: 100%;
-        }
-        .form-field input[type="date"]::-webkit-datetime-edit-text {
-            padding: 0 0.15em;
+            min-width: 0;
         }
         .form-field textarea.memo-textarea {
             min-height: 140px;
@@ -333,27 +343,33 @@
                     <div class="form-grid">
                         <label class="form-field">
                             <span>日付</span>
-                            <span class="form-field-date-shell">
+                            <span class="form-field-control form-field-control--date">
                                 <input type="date" id="match-date" />
                             </span>
                         </label>
 
                         <label class="form-field">
                             <span>対戦相手</span>
-                            <input type="text" id="match-opponent" placeholder="例: ○○SC" />
+                            <span class="form-field-control">
+                                <input type="text" id="match-opponent" placeholder="例: ○○SC" autocomplete="off" />
+                            </span>
                         </label>
 
                         <label class="form-field">
                             <span>勝敗/スコア</span>
-                            <input type="text" id="match-score" placeholder="例: 2-1（勝ち）" />
+                            <span class="form-field-control">
+                                <input type="text" id="match-score" placeholder="例: 2-1（勝ち）" autocomplete="off" />
+                            </span>
                         </label>
 
                         <label class="form-field">
                             <span>得点者・失点者 / 主な出来事</span>
-                            <textarea id="match-events" class="memo-textarea" placeholder="例：
+                            <span class="form-field-control">
+                                <textarea id="match-events" class="memo-textarea" placeholder="例：
 得点者: ...
 失点者: ...
 主な出来事: ..."></textarea>
+                            </span>
                         </label>
                     </div>
 
@@ -368,17 +384,19 @@
                     <div class="form-grid">
                         <label class="form-field">
                             <span>日付</span>
-                            <span class="form-field-date-shell">
+                            <span class="form-field-control form-field-control--date">
                                 <input type="date" id="daily-date" />
                             </span>
                         </label>
 
                         <label class="form-field">
                             <span>メモ</span>
-                            <textarea id="daily-content" class="memo-textarea" placeholder="例：
+                            <span class="form-field-control">
+                                <textarea id="daily-content" class="memo-textarea" placeholder="例：
 ・今日の狙い
 ・うまくいった点
 ・次回への改善"></textarea>
+                            </span>
                         </label>
                     </div>
 

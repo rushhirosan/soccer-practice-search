@@ -82,8 +82,9 @@ if [[ "$DO_PUSH" == true && "$DO_SHIP" == false && -z "$COMMIT_MSG" ]]; then
   exit 1
 fi
 
+# 変更ファイルから conventional 風プレフィックスと要約文を生成（72 文字目安）
 generate_auto_commit_message() {
-  local files=() prefix n dirs line
+  local files=() line n
   while IFS= read -r line; do
     [[ -n "$line" ]] && files+=("$line")
   done < <(git diff --cached --name-only)
@@ -93,23 +94,56 @@ generate_auto_commit_message() {
     return 1
   fi
 
-  local all_test=true all_md=true
+  local all_test=true all_md=true only_templates_static=true
   for line in "${files[@]}"; do
     [[ "$line" == tests/* ]] || all_test=false
     [[ "$line" == *.md ]] || all_md=false
+    case "$line" in
+      templates/*|static/*) ;;
+      *) only_templates_static=false ;;
+    esac
   done
+
+  local prefix
   if [[ "$all_test" == true ]]; then
     prefix="test"
   elif [[ "$all_md" == true ]]; then
     prefix="docs"
+  elif [[ "$only_templates_static" == true ]]; then
+    prefix="ui"
   else
     prefix="chore"
   fi
 
-  dirs=$(printf '%s\n' "${files[@]}" | awk -F/ 'NF>=1 { print $1 }' | sort -u | paste -sd ', ' -)
-  local subject="${prefix}: update ${n} file(s) (${dirs})"
+  # 1 件だけならフロント系はページ名が分かるよう相対パスをそのまま
+  local summary
+  if [[ "$n" -eq 1 ]]; then
+    summary="${files[0]}"
+  elif [[ "$n" -eq 2 ]]; then
+    summary="${files[0]}, ${files[1]}"
+  elif [[ "$n" -eq 3 ]]; then
+    summary="${files[0]}, ${files[1]}, ${files[2]}"
+  else
+    summary="${files[0]}, ${files[1]} +$((n - 2)) more"
+  fi
+
+  local subject="${prefix}: ${summary}"
   if [[ ${#subject} -gt 72 ]]; then
-    subject="${subject:0:69}..."
+    # 長いときはベース名だけで再構成
+    local b0 b1
+    b0=$(basename "${files[0]}")
+    if [[ "$n" -eq 1 ]]; then
+      subject="${prefix}: ${b0}"
+    elif [[ "$n" -eq 2 ]]; then
+      b1=$(basename "${files[1]}")
+      subject="${prefix}: ${b0}, ${b1}"
+    else
+      b1=$(basename "${files[1]}")
+      subject="${prefix}: ${b0}, ${b1} +$((n - 2)) more"
+    fi
+    if [[ ${#subject} -gt 72 ]]; then
+      subject="${subject:0:69}..."
+    fi
   fi
   echo "$subject"
 }

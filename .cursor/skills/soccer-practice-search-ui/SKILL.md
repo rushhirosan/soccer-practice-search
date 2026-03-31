@@ -29,7 +29,7 @@ Stack: **Jinja2** templates, **vanilla JavaScript**, single large **`static/styl
 
 ## Client-side state
 
-- **Favorites** and similar features may use **`localStorage`** — keys and shapes are defined in the relevant JS files; server has no favorites DB in the default design.
+- **Favorites / notes / board**: default is **`localStorage`**. Optional **nickname login** syncs a JSON snapshot to PostgreSQL; see `utilities/app_user_store.py`, `/api/user-data`, `static/user-sync.js`.
 
 ## When changing UI
 

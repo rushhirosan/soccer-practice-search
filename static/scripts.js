@@ -872,6 +872,7 @@ function setupRealtimeSearch() {
         toggleEl.addEventListener('change', () => {
             try {
                 localStorage.setItem(REALTIME_SEARCH_KEY, String(toggleEl.checked));
+                if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
             } catch (e) {
                 console.warn('設定の保存に失敗:', e);
             }
@@ -933,6 +934,7 @@ function addToSelectedMenus(activity) {
     items.push({ ...activity, memo: '' });
     saveSelectedMenus(items);
     updateSelectedMenusBadge();
+    if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
     return true;
 }
 
@@ -940,6 +942,7 @@ function removeFromSelectedMenus(activityId) {
     const items = getSelectedMenus().filter(it => it.id !== activityId);
     saveSelectedMenus(items);
     updateSelectedMenusBadge();
+    if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
 }
 
 function updateSelectedMenusBadge() {
@@ -983,6 +986,7 @@ function addFavorite(activity) {
     items.push({ ...activity });
     saveFavorites(items);
     updateFavoritesBadge();
+    if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
     return true;
 }
 
@@ -990,6 +994,7 @@ function removeFavorite(activityId) {
     const items = getFavorites().filter(it => it.id !== activityId);
     saveFavorites(items);
     updateFavoritesBadge();
+    if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
 }
 
 function updateFavoritesBadge() {
@@ -1021,6 +1026,7 @@ function saveSearchHistory(query) {
     history = history.slice(0, SEARCH_HISTORY_MAX);
     try {
         localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+        if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
     } catch (e) {
         console.warn('検索履歴の保存に失敗:', e);
     }
@@ -1030,6 +1036,7 @@ function removeFromSearchHistory(query) {
     let history = getSearchHistory().filter(q => q !== query);
     try {
         localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+        if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
     } catch (e) {
         console.warn('検索履歴の削除に失敗:', e);
     }

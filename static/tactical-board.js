@@ -1370,7 +1370,7 @@
     renderSequenceList();
   }
 
-  function saveToStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
+  function saveToStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush(); alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
   function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert('保存データがありません'); return; } setData(JSON.parse(r)); alert('読込ました'); } catch (e) { alert('読込失敗: ' + e.message); } }
   function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert('読込ました'); } catch (err) { alert('読込失敗'); } }; r.readAsText(f); e.target.value = ''; }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
@@ -1381,7 +1381,7 @@
       const imageDataUrl = stage.toDataURL({ pixelRatio: 2 });
       const boardData = getData();
       const payload = { imageDataUrl, boardData, savedAt: new Date().toISOString() };
-      localStorage.setItem('soccer_pending_board_for_plan', JSON.stringify(payload));
+      localStorage.setItem('soccer_pending_board_for_plan', JSON.stringify(payload)); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       alert('メニュー帳に追加する準備ができました。\n練習メモ帳ページで「ボード図を取り込む」をクリックしてください。');
       window.location.href = '/practice-notes';
     } catch (e) {

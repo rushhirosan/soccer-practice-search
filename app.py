@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify, g, session
 from flask_wtf.csrf import CSRFProtect, generate_csrf
-from datetime import datetime
-from utilities.db_access import get_db_connection, pool, get_channel_name_from_id
+from datetime import datetime, timedelta
+from utilities.db_access import get_db_connection, pool, get_channel_name_from_id, ensure_app_user_tables
 from contextlib import closing
 import os
 import sqlite3
@@ -10,6 +10,8 @@ import logging
 import psycopg2
 from typing import Optional, Any
 from dotenv import load_dotenv
+from utilities import app_user_store
+import threading
 
 
 # ロガーの設定
@@ -35,6 +37,37 @@ app.config['WTF_CSRF_HEADERS'] = ['X-CSRFToken', 'X-CSRF-Token']
 
 # CSRF保護を有効化
 csrf = CSRFProtect(app)
+
+# セッション（ニックネームログイン）
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+if os.getenv('SESSION_COOKIE_SECURE', '').lower() in ('1', 'true', 'yes'):
+    app.config['SESSION_COOKIE_SECURE'] = True
+
+_user_tables_lock = threading.Lock()
+_user_tables_ready = False
+
+
+def ensure_user_tables_migrated():
+    global _user_tables_ready
+    if _user_tables_ready:
+        return
+    with _user_tables_lock:
+        if _user_tables_ready:
+            return
+        try:
+            ensure_app_user_tables()
+            _user_tables_ready = True
+        except Exception as e:
+            logger.error("ensure_app_user_tables failed: %s", e)
+            raise
+
+
+def client_ip() -> str:
+    return (request.headers.get("X-Forwarded-For") or request.remote_addr or "unknown").split(",")[0].strip()
+
+
 
 
 def convert_to_embed_url(video_url: str) -> str:
@@ -1110,6 +1143,158 @@ app.teardown_appcontext(close_db)
 
 
 
+
+
+
+
+@app.context_processor
+def _inject_csrf():
+    return dict(csrf_token=generate_csrf)
+
+
+@app.route('/account')
+def account_page():
+    return render_template('account.html')
+
+
+@app.route('/auth/status', methods=['GET'])
+def auth_status():
+    uid = session.get('user_id')
+    nick = session.get('nickname')
+    return jsonify({
+        'logged_in': uid is not None,
+        'nickname': nick,
+        'csrf_token': generate_csrf(),
+    })
+
+
+@app.route('/auth/register', methods=['POST'])
+def auth_register():
+    ensure_user_tables_migrated()
+    ip = client_ip()
+    if not app_user_store.rate_limit_allow(f"reg:{ip}", 20, 900):
+        return jsonify({'error': '試行回数が多すぎます。しばらく待ってからお試しください。'}), 429
+    data = request.get_json(silent=True) or {}
+    try:
+        uid, recovery = app_user_store.create_user(
+            data.get('nickname') or '',
+            data.get('password') or '',
+        )
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    session.permanent = True
+    session['user_id'] = uid
+    session['nickname'] = app_user_store.get_user_by_id(uid)['nickname']
+    return jsonify({'ok': True, 'recovery_secret': recovery, 'nickname': session['nickname']})
+
+
+@app.route('/auth/login', methods=['POST'])
+def auth_login():
+    ensure_user_tables_migrated()
+    ip = client_ip()
+    if not app_user_store.rate_limit_allow(f"login:{ip}", 40, 900):
+        return jsonify({'error': '試行回数が多すぎます。しばらく待ってからお試しください。'}), 429
+    data = request.get_json(silent=True) or {}
+    nick = (data.get('nickname') or '').strip()
+    pw = data.get('password') or ''
+    if not app_user_store.rate_limit_allow(f"login_nick:{nick}", 15, 900):
+        return jsonify({'error': '試行回数が多すぎます。しばらく待ってからお試しください。'}), 429
+    uid = app_user_store.verify_login(nick, pw)
+    if uid is None:
+        return jsonify({'error': 'ニックネームまたはパスワードが正しくありません'}), 401
+    session.permanent = True
+    session['user_id'] = uid
+    session['nickname'] = app_user_store.get_user_by_id(uid)['nickname']
+    return jsonify({'ok': True, 'nickname': session['nickname']})
+
+
+@app.route('/auth/logout', methods=['POST'])
+def auth_logout():
+    session.clear()
+    return jsonify({'ok': True})
+
+
+@app.route('/auth/reset-password', methods=['POST'])
+def auth_reset_password():
+    ensure_user_tables_migrated()
+    ip = client_ip()
+    if not app_user_store.rate_limit_allow(f"reset:{ip}", 20, 900):
+        return jsonify({'error': '試行回数が多すぎます。'}), 429
+    data = request.get_json(silent=True) or {}
+    try:
+        app_user_store.reset_password_with_recovery(
+            data.get('nickname') or '',
+            data.get('recovery_secret') or '',
+            data.get('new_password') or '',
+        )
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    return jsonify({'ok': True})
+
+
+@app.route('/auth/change-password', methods=['POST'])
+def auth_change_password():
+    ensure_user_tables_migrated()
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'error': 'ログインが必要です'}), 401
+    data = request.get_json(silent=True) or {}
+    u = app_user_store.get_user_by_id(uid)
+    if not u:
+        session.clear()
+        return jsonify({'error': 'セッションが無効です'}), 401
+    if not app_user_store.verify_secret(u['password_hash'], data.get('old_password') or ''):
+        return jsonify({'error': '現在のパスワードが正しくありません'}), 400
+    try:
+        app_user_store.update_password_for_user_id(uid, data.get('new_password') or '')
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    return jsonify({'ok': True})
+
+
+@app.route('/auth/delete-account', methods=['POST'])
+def auth_delete_account():
+    ensure_user_tables_migrated()
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'error': 'ログインが必要です'}), 401
+    data = request.get_json(silent=True) or {}
+    u = app_user_store.get_user_by_id(uid)
+    if not u:
+        session.clear()
+        return jsonify({'error': 'セッションが無効です'}), 401
+    if not app_user_store.verify_secret(u['password_hash'], data.get('password') or ''):
+        return jsonify({'error': 'パスワードが正しくありません'}), 400
+    app_user_store.delete_user_and_data(uid)
+    session.clear()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/user-data', methods=['GET'])
+def api_user_data_get():
+    ensure_user_tables_migrated()
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'error': 'ログインが必要です'}), 401
+    payload, updated_at = app_user_store.get_payload(uid)
+    return jsonify({'payload': payload, 'updated_at': updated_at})
+
+
+@app.route('/api/user-data', methods=['PUT'])
+def api_user_data_put():
+    ensure_user_tables_migrated()
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'error': 'ログインが必要です'}), 401
+    data = request.get_json(silent=True) or {}
+    pl = data.get('payload')
+    if not isinstance(pl, dict):
+        return jsonify({'error': 'payload が必要です'}), 400
+    try:
+        updated = app_user_store.put_payload(uid, pl)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    return jsonify({'ok': True, 'updated_at': updated})
 
 @app.route('/robots.txt')
 def robots():

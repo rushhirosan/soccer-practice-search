@@ -16,7 +16,7 @@ alwaysApply: true
 ## Product Principles
 - Help coaches and players find relevant drills quickly
 - Prefer clarity and fast scanning over feature bloat
-- Client-side features (favorites, practice notes, tactical board) may use `localStorage` — do not assume server-side persistence for those
+- Favorites, practice notes, tactical board: default is `localStorage`; **optional** nickname login syncs a JSON snapshot to PostgreSQL (`app_users` / `user_sync_data`). Unauthenticated users remain client-only.
 - Respect CSRF on state-changing HTTP APIs from the browser
 
 ---

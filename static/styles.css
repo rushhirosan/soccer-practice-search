@@ -1150,9 +1150,6 @@ button:active {
 }
 
 /* ユーティリティクラス */
-.hidden {
-  display: none !important;
-}
 
 /* レスポンシブデザイン */
 @media (max-width: 1024px) {
@@ -1590,6 +1587,413 @@ footer a:hover {
   .record-card {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+}
+
+
+/* ユーティリティ: 単体 class="hidden" 用（アカウント・その他） */
+.hidden {
+  display: none !important;
+}
+
+/* アカウント（ニックネームログイン）
+   .content-wrapper はホーム用に flex 横並びのため、単独ページでは縦に積む */
+.content-wrapper.account-page {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+  box-sizing: border-box;
+  min-height: auto;
+}
+
+.account-page__header {
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+.account-page__title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  word-break: keep-all;
+  width: 100%;
+}
+
+.account-page__lead {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.65;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.account-section {
+  width: 100%;
+}
+
+/* 認証カード */
+.account-card {
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+
+.account-card--auth {
+  padding-top: 1rem;
+}
+
+/* タブ */
+.account-tabs {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  margin: 0 0 1.25rem;
+  background: rgba(13, 148, 136, 0.08);
+  border-radius: var(--radius-lg);
+}
+
+.account-tabs__btn {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.account-tabs__btn:hover {
+  color: var(--text-primary);
+}
+
+.account-tabs__btn.is-active {
+  background: var(--surface-color);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-tabs__btn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.account-tab-panel.hidden {
+  display: none !important;
+}
+
+.account-tab-panel {
+  animation: accountFadeIn 0.2s ease;
+}
+
+@keyframes accountFadeIn {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+/* フォーム */
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0;
+}
+
+.account-form--compact {
+  gap: 0.55rem;
+}
+
+.account-form label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.account-form input {
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.account-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.account-btn-primary {
+  margin-top: 0.35rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.account-btn-primary:hover {
+  filter: brightness(1.03);
+  box-shadow: var(--shadow-md);
+}
+
+.account-btn-primary--secondary {
+  background: var(--surface-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.account-btn-primary--secondary:hover {
+  background: rgba(13, 148, 136, 0.08);
+}
+
+.account-btn-outline {
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.account-btn-outline:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.account-btn-outline:focus-visible,
+.account-btn-primary:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.account-btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.account-btn-danger--full {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+
+.account-btn-danger--full:hover {
+  filter: brightness(1.05);
+}
+
+/* パスワード忘れ */
+.account-details {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.5rem;
+}
+
+.account-details__summary {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  padding: 0.5rem 0;
+}
+
+.account-details__summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-details__summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.account-details[open] .account-details__summary::before {
+  transform: rotate(90deg);
+}
+
+.account-details__body {
+  padding: 0.75rem 0 0.25rem;
+}
+
+/* 登録後モーダル風バナー */
+.account-recovery-modal {
+  width: 100%;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--primary-color);
+  background: linear-gradient(180deg, rgba(13, 148, 136, 0.1) 0%, var(--surface-color) 100%);
+  box-shadow: var(--shadow-md);
+}
+
+.account-recovery-modal__title {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+  color: var(--text-primary);
+}
+
+.account-recovery-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.account-recovery-modal__actions .account-btn-primary {
+  margin-top: 0;
+  flex: 1;
+  min-width: 8rem;
+}
+
+.account-recovery-modal__actions .account-btn-outline {
+  flex: 1;
+  min-width: 6rem;
+}
+
+.account-note {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* ログイン後ダッシュボード */
+.account-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.account-dashboard__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-dashboard__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.account-dashboard__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--primary-light);
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.account-dashboard__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0 0 0.15rem;
+}
+
+.account-dashboard__name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.account-settings-card {
+  padding: 1.15rem 1.25rem;
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-settings-card--danger {
+  border-color: rgba(185, 28, 28, 0.35);
+  background: linear-gradient(180deg, #fffafa 0%, var(--surface-color) 100%);
+}
+
+.account-settings-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.85rem;
+  color: var(--text-primary);
+}
+
+.account-settings-card__title--danger {
+  color: #991b1b;
+}
+
+.account-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  min-height: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.account-message--error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.account-recovery__textarea {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+  padding: 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .account-dashboard__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .account-dashboard__header .account-btn-outline {
+    width: 100%;
   }
 }
 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>アカウント - サッカートレーニング検索サイト</title>
+    <meta name="description" content="ニックネームでログインし、お気に入りとメモを端末間で同期します。">
+    <meta name="robots" content="noindex, follow">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=49">
+</head>
+<body>
+    {% set active_nav = '' %}
+    {% include 'partials/site_header.html' %}
+
+    <main>
+        <div class="content-wrapper account-page">
+            <header class="account-page__header">
+                <h1 class="account-page__title">アカウント</h1>
+                <p class="account-page__lead">メールアドレスは不要です。ニックネームとパスワードでお気に入り・メモ帳などを同期できます。</p>
+            </header>
+
+            <!-- 登録直後のみ表示（ログイン後ビューに切り替わっても見える） -->
+            <div id="account-recovery-modal" class="account-recovery-modal hidden" role="region" aria-labelledby="recovery-modal-title">
+                <h2 id="recovery-modal-title" class="account-recovery-modal__title">回復用キーを必ず保存してください</h2>
+                <p class="account-note">パスワードを忘れたときの再設定に必要です。紛失すると復旧できません。</p>
+                <textarea id="register-recovery-text" readonly rows="3" class="account-recovery__textarea" aria-label="回復用キー"></textarea>
+                <div class="account-recovery-modal__actions">
+                    <button type="button" id="register-recovery-copy" class="account-btn-outline">コピー</button>
+                    <button type="button" id="register-recovery-dismiss" class="account-btn-primary">保存したので続行</button>
+                </div>
+            </div>
+
+            <div id="account-logged-out" class="account-section">
+                <div class="account-card account-card--auth">
+                    <div class="account-tabs" role="tablist" aria-label="ログインまたは新規登録">
+                        <button type="button" class="account-tabs__btn is-active" role="tab" id="tab-login" aria-selected="true" aria-controls="panel-login" tabindex="0">ログイン</button>
+                        <button type="button" class="account-tabs__btn" role="tab" id="tab-register" aria-selected="false" aria-controls="panel-register" tabindex="-1">新規登録</button>
+                    </div>
+
+                    <div id="panel-login" role="tabpanel" aria-labelledby="tab-login" class="account-tab-panel" aria-hidden="false">
+                        <form id="form-login" class="account-form" autocomplete="off">
+                            <label for="login-nick">ニックネーム</label>
+                            <input type="text" id="login-nick" name="nickname" required maxlength="24" autocomplete="username">
+                            <label for="login-pw">パスワード</label>
+                            <input type="password" id="login-pw" name="password" required autocomplete="current-password">
+                            <button type="submit" class="account-btn-primary">ログイン</button>
+                        </form>
+
+                        <details class="account-details" id="account-reset-details">
+                            <summary class="account-details__summary">パスワードを忘れた場合</summary>
+                            <div class="account-details__body">
+                                <p class="account-note">登録時に表示した回復用キーが必要です。</p>
+                                <form id="form-reset" class="account-form account-form--compact" autocomplete="off">
+                                    <label for="reset-nick">ニックネーム</label>
+                                    <input type="text" id="reset-nick" required maxlength="24">
+                                    <label for="reset-secret">回復用キー</label>
+                                    <input type="text" id="reset-secret" required autocomplete="off">
+                                    <label for="reset-newpw">新しいパスワード</label>
+                                    <input type="password" id="reset-newpw" required minlength="8" autocomplete="new-password">
+                                    <button type="submit" class="account-btn-primary account-btn-primary--secondary">パスワードを再設定</button>
+                                </form>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="account-tab-panel hidden" aria-hidden="true">
+                        <form id="form-register" class="account-form" autocomplete="off">
+                            <label for="reg-nick">ニックネーム（2〜24文字）</label>
+                            <input type="text" id="reg-nick" name="nickname" required maxlength="24" pattern="[\w\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\-]{2,24}" autocomplete="username">
+                            <label for="reg-pw">パスワード（8文字以上）</label>
+                            <input type="password" id="reg-pw" name="password" required minlength="8" autocomplete="new-password">
+                            <button type="submit" class="account-btn-primary">登録してログイン</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="account-logged-in" class="account-dashboard hidden">
+                <div class="account-dashboard__header">
+                    <div class="account-dashboard__user">
+                        <span class="account-dashboard__avatar" aria-hidden="true">⚽</span>
+                        <div>
+                            <p class="account-dashboard__label">ログイン中</p>
+                            <p id="account-nickname-line" class="account-dashboard__name"></p>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-logout" class="account-btn-outline">ログアウト</button>
+                </div>
+
+                <section class="account-settings-card" aria-labelledby="account-security-heading">
+                    <h2 id="account-security-heading" class="account-settings-card__title">パスワード</h2>
+                    <form id="form-change-pw" class="account-form account-form--compact">
+                        <label for="old-pw">現在のパスワード</label>
+                        <input type="password" id="old-pw" required autocomplete="current-password">
+                        <label for="new-pw">新しいパスワード</label>
+                        <input type="password" id="new-pw" required minlength="8" autocomplete="new-password">
+                        <button type="submit" class="account-btn-primary">パスワードを変更</button>
+                    </form>
+                </section>
+
+                <section class="account-settings-card account-settings-card--danger" aria-labelledby="account-danger-heading">
+                    <h2 id="account-danger-heading" class="account-settings-card__title account-settings-card__title--danger">アカウントを削除</h2>
+                    <p class="account-note">サーバーに保存した同期データもすべて削除されます。この操作は取り消せません。</p>
+                    <form id="form-delete" class="account-form account-form--compact">
+                        <label for="delete-pw">パスワード（確認）</label>
+                        <input type="password" id="delete-pw" required autocomplete="current-password">
+                        <button type="submit" class="account-btn-danger account-btn-danger--full">アカウントを削除する</button>
+                    </form>
+                </section>
+            </div>
+
+            <p id="account-message" class="account-message" role="status" aria-live="polite"></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
+        <p><a href="/">ホーム</a> | <a href="/privacy">プライバシーポリシー</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='site-header.js') }}"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=1"></script>
+    <script src="{{ url_for('static', filename='account.js') }}?v=2"></script>
+</body>
+</html>

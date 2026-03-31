@@ -38,6 +38,7 @@
     function writeList(key, list) {
       try {
         localStorage.setItem(key, JSON.stringify(list));
+        if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       } catch (e) {
         console.warn('保存失敗:', e);
       }
@@ -387,6 +388,7 @@
   function saveSelectedMenus(items) {
     try {
       localStorage.setItem(SELECTED_MENUS_KEY, JSON.stringify(items));
+      if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       return true;
     } catch (e) {
       console.warn('保存失敗:', e);
@@ -406,6 +408,7 @@
   function savePlans(plans) {
     try {
       localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
+      if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       return true;
     } catch (e) {
       console.warn('保存失敗:', e);

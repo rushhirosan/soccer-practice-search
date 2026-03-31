@@ -467,3 +467,41 @@ def temp_func(tbl_name: str) -> List[tuple]:
 #     # search_term = 'ドリブル'
 #     # contents = search_table(search_term)
 #     # print(contents)
+
+
+def create_app_user_tables() -> None:
+    """擬似匿名アカウントと端末同期用 JSON（お気に入り・メモ等）。"""
+    logger.info("Creating app_users / user_sync_data tables if not exist...")
+    q_users_plain = """
+        CREATE TABLE IF NOT EXISTS app_users (
+            id BIGSERIAL PRIMARY KEY,
+            nickname TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            recovery_secret_hash TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """
+    q_data = """
+        CREATE TABLE IF NOT EXISTS user_sync_data (
+            user_id BIGINT PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
+            payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    """
+    with use_db_connection() as conn:
+        with conn.cursor() as c:
+            try:
+                c.execute(q_users_plain)
+                c.execute(q_data)
+                conn.commit()
+                logger.info("app_users / user_sync_data ensured.")
+            except psycopg2.Error as e:
+                logger.error("Error creating app user tables: %s", e)
+                conn.rollback()
+                raise
+
+
+def ensure_app_user_tables() -> None:
+    """マイグレーション相当: テーブルが無ければ作成（冪等）。"""
+    create_app_user_tables()

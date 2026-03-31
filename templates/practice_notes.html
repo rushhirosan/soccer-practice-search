@@ -6,7 +6,7 @@
     <title>練習メモ帳 - サッカートレーニング検索サイト</title>
     <meta name="description" content="検索した練習メニューを選んでメモを付け、印刷できるメニュー帳。練習計画の記録・保存も可能です。">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=46">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=47">
     <style>
         /* main に加えてセーフエリア＋最低限の横インデント（iPhone 等） */
         .practice-notes-page {
@@ -78,13 +78,18 @@
 
         .form-grid {
             display: grid;
+            grid-template-columns: minmax(0, 1fr);
             gap: 0.75rem;
             min-width: 0;
+            width: 100%;
         }
         .form-field {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
             min-width: 0;
             max-width: 100%;
+            width: 100%;
         }
         .form-field > span {
             display: block;
@@ -104,16 +109,34 @@
             color: var(--text-primary);
             font-size: 0.95rem;
         }
+        /* 日付: ネイティブ UI の最小幅で横にはみ出さないようラッパーで拘束 */
+        .form-field-date-shell {
+            display: flex;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
         /* iOS / WebKit: 日付コントロールの内側最小幅で親からはみ出すのを防ぐ */
         .form-field input[type="date"] {
             display: block;
+            flex: 1 1 auto;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
             box-sizing: border-box;
             font-size: 16px; /* iOS のフォーカス時ズーム緩和・レイアウト安定 */
         }
+        .form-field-date-shell input[type="date"] {
+            min-width: 0;
+        }
         .form-field input[type="date"]::-webkit-datetime-edit,
         .form-field input[type="date"]::-webkit-datetime-edit-fields-wrapper {
-            min-width: 0;
-            width: 100%;
+            min-width: 0 !important;
+            max-width: 100%;
+        }
+        .form-field input[type="date"]::-webkit-datetime-edit-text {
+            padding: 0 0.15em;
         }
         .form-field textarea.memo-textarea {
             min-height: 140px;
@@ -310,7 +333,9 @@
                     <div class="form-grid">
                         <label class="form-field">
                             <span>日付</span>
-                            <input type="date" id="match-date" />
+                            <span class="form-field-date-shell">
+                                <input type="date" id="match-date" />
+                            </span>
                         </label>
 
                         <label class="form-field">
@@ -343,7 +368,9 @@
                     <div class="form-grid">
                         <label class="form-field">
                             <span>日付</span>
-                            <input type="date" id="daily-date" />
+                            <span class="form-field-date-shell">
+                                <input type="date" id="daily-date" />
+                            </span>
                         </label>
 
                         <label class="form-field">

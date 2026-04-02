@@ -1,5 +1,10 @@
 /**
  * ログイン時: サーバーと localStorage を同期（お気に入り・メモ帳など）
+ *
+ * マージ規約（初回 pull）:
+ * - サーバー payload が空オブジェクト → ローカルを PUT でアップロード（初回ログイン・新規端末）。
+ * - サーバーにキーが1つでもあれば → サーバー側を applyPayload で localStorage に反映（サーバー優先）。
+ * 以降の編集は debounce 付き PUT でサーバーへ反映。
  */
 (function () {
   'use strict';

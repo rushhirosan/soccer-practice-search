@@ -145,10 +145,6 @@ main {
   color: #fff;
 }
 
-.site-header__brand.is-active {
-  background: rgba(255, 255, 255, 0.14);
-}
-
 .site-header__brand-mark {
   font-size: 1.35rem;
   line-height: 1;

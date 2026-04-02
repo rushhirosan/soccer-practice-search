@@ -1,5 +1,8 @@
 """
 擬似匿名ユーザー（ニックネーム＋パスワード）と user_sync_data の読み書き。
+
+スキーマは utilities.db_access.create_app_user_tables を参照（app_users /
+user_sync_data.payload JSONB、1ユーザー1行）。
 """
 from __future__ import annotations
 

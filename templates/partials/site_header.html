@@ -1,13 +1,17 @@
-{# active_nav: home | board | favorites | notes | about | privacy（その他は未選択） #}
+{# active_nav: home | board | favorites | notes | account | about | privacy（その他は未選択） #}
 {% set nav = active_nav|default('') %}
 <header class="site-header">
   <div class="site-header__inner">
-    <a href="/" class="site-header__brand">
+    <a href="/" class="site-header__brand{% if nav == 'home' %} is-active{% endif %}">
       <span class="site-header__brand-mark" aria-hidden="true">⚽</span>
       <span class="site-header__brand-text">
         <span class="site-header__title">サッカートレーニング検索</span>
         <span class="site-header__beta" aria-label="ベータ版">Beta</span>
       </span>
+    </a>
+    <a href="/account" id="site-header-auth-chip" class="site-header__auth-chip hidden" aria-hidden="true">
+      <span class="site-header__auth-dot" aria-hidden="true"></span>
+      <span id="site-header-auth-label" class="site-header__auth-label">ログイン中</span>
     </a>
     <button type="button" class="site-header__menu-btn" id="site-header-menu-btn" aria-expanded="false" aria-controls="site-header-nav" aria-label="メニューを開く">
       <span class="site-header__menu-icon" aria-hidden="true"></span>
@@ -27,7 +31,7 @@
           <a href="/practice-notes" id="practice-notes-link" class="site-header__link nav-with-badge{% if nav == 'notes' %} is-active{% endif %}"{% if nav == 'notes' %} aria-current="page"{% endif %}>メモ帳<span id="practice-notes-badge" class="nav-badge" aria-label="選んだメニュー数" style="display:none;"></span></a>
         </li>
         <li>
-          <a href="/account" class="site-header__link">アカウント</a>
+          <a href="/account" class="site-header__link{% if nav == 'account' %} is-active{% endif %}"{% if nav == 'account' %} aria-current="page"{% endif %}>アカウント</a>
         </li>
         <li>
           <a href="/about" class="site-header__link{% if nav == 'about' %} is-active{% endif %}"{% if nav == 'about' %} aria-current="page"{% endif %}>このサイトについて</a>

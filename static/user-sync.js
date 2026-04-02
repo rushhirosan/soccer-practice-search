@@ -177,6 +177,9 @@
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (j && j.csrf_token) csrfToken = j.csrf_token;
+        if (typeof window.soccerUpdateAuthHeader === 'function') {
+          window.soccerUpdateAuthHeader(j);
+        }
         if (j && j.logged_in) {
           setLoggedInFlag(true);
           return pullFromServer();
@@ -199,6 +202,9 @@
       return fetch('/auth/status', { credentials: 'same-origin' }).then(function (r) { return r.json(); });
     }).then(function (j) {
       if (j && j.csrf_token) csrfToken = j.csrf_token;
+      if (typeof window.soccerUpdateAuthHeader === 'function') {
+        window.soccerUpdateAuthHeader(j);
+      }
       if (j && j.logged_in) {
         setLoggedInFlag(true);
         return pullFromServer();

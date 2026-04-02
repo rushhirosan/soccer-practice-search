@@ -157,6 +157,25 @@
     });
   }
 
+  function updateAuthHeader(j) {
+    var chip = document.getElementById('site-header-auth-chip');
+    var label = document.getElementById('site-header-auth-label');
+    if (!chip || !label) return;
+    if (j && j.logged_in && j.nickname) {
+      label.textContent = 'ログイン中 · ' + j.nickname;
+      chip.classList.remove('hidden');
+      chip.setAttribute('aria-hidden', 'false');
+      chip.setAttribute('aria-label', 'ログイン中: ' + j.nickname + '。アカウントページへ');
+    } else {
+      chip.classList.add('hidden');
+      label.textContent = 'ログイン中';
+      chip.setAttribute('aria-hidden', 'true');
+      chip.removeAttribute('aria-label');
+    }
+  }
+
+  window.soccerUpdateAuthHeader = updateAuthHeader;
+
   document.addEventListener('DOMContentLoaded', function () {
     syncMemoBadge();
     syncFavoritesBadge();

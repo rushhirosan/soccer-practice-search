@@ -175,6 +175,48 @@ main {
   margin-top: 0.15rem;
 }
 
+/* ログイン中（/auth/status と連動、user-sync が更新） */
+.site-header__auth-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: min(14rem, 42vw);
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+  transition: var(--transition);
+}
+
+.site-header__auth-chip:hover {
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.site-header__auth-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6ee7b7;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.site-header__auth-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 .site-header__menu-btn {
   display: none;
   align-items: center;
@@ -1291,10 +1333,19 @@ button:active {
 
   .site-header__inner {
     padding: 0.5rem 0.75rem;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .site-header__auth-chip {
+    max-width: min(9rem, 36vw);
+    font-size: 0.65rem;
+    padding: 0.25rem 0.45rem;
   }
 
   .site-header__menu-btn {
     display: inline-flex;
+    flex-shrink: 0;
   }
 
   .site-header__nav {
@@ -1786,6 +1837,23 @@ footer a:hover {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* パスワード表示切替（data-password-enhanced）をアカウントフォーム内でも横並びに */
+.account-form .password-field-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.account-form .password-field__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.account-form .password-field__toggle {
+  min-height: 2.75rem;
 }
 
 .account-btn-primary {

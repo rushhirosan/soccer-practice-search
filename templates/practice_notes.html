@@ -6,7 +6,7 @@
     <title>練習メモ帳 - サッカートレーニング検索サイト</title>
     <meta name="description" content="検索した練習メニューを選んでメモを付け、印刷できるメニュー帳。練習計画の記録・保存も可能です。">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=48">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=50">
     <style>
         /* main に加えてセーフエリア＋最低限の横インデント（iPhone 等） */
         .practice-notes-page {
@@ -421,8 +421,8 @@
         <p><a href="/">ホーム</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
 
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=1"></script>
-    <script src="{{ url_for('static', filename='site-header.js') }}?v=48"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=2"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}?v=50"></script>
     <script src="{{ url_for('static', filename='practice-notes.js') }}"></script>
 </body>
 </html>

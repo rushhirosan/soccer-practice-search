@@ -1570,6 +1570,65 @@ footer a:hover {
   cursor: default;
 }
 
+/* パスワード: 表示切替（data-password-enhanced を site-header.js がラップ） */
+.password-field-group .password-field-wrap,
+.password-field-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.password-field__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.password-field__toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.password-field__toggle:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.password-field__toggle:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.password-field__toggle svg {
+  display: block;
+  pointer-events: none;
+}
+
+/* is-visible = 平文表示中 → 目線アイコン（隠す操作） */
+.password-field-wrap.is-visible .password-field__icon-masked {
+  display: none;
+}
+
+.password-field-wrap:not(.is-visible) .password-field__icon-plain {
+  display: none;
+}
+
 /* 記録（試合結果/気づき）印刷最適化 */
 @media print {
   #record-input-section {

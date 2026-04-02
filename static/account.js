@@ -33,9 +33,22 @@
     var out = document.getElementById('account-logged-out');
     var inn = document.getElementById('account-logged-in');
     var line = document.getElementById('account-nickname-line');
-    if (out) out.classList.add('hidden');
-    if (inn) inn.classList.remove('hidden');
-    if (line) line.textContent = nickname || '';
+    /* Chrome: パスワード入力にフォーカスがあるままログイン後ビューを display:none にすると
+       オートフィル／キーボードまわりの半透明レイヤーが残ることがある → 先に blur してから切替 */
+    try {
+      var ae = document.activeElement;
+      if (ae && typeof ae.blur === 'function') ae.blur();
+    } catch (e) {}
+    var apply = function () {
+      if (out) out.classList.add('hidden');
+      if (inn) inn.classList.remove('hidden');
+      if (line) line.textContent = nickname || '';
+    };
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(apply);
+    } else {
+      apply();
+    }
   }
 
   function showLoggedOut() {

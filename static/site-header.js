@@ -136,6 +136,13 @@
       document.body.classList.remove('site-header-nav-open');
     }
 
+    window.soccerCloseSiteHeaderNav = close;
+
+    /* bfcache 復帰時にメニュー開状態が残ると、下層が暗く見えたり操作できないことがある */
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) close();
+    });
+
     function toggle() {
       var open = btn.getAttribute('aria-expanded') === 'true';
       btn.setAttribute('aria-expanded', open ? 'false' : 'true');

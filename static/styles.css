@@ -1360,11 +1360,13 @@ button:active {
     box-shadow: var(--shadow-lg);
     transition: max-height 0.35s ease, opacity 0.25s ease;
     opacity: 0;
+    pointer-events: none;
   }
 
   body.site-header-nav-open .site-header__nav {
     max-height: 320px;
     opacity: 1;
+    pointer-events: auto;
   }
 
   .site-header__list {

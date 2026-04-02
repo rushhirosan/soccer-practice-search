@@ -160,6 +160,12 @@
       });
   }
 
+  function closeHeaderNavIfOpen() {
+    if (typeof window.soccerCloseSiteHeaderNav === 'function') {
+      window.soccerCloseSiteHeaderNav();
+    }
+  }
+
   function schedulePush() {
     if (!window.__soccerLoggedIn) return;
     if (pushTimer) clearTimeout(pushTimer);
@@ -182,9 +188,11 @@
         }
         if (j && j.logged_in) {
           setLoggedInFlag(true);
+          setTimeout(closeHeaderNavIfOpen, 0);
           return pullFromServer();
         }
         setLoggedInFlag(false);
+        setTimeout(closeHeaderNavIfOpen, 0);
       })
       .catch(function (e) {
         console.warn('user-sync init', e);
@@ -207,9 +215,11 @@
       }
       if (j && j.logged_in) {
         setLoggedInFlag(true);
+        setTimeout(closeHeaderNavIfOpen, 0);
         return pullFromServer();
       }
       setLoggedInFlag(false);
+      setTimeout(closeHeaderNavIfOpen, 0);
       return j;
     });
   };

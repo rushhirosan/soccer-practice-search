@@ -82,7 +82,19 @@
 
   function refreshUi() {
     return fetch('/auth/status', { credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.text().then(function (text) {
+          var j = {};
+          if (text) {
+            try {
+              j = JSON.parse(text);
+            } catch (ignore) {
+              j = {};
+            }
+          }
+          return j;
+        });
+      })
       .then(function (j) {
         if (j.csrf_token) setMetaCsrf(j.csrf_token);
         if (j.logged_in && j.nickname) showLoggedIn(j.nickname);
@@ -100,6 +112,33 @@
         'X-CSRFToken': csrf()
       },
       body: JSON.stringify(body)
+    });
+  }
+
+  /** HTML や空ボディのとき r.json() が壊れるので、テキスト経由で JSON を読む */
+  function parsePostJsonResponse(r) {
+    return r.text().then(function (text) {
+      var j = null;
+      if (text) {
+        try {
+          j = JSON.parse(text);
+        } catch (ignore) {
+          j = null;
+        }
+      }
+      if (j !== null && typeof j === 'object') {
+        return j;
+      }
+      if (r.status === 401) {
+        throw new Error('ニックネームまたはパスワードが正しくありません');
+      }
+      if (r.status === 400 || r.status === 403) {
+        throw new Error('セキュリティトークンが無効です。ページを再読み込みしてからお試しください。');
+      }
+      if (r.status === 429) {
+        throw new Error('試行回数が多すぎます。しばらく待ってからお試しください。');
+      }
+      throw new Error('サーバーから予期しない応答でした。しばらくしてからお試しください。');
     });
   }
 
@@ -128,7 +167,7 @@
           nickname: document.getElementById('reg-nick').value,
           password: document.getElementById('reg-pw').value
         }).then(function (r) {
-          return r.json().then(function (j) {
+          return parsePostJsonResponse(r).then(function (j) {
             if (!r.ok) throw new Error(j.error || '登録に失敗しました');
             return j;
           });
@@ -173,7 +212,7 @@
           nickname: document.getElementById('login-nick').value,
           password: document.getElementById('login-pw').value
         }).then(function (r) {
-          return r.json().then(function (j) {
+          return parsePostJsonResponse(r).then(function (j) {
             if (!r.ok) throw new Error(j.error || 'ログインに失敗しました');
             return j;
           });
@@ -197,7 +236,7 @@
           recovery_secret: document.getElementById('reset-secret').value,
           new_password: document.getElementById('reset-newpw').value
         }).then(function (r) {
-          return r.json().then(function (j) {
+          return parsePostJsonResponse(r).then(function (j) {
             if (!r.ok) throw new Error(j.error || '再設定に失敗しました');
             return j;
           });
@@ -234,7 +273,7 @@
           old_password: document.getElementById('old-pw').value,
           new_password: document.getElementById('new-pw').value
         }).then(function (r) {
-          return r.json().then(function (j) {
+          return parsePostJsonResponse(r).then(function (j) {
             if (!r.ok) throw new Error(j.error || '変更に失敗しました');
             return j;
           });
@@ -257,7 +296,7 @@
         postJson('/auth/delete-account', {
           password: document.getElementById('delete-pw').value
         }).then(function (r) {
-          return r.json().then(function (j) {
+          return parsePostJsonResponse(r).then(function (j) {
             if (!r.ok) throw new Error(j.error || '削除に失敗しました');
             return j;
           });

@@ -1,6 +1,23 @@
 (function () {
   'use strict';
 
+  var POST_AUTH_TOAST_KEY = 'soccerPostAuthToast';
+
+  /** ログイン／登録完了後は検索ホームへ。成功フィードバックは user-sync のトーストで表示 */
+  function redirectHomeAfterAuth(toastKind) {
+    try {
+      sessionStorage.setItem(POST_AUTH_TOAST_KEY, toastKind || 'login');
+    } catch (e) {}
+    var go = function () {
+      window.location.href = '/';
+    };
+    if (typeof window.soccerRefreshAuthAndSync === 'function') {
+      window.soccerRefreshAuthAndSync().then(go).catch(go);
+    } else {
+      go();
+    }
+  }
+
   function msg(el, text, isError) {
     if (!el) return;
     el.textContent = text || '';
@@ -173,11 +190,13 @@
           });
         }).then(function (j) {
           if (j.recovery_secret) {
+            showLoggedIn(j.nickname || '');
+            if (window.soccerRefreshAuthAndSync) window.soccerRefreshAuthAndSync();
             showRecoveryModal(j.recovery_secret);
+            msg(elMsg, '回復用キーを必ず保存してください。');
+          } else {
+            redirectHomeAfterAuth('register');
           }
-          msg(elMsg, '登録しました。回復用キーを保存してください。');
-          showLoggedIn(j.nickname || '');
-          if (window.soccerRefreshAuthAndSync) window.soccerRefreshAuthAndSync();
         }).catch(function (err) {
           msg(elMsg, err.message || String(err), true);
         });
@@ -200,6 +219,7 @@
       btnDismiss.addEventListener('click', function () {
         hideRecoveryModal();
         msg(elMsg, '');
+        redirectHomeAfterAuth('register');
       });
     }
 
@@ -217,9 +237,7 @@
             return j;
           });
         }).then(function (j) {
-          msg(elMsg, 'ログインしました。');
-          showLoggedIn(j.nickname);
-          if (window.soccerRefreshAuthAndSync) window.soccerRefreshAuthAndSync();
+          redirectHomeAfterAuth('login');
         }).catch(function (err) {
           msg(elMsg, err.message || String(err), true);
         });

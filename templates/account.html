@@ -8,7 +8,7 @@
     <meta name="description" content="ニックネームでログインし、お気に入りとメモを端末間で同期します。">
     <meta name="robots" content="noindex, follow">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=51">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=52">
 </head>
 <body>
     {% set active_nav = 'account' %}
@@ -18,7 +18,7 @@
         <div class="content-wrapper account-page">
             <header class="account-page__header">
                 <h1 class="account-page__title">アカウント</h1>
-                <p class="account-page__lead">メールアドレスは不要です。ニックネームとパスワードでお気に入り・メモ帳などを同期できます。</p>
+                <p class="account-page__lead">メールアドレスは不要です。ニックネームとパスワードでお気に入り・メモ帳などを同期できます。ログインすると検索のトップへ移動し、パスワード変更や削除はこのページからいつでも行えます。</p>
             </header>
 
             <!-- 登録直後のみ表示（ログイン後ビューに切り替わっても見える） -->
@@ -100,15 +100,20 @@
                     </form>
                 </section>
 
-                <section class="account-settings-card account-settings-card--danger" aria-labelledby="account-danger-heading">
-                    <h2 id="account-danger-heading" class="account-settings-card__title account-settings-card__title--danger">アカウントを削除</h2>
-                    <p class="account-note">サーバーに保存した同期データもすべて削除されます。この操作は取り消せません。</p>
-                    <form id="form-delete" class="account-form account-form--compact">
-                        <label for="delete-pw">パスワード（確認）</label>
-                        <input type="password" id="delete-pw" required autocomplete="current-password" data-password-enhanced>
-                        <button type="submit" class="account-btn-danger account-btn-danger--full">アカウントを削除する</button>
-                    </form>
-                </section>
+                <details class="account-danger-zone" id="account-delete-details">
+                    <summary class="account-danger-zone__summary" id="account-danger-heading">
+                        アカウントを削除
+                        <span class="account-danger-zone__hint">取り消せません。開いてから操作してください。</span>
+                    </summary>
+                    <div class="account-danger-zone__body">
+                        <p class="account-note account-note--danger">サーバーに保存した同期データもすべて削除されます。この操作は取り消せません。</p>
+                        <form id="form-delete" class="account-form account-form--compact">
+                            <label for="delete-pw">パスワード（確認）</label>
+                            <input type="password" id="delete-pw" required autocomplete="current-password" data-password-enhanced>
+                            <button type="submit" class="account-btn-danger account-btn-danger--full">アカウントを削除する</button>
+                        </form>
+                    </div>
+                </details>
             </div>
 
             <p id="account-message" class="account-message" role="status" aria-live="polite"></p>
@@ -121,7 +126,7 @@
     </footer>
 
     <script src="{{ url_for('static', filename='site-header.js') }}?v=51"></script>
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=3"></script>
-    <script src="{{ url_for('static', filename='account.js') }}?v=3"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=4"></script>
+    <script src="{{ url_for('static', filename='account.js') }}?v=4"></script>
 </body>
 </html>

@@ -2099,6 +2099,83 @@ footer a:hover {
   color: #991b1b;
 }
 
+/* ログイン／登録直後のワンショット通知（user-sync.js） */
+.soccer-global-toast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  padding: 0.75rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  background: var(--primary-light);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: center;
+  box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.12);
+  transform: translateY(110%);
+  transition: transform 0.28s ease;
+  pointer-events: none;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.soccer-global-toast.soccer-global-toast--visible {
+  transform: translateY(0);
+}
+
+/* アカウント削除（折りたたみ・デフォルトは閉じる） */
+.account-danger-zone {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(185, 28, 28, 0.35);
+  background: linear-gradient(180deg, #fffafa 0%, var(--surface-color) 100%);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-danger-zone__summary {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #991b1b;
+  padding: 1rem 1.25rem;
+  line-height: 1.45;
+}
+
+.account-danger-zone__summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-danger-zone__summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform 0.15s ease;
+  color: #991b1b;
+}
+
+.account-danger-zone[open] .account-danger-zone__summary::before {
+  transform: rotate(90deg);
+}
+
+.account-danger-zone__hint {
+  display: block;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.account-danger-zone__body {
+  padding: 0 1.25rem 1.15rem;
+  border-top: 1px solid rgba(185, 28, 28, 0.2);
+}
+
+.account-note--danger {
+  color: #b91c1c;
+}
+
 .account-recovery__textarea {
   width: 100%;
   font-family: ui-monospace, monospace;

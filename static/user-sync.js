@@ -24,6 +24,53 @@
   var csrfToken = '';
   var pushTimer = null;
   var DEBOUNCE_MS = 2000;
+  var POST_AUTH_TOAST_KEY = 'soccerPostAuthToast';
+  var POST_AUTH_TOAST_MS = 6500;
+
+  function showGlobalAuthToast(message) {
+    if (!message) return;
+    var el = document.getElementById('soccer-global-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'soccer-global-toast';
+      el.className = 'soccer-global-toast hidden';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      document.body.appendChild(el);
+    }
+    el.textContent = message;
+    el.classList.remove('hidden');
+    requestAnimationFrame(function () {
+      el.classList.add('soccer-global-toast--visible');
+    });
+    var hideTimer = null;
+    function hide() {
+      if (hideTimer) clearTimeout(hideTimer);
+      el.classList.remove('soccer-global-toast--visible');
+      setTimeout(function () {
+        el.classList.add('hidden');
+        el.textContent = '';
+      }, 320);
+    }
+    hideTimer = setTimeout(hide, POST_AUTH_TOAST_MS);
+  }
+
+  function consumePostAuthToastIfAny() {
+    var kind;
+    try {
+      kind = sessionStorage.getItem(POST_AUTH_TOAST_KEY);
+      if (kind) sessionStorage.removeItem(POST_AUTH_TOAST_KEY);
+    } catch (e) {
+      return;
+    }
+    if (!kind) return;
+    if (!window.__soccerLoggedIn) return;
+    var messages = {
+      login: 'ログインしました。お気に入り・メモなどを同期します。',
+      register: '登録ありがとうございます。回復用キーは安全な場所に保管してください。'
+    };
+    showGlobalAuthToast(messages[kind] || messages.login);
+  }
 
   function getMetaCsrf() {
     var m = document.querySelector('meta[name="csrf-token"]');
@@ -189,10 +236,13 @@
         if (j && j.logged_in) {
           setLoggedInFlag(true);
           setTimeout(closeHeaderNavIfOpen, 0);
-          return pullFromServer();
+          return pullFromServer().then(function () {
+            consumePostAuthToastIfAny();
+          });
         }
         setLoggedInFlag(false);
         setTimeout(closeHeaderNavIfOpen, 0);
+        consumePostAuthToastIfAny();
       })
       .catch(function (e) {
         console.warn('user-sync init', e);

@@ -266,7 +266,9 @@
       if (j && j.logged_in) {
         setLoggedInFlag(true);
         setTimeout(closeHeaderNavIfOpen, 0);
-        return pullFromServer();
+        return pullFromServer().then(function () {
+          consumePostAuthToastIfAny();
+        });
       }
       setLoggedInFlag(false);
       setTimeout(closeHeaderNavIfOpen, 0);

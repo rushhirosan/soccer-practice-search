@@ -12,6 +12,7 @@ from typing import Optional, Any
 from dotenv import load_dotenv
 from utilities import app_user_store
 import threading
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 # ロガーの設定
@@ -29,11 +30,23 @@ DATABASE = 'soccer_content.db'
 
 # セキュリティ: CSRF保護の設定
 # SECRET_KEYは環境変数から取得、なければランダムに生成（本番環境では必ず環境変数で設定すること）
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(32).hex())
+_secret_key_env = os.getenv("SECRET_KEY")
+# Fly.io など複数インスタンスでは未設定だとプロセスごとに鍵が変わり、セッション/CSRF が一致しない
+if os.getenv("FLY_APP_NAME") and not (_secret_key_env or "").strip():
+    raise RuntimeError(
+        "SECRET_KEY must be set on Fly (e.g. fly secrets set SECRET_KEY=...). "
+        "Without a stable secret, login fails with CSRF errors across machines or deploys."
+    )
+app.config["SECRET_KEY"] = (_secret_key_env or os.urandom(32).hex())
+# ヘッダーに署名済み CSRF トークンがあるため、Referer 厳格チェックはプロキシ背後で誤判定しやすい
+app.config["WTF_CSRF_SSL_STRICT"] = False
 app.config['WTF_CSRF_ENABLED'] = True
 app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # トークンの有効期限（秒）
 # JSONリクエストでもCSRFトークンを検証するための設定
 app.config['WTF_CSRF_HEADERS'] = ['X-CSRFToken', 'X-CSRF-Token']
+
+# Fly / リバースプロキシ: Host・HTTPS をクライアント向けに合わせる
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 # CSRF保護を有効化
 csrf = CSRFProtect(app)

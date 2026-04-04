@@ -132,6 +132,13 @@
     });
   }
 
+  /** 認証 API: 先に /auth/status でセッションと meta の CSRF を揃える（bfcache 古トークン対策） */
+  function postJsonAuth(url, body) {
+    return refreshUi().then(function () {
+      return postJson(url, body);
+    });
+  }
+
   /** HTML や空ボディのとき r.json() が壊れるので、テキスト経由で JSON を読む */
   function parsePostJsonResponse(r) {
     return r.text().then(function (text) {
@@ -159,6 +166,12 @@
     });
   }
 
+  window.addEventListener('pageshow', function (ev) {
+    if (ev.persisted) {
+      refreshUi();
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     var elMsg = document.getElementById('account-message');
 
@@ -180,7 +193,7 @@
       formReg.addEventListener('submit', function (e) {
         e.preventDefault();
         msg(elMsg, '');
-        postJson('/auth/register', {
+        postJsonAuth('/auth/register', {
           nickname: document.getElementById('reg-nick').value,
           password: document.getElementById('reg-pw').value
         }).then(function (r) {
@@ -228,7 +241,7 @@
       formLogin.addEventListener('submit', function (e) {
         e.preventDefault();
         msg(elMsg, '');
-        postJson('/auth/login', {
+        postJsonAuth('/auth/login', {
           nickname: document.getElementById('login-nick').value,
           password: document.getElementById('login-pw').value
         }).then(function (r) {
@@ -249,7 +262,7 @@
       formReset.addEventListener('submit', function (e) {
         e.preventDefault();
         msg(elMsg, '');
-        postJson('/auth/reset-password', {
+        postJsonAuth('/auth/reset-password', {
           nickname: document.getElementById('reset-nick').value,
           recovery_secret: document.getElementById('reset-secret').value,
           new_password: document.getElementById('reset-newpw').value
@@ -273,7 +286,7 @@
     var btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
       btnLogout.addEventListener('click', function () {
-        postJson('/auth/logout', {}).then(function () {
+        postJsonAuth('/auth/logout', {}).then(function () {
           showLoggedOut();
           setTab('login');
           msg(elMsg, 'ログアウトしました。');
@@ -287,7 +300,7 @@
       formCh.addEventListener('submit', function (e) {
         e.preventDefault();
         msg(elMsg, '');
-        postJson('/auth/change-password', {
+        postJsonAuth('/auth/change-password', {
           old_password: document.getElementById('old-pw').value,
           new_password: document.getElementById('new-pw').value
         }).then(function (r) {
@@ -311,7 +324,7 @@
         e.preventDefault();
         if (!window.confirm('本当にアカウントと同期データを削除しますか？')) return;
         msg(elMsg, '');
-        postJson('/auth/delete-account', {
+        postJsonAuth('/auth/delete-account', {
           password: document.getElementById('delete-pw').value
         }).then(function (r) {
           return parsePostJsonResponse(r).then(function (j) {

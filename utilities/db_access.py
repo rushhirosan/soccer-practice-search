@@ -9,7 +9,6 @@ from typing import Optional, List, Dict, Any, Generator, Union
 import sqlite3
 import psycopg2
 import logging
-import pandas as pd
 import os
 
 # データベースに接続し、コンテキストマネージャを使って自動で接続を閉じる

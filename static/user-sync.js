@@ -1,6 +1,12 @@
 /**
  * ログイン時: サーバーと localStorage を同期（お気に入り・メモ帳など）
  *
+ * アカウントにログインして同期したデータは「アカウントのデータ」として扱う:
+ * - ログアウト時・セッション切れ時は localStorage の同期キーを消し、画面からは見えないようにする。
+ * - 次回ログインでサーバーから再取得する。
+ *
+ * 未ログインのみの利用では soccer_account_local_mirror を立てない（ゲストの local は消さない）。
+ *
  * マージ規約（初回 pull）:
  * - サーバー payload が空オブジェクト → ローカルを PUT でアップロード（初回ログイン・新規端末）。
  * - サーバーにキーが1つでもあれば → サーバー側を applyPayload で localStorage に反映（サーバー優先）。
@@ -26,6 +32,8 @@
   var DEBOUNCE_MS = 2000;
   var POST_AUTH_TOAST_KEY = 'soccerPostAuthToast';
   var POST_AUTH_TOAST_MS = 6500;
+  /** サーバーでログイン済みのときだけ立つ。セッション切れ検知に使う（ゲストと区別）。 */
+  var ACCOUNT_LOCAL_MIRROR_KEY = 'soccer_account_local_mirror';
 
   function showGlobalAuthToast(message) {
     if (!message) return;
@@ -80,6 +88,41 @@
   function setLoggedInFlag(on) {
     if (document.body) document.body.dataset.soccerLoggedIn = on ? '1' : '';
     window.__soccerLoggedIn = !!on;
+    if (on) {
+      try {
+        localStorage.setItem(ACCOUNT_LOCAL_MIRROR_KEY, '1');
+      } catch (e) {}
+    }
+  }
+
+  function clearLocalSyncedUserData() {
+    if (pushTimer) {
+      clearTimeout(pushTimer);
+      pushTimer = null;
+    }
+    for (var i = 0; i < SYNC_KEYS.length; i++) {
+      try {
+        localStorage.removeItem(SYNC_KEYS[i]);
+      } catch (e) {}
+    }
+    try {
+      localStorage.removeItem(ACCOUNT_LOCAL_MIRROR_KEY);
+    } catch (e) {}
+    refreshBadgesFromStorage();
+    try {
+      window.dispatchEvent(new CustomEvent('soccerUserDataSynced'));
+    } catch (e) {}
+  }
+
+  /** ログアウト／アカウント削除直後に呼ぶ（明示的ログアウト用） */
+  window.soccerClearSyncedUserDataOnLogout = clearLocalSyncedUserData;
+
+  function clearSyncedDataIfSessionExpired() {
+    try {
+      if (localStorage.getItem(ACCOUNT_LOCAL_MIRROR_KEY) === '1') {
+        clearLocalSyncedUserData();
+      }
+    } catch (e) {}
   }
 
   function collectPayload() {
@@ -240,6 +283,7 @@
             consumePostAuthToastIfAny();
           });
         }
+        clearSyncedDataIfSessionExpired();
         setLoggedInFlag(false);
         setTimeout(closeHeaderNavIfOpen, 0);
         consumePostAuthToastIfAny();
@@ -270,6 +314,7 @@
           consumePostAuthToastIfAny();
         });
       }
+      clearSyncedDataIfSessionExpired();
       setLoggedInFlag(false);
       setTimeout(closeHeaderNavIfOpen, 0);
       return j;

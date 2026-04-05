@@ -23,6 +23,10 @@
     render();
   });
 
+  window.addEventListener('soccerUserDataSynced', function () {
+    render();
+  });
+
   window.addEventListener('storage', function (e) {
     if (e.key === FAVORITES_KEY) render();
   });

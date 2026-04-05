@@ -285,6 +285,9 @@
     if (btnLogout) {
       btnLogout.addEventListener('click', function () {
         postJsonAuth('/auth/logout', {}).then(function () {
+          if (typeof window.soccerClearSyncedUserDataOnLogout === 'function') {
+            window.soccerClearSyncedUserDataOnLogout();
+          }
           showLoggedOut();
           setTab('login');
           msg(elMsg, 'ログアウトしました。');
@@ -331,6 +334,9 @@
           });
         }).then(function () {
           msg(elMsg, 'アカウントを削除しました。');
+          if (typeof window.soccerClearSyncedUserDataOnLogout === 'function') {
+            window.soccerClearSyncedUserDataOnLogout();
+          }
           showLoggedOut();
           setTab('login');
           if (window.soccerRefreshAuthAndSync) window.soccerRefreshAuthAndSync();

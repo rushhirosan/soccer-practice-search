@@ -1426,5 +1426,18 @@
       const r = localStorage.getItem(STORAGE_KEY);
       if (r) { const d = JSON.parse(r); if (d.scenes?.length) setData(d); }
     } catch (_) {}
+    window.addEventListener('soccerUserDataSynced', () => {
+      try {
+        const r = localStorage.getItem(STORAGE_KEY);
+        if (r) {
+          const d = JSON.parse(r);
+          if (d.scenes?.length) setData(d);
+        } else {
+          location.reload();
+        }
+      } catch (_) {
+        location.reload();
+      }
+    });
   });
 })();

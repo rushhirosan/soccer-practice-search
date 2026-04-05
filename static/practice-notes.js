@@ -369,6 +369,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', setup);
+    window.addEventListener('soccerUserDataSynced', function () {
+      renderSavedRecords();
+    });
     return;
   }
 
@@ -680,4 +683,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', setup);
+  window.addEventListener('soccerUserDataSynced', function () {
+    renderSelectedMenus();
+    renderSavedPlans();
+  });
 })();

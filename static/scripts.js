@@ -1006,6 +1006,27 @@ function updateFavoritesBadge() {
     }
 }
 
+/** ログアウト同期などで localStorage が変わったあと、検索結果カードの★表示を合わせ直す */
+function resyncSearchResultsFavoriteButtons() {
+    const container = document.querySelector('.card-container');
+    if (!container) return;
+    container.querySelectorAll('.card[data-activity-id] .card-favorite-btn').forEach((btn) => {
+        const card = btn.closest('.card');
+        if (!card || !card.dataset.activityId) return;
+        const fav = isFavorite(card.dataset.activityId);
+        btn.classList.toggle('is-favorite', fav);
+        btn.setAttribute('aria-pressed', fav ? 'true' : 'false');
+        btn.setAttribute('aria-label', fav ? 'お気に入りから外す' : 'お気に入りに追加');
+        btn.textContent = fav ? '★ お気に入り済み' : '☆ お気に入り';
+    });
+}
+
+window.addEventListener('soccerUserDataSynced', () => {
+    updateFavoritesBadge();
+    updateSelectedMenusBadge();
+    resyncSearchResultsFavoriteButtons();
+});
+
 // 検索履歴（localStorage、最大10件）
 const SEARCH_HISTORY_KEY = 'soccer_search_history';
 const SEARCH_HISTORY_MAX = 10;

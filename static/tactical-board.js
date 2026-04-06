@@ -37,7 +37,7 @@
   let scenes = [];
   let currentSceneIndex = 0;
   let courtMode = '8';
-  let boardType = 'tactical';
+  let boardType = 'practice';
   let tacticalFormation = DEFAULT_TACTICAL_FORMATION;
   let practiceFormation = '';
   let practiceFormationOptions = [...DEFAULT_PRACTICE_FORMATIONS];
@@ -48,6 +48,8 @@
   let selectedBoard = { players: new Set(), opponents: new Set(), balls: new Set(), arrows: new Set(), lines: new Set() };
   let marqueeStart = null;
   let marqueeRect = null;
+  /** soccerUserDataSynced で localStorage の生文字列と比較し、同じなら再 setData しない */
+  let lastAppliedBoardStorageRaw;
 
   // Konva のステージ（キャンバス）を画面幅に合わせてスケールする（モバイル横溢れ防止）
   let stageFitScale = 1;
@@ -303,7 +305,7 @@
     }
   }
 
-  function init() {
+  function init(initialStorageRaw) {
     if (!document.getElementById('tactical-container')) return;
 
     scenes = [createEmptyScene()];
@@ -331,16 +333,47 @@
 
     drawPitch();
     updateBoardModeControls();
-    applyFormation(tacticalFormation);
-    applyOpponentFormation(tacticalFormation);
-    const s = scenes[0];
-    if (s && (!s.balls || s.balls.length === 0)) {
-      s.balls = [{ x: pitchWidth * 0.57, y: pitchHeight * 0.49 }];
-      renderCurrentScene();
+
+    function ensureDefaultBallInCurrentScene() {
+      const s = scenes[0];
+      if (s && (!s.balls || s.balls.length === 0)) {
+        s.balls = [{ x: pitchWidth * 0.57, y: pitchHeight * 0.49 }];
+        renderCurrentScene();
+      }
     }
+
+    let loadedFromStorage = false;
+    try {
+      if (initialStorageRaw) {
+        const d = JSON.parse(initialStorageRaw);
+        if (d.scenes?.length) {
+          setData(d);
+          lastAppliedBoardStorageRaw = initialStorageRaw;
+          loadedFromStorage = true;
+        }
+      }
+    } catch (_) { /* 保存が壊れている場合は下のデフォルト初期化へ */ }
+
+    if (!loadedFromStorage) {
+      if (boardType === 'practice') {
+        loadPracticeFormationOptions().then(() => {
+          if (!practiceFormation) practiceFormation = practiceFormationOptions[0] || '';
+          updateBoardModeControls();
+          if (practiceFormation) applyPracticeFormation(practiceFormation);
+          ensureDefaultBallInCurrentScene();
+        });
+      } else {
+        applyFormation(tacticalFormation);
+        applyOpponentFormation(tacticalFormation);
+        ensureDefaultBallInCurrentScene();
+        void loadPracticeFormationOptions();
+      }
+    } else {
+      void loadPracticeFormationOptions();
+    }
+
     setupEventListeners();
     setupKeyboardShortcuts();
-    loadPracticeFormationOptions();
     renderSequenceList();
     const hint = document.getElementById('tool-hint');
     if (hint) hint.textContent = 'ドラッグで移動';
@@ -1370,8 +1403,8 @@
     renderSequenceList();
   }
 
-  function saveToStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush(); alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
-  function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert('保存データがありません'); return; } setData(JSON.parse(r)); alert('読込ました'); } catch (e) { alert('読込失敗: ' + e.message); } }
+  function saveToStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); lastAppliedBoardStorageRaw = localStorage.getItem(STORAGE_KEY); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush(); alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
+  function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert('保存データがありません'); return; } setData(JSON.parse(r)); lastAppliedBoardStorageRaw = r; alert('読込ました'); } catch (e) { alert('読込失敗: ' + e.message); } }
   function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert('読込ました'); } catch (err) { alert('読込失敗'); } }; r.readAsText(f); e.target.value = ''; }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
   function exportPNG() { const a = document.createElement('a'); a.href = stage.toDataURL({ pixelRatio: 2 }); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.png'; a.click(); }
@@ -1421,22 +1454,28 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    init();
+    let initialRaw = null;
     try {
-      const r = localStorage.getItem(STORAGE_KEY);
-      if (r) { const d = JSON.parse(r); if (d.scenes?.length) setData(d); }
+      initialRaw = localStorage.getItem(STORAGE_KEY);
     } catch (_) {}
+    init(initialRaw);
+    /* user-sync の applyPayload のたびに発火するが、内容が同じなら setData しない（ログイン直後のちらつき防止） */
     window.addEventListener('soccerUserDataSynced', () => {
       try {
         const r = localStorage.getItem(STORAGE_KEY);
-        if (r) {
-          const d = JSON.parse(r);
-          if (d.scenes?.length) setData(d);
-        } else {
+        if (!r) {
+          if (lastAppliedBoardStorageRaw === undefined) return;
+          lastAppliedBoardStorageRaw = undefined;
           location.reload();
+          return;
         }
+        if (r === lastAppliedBoardStorageRaw) return;
+        const d = JSON.parse(r);
+        if (!d.scenes?.length) return;
+        setData(d);
+        lastAppliedBoardStorageRaw = r;
       } catch (_) {
-        location.reload();
+        if (lastAppliedBoardStorageRaw !== undefined) location.reload();
       }
     });
   });

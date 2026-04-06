@@ -121,8 +121,19 @@ main {
   padding: 0.65rem 1.25rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
+}
+
+/* ログイン中表示・ハンバーガー・ナビをまとめて右側に寄せる（チップだけ中央に浮かない） */
+.site-header__end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  flex: 1;
+  min-width: 0;
+  margin-left: auto;
 }
 
 .site-header__brand {

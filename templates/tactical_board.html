@@ -8,7 +8,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=52">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=53">
     <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=9">
 </head>
 <body>
@@ -33,8 +33,8 @@
             <div class="tool-group">
                 <h3>ボード</h3>
                 <select id="board-type-select" aria-label="ボード種別">
-                    <option value="tactical" selected>戦術ボード</option>
-                    <option value="practice">練習ボード</option>
+                    <option value="tactical">戦術ボード</option>
+                    <option value="practice" selected>練習ボード</option>
                 </select>
             </div>
 
@@ -132,6 +132,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=6"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=12"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=13"></script>
 </body>
 </html>

@@ -908,6 +908,40 @@ function setupRealtimeSearch() {
 // 練習メモ帳: 選んだメニュー（localStorage）
 const SELECTED_MENUS_KEY = 'soccer_selected_menus';
 
+/** ヘッダー数字バッジは「追加直後の目印」だけ。該当ページ表示・リロードで消す（件数の常時表示ではない） */
+const NAV_MEMO_BADGE_PENDING_KEY = 'soccer_nav_memo_badge_pending';
+const NAV_FAV_BADGE_PENDING_KEY = 'soccer_nav_fav_badge_pending';
+
+function isNavigationReload() {
+    try {
+        const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        if (nav && nav.type === 'reload') return true;
+    } catch (e) { /* ignore */ }
+    try {
+        if (typeof performance !== 'undefined' && performance.navigation && performance.navigation.type === 1) {
+            return true;
+        }
+    } catch (e2) { /* ignore */ }
+    return false;
+}
+
+function applyNavBadgeSessionContext() {
+    try {
+        if (isNavigationReload()) {
+            sessionStorage.removeItem(NAV_FAV_BADGE_PENDING_KEY);
+            sessionStorage.removeItem(NAV_MEMO_BADGE_PENDING_KEY);
+            return;
+        }
+        const p = window.location.pathname || '';
+        if (p === '/favorites' || /\/favorites\/?$/.test(p)) {
+            sessionStorage.removeItem(NAV_FAV_BADGE_PENDING_KEY);
+        }
+        if (p === '/practice-notes' || /\/practice-notes\/?$/.test(p)) {
+            sessionStorage.removeItem(NAV_MEMO_BADGE_PENDING_KEY);
+        }
+    } catch (e) { /* ignore */ }
+}
+
 function getSelectedMenus() {
     try {
         const stored = localStorage.getItem(SELECTED_MENUS_KEY);
@@ -931,6 +965,9 @@ function addToSelectedMenus(activity) {
     const items = getSelectedMenus();
     const exists = items.some(it => it.id === activity.id);
     if (exists) return false;
+    try {
+        sessionStorage.setItem(NAV_MEMO_BADGE_PENDING_KEY, '1');
+    } catch (e) { /* ignore */ }
     items.push({ ...activity, memo: '' });
     saveSelectedMenus(items);
     updateSelectedMenusBadge();
@@ -946,11 +983,18 @@ function removeFromSelectedMenus(activityId) {
 }
 
 function updateSelectedMenusBadge() {
+    applyNavBadgeSessionContext();
     const count = getSelectedMenus().length;
     const badge = document.getElementById('practice-notes-badge');
+    let show = false;
+    try {
+        show = count > 0 && sessionStorage.getItem(NAV_MEMO_BADGE_PENDING_KEY) === '1';
+    } catch (e) {
+        show = false;
+    }
     if (badge) {
-        badge.textContent = count > 0 ? count : '';
-        badge.style.display = count > 0 ? 'inline-flex' : 'none';
+        badge.textContent = show ? String(count) : '';
+        badge.style.display = show ? 'inline-flex' : 'none';
     }
 }
 
@@ -983,6 +1027,9 @@ function isFavorite(activityId) {
 function addFavorite(activity) {
     const items = getFavorites();
     if (items.some(it => it.id === activity.id)) return false;
+    try {
+        sessionStorage.setItem(NAV_FAV_BADGE_PENDING_KEY, '1');
+    } catch (e) { /* ignore */ }
     items.push({ ...activity });
     saveFavorites(items);
     updateFavoritesBadge();
@@ -998,11 +1045,18 @@ function removeFavorite(activityId) {
 }
 
 function updateFavoritesBadge() {
+    applyNavBadgeSessionContext();
     const count = getFavorites().length;
     const badge = document.getElementById('favorites-badge');
+    let show = false;
+    try {
+        show = count > 0 && sessionStorage.getItem(NAV_FAV_BADGE_PENDING_KEY) === '1';
+    } catch (e) {
+        show = false;
+    }
     if (badge) {
-        badge.textContent = count > 0 ? String(count) : '';
-        badge.style.display = count > 0 ? 'inline-flex' : 'none';
+        badge.textContent = show ? String(count) : '';
+        badge.style.display = show ? 'inline-flex' : 'none';
     }
 }
 

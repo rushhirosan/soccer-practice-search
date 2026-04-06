@@ -166,15 +166,40 @@
     } catch (e) {}
   }
 
+  function applyNavBadgeSessionContextForSync() {
+    try {
+      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (nav && nav.type === 'reload') {
+        sessionStorage.removeItem('soccer_nav_fav_badge_pending');
+        sessionStorage.removeItem('soccer_nav_memo_badge_pending');
+        return;
+      }
+    } catch (e) {}
+    try {
+      if (typeof performance !== 'undefined' && performance.navigation && performance.navigation.type === 1) {
+        sessionStorage.removeItem('soccer_nav_fav_badge_pending');
+        sessionStorage.removeItem('soccer_nav_memo_badge_pending');
+        return;
+      }
+    } catch (e2) {}
+    try {
+      var p = window.location.pathname || '';
+      if (p === '/favorites' || /\/favorites\/?$/.test(p)) sessionStorage.removeItem('soccer_nav_fav_badge_pending');
+      if (p === '/practice-notes' || /\/practice-notes\/?$/.test(p)) sessionStorage.removeItem('soccer_nav_memo_badge_pending');
+    } catch (e3) {}
+  }
+
   function syncBadgesFallback() {
+    applyNavBadgeSessionContextForSync();
     try {
       var fb = document.getElementById('favorites-badge');
       if (fb) {
         var fr = localStorage.getItem('soccer_favorite_videos');
         var fi = fr ? JSON.parse(fr) : [];
         var fc = Array.isArray(fi) ? fi.length : 0;
-        fb.textContent = fc > 0 ? String(fc) : '';
-        fb.style.display = fc > 0 ? 'inline-flex' : 'none';
+        var showF = fc > 0 && sessionStorage.getItem('soccer_nav_fav_badge_pending') === '1';
+        fb.textContent = showF ? String(fc) : '';
+        fb.style.display = showF ? 'inline-flex' : 'none';
       }
     } catch (e) {}
     try {
@@ -183,8 +208,9 @@
         var mr = localStorage.getItem('soccer_selected_menus');
         var mi = mr ? JSON.parse(mr) : [];
         var mc = Array.isArray(mi) ? mi.length : 0;
-        mb.textContent = mc > 0 ? String(mc) : '';
-        mb.style.display = mc > 0 ? 'inline-flex' : 'none';
+        var showM = mc > 0 && sessionStorage.getItem('soccer_nav_memo_badge_pending') === '1';
+        mb.textContent = showM ? String(mc) : '';
+        mb.style.display = showM ? 'inline-flex' : 'none';
       }
     } catch (e) {}
   }

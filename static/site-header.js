@@ -1,30 +1,62 @@
 (function () {
   var STORAGE_KEY = 'soccer_selected_menus';
   var FAVORITES_KEY = 'soccer_favorite_videos';
+  var PENDING_MEMO = 'soccer_nav_memo_badge_pending';
+  var PENDING_FAV = 'soccer_nav_fav_badge_pending';
+
+  function isNavigationReload() {
+    try {
+      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (nav && nav.type === 'reload') return true;
+    } catch (e) { /* ignore */ }
+    try {
+      if (typeof performance !== 'undefined' && performance.navigation && performance.navigation.type === 1) {
+        return true;
+      }
+    } catch (e2) { /* ignore */ }
+    return false;
+  }
+
+  function applyNavBadgeSessionContext() {
+    try {
+      if (isNavigationReload()) {
+        sessionStorage.removeItem(PENDING_FAV);
+        sessionStorage.removeItem(PENDING_MEMO);
+        return;
+      }
+      var p = window.location.pathname || '';
+      if (p === '/favorites' || /\/favorites\/?$/.test(p)) sessionStorage.removeItem(PENDING_FAV);
+      if (p === '/practice-notes' || /\/practice-notes\/?$/.test(p)) sessionStorage.removeItem(PENDING_MEMO);
+    } catch (e) { /* ignore */ }
+  }
 
   function syncMemoBadge() {
+    applyNavBadgeSessionContext();
     var badge = document.getElementById('practice-notes-badge');
     if (!badge) return;
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       var items = raw ? JSON.parse(raw) : [];
       var count = Array.isArray(items) ? items.length : 0;
-      badge.textContent = count > 0 ? String(count) : '';
-      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+      var show = count > 0 && sessionStorage.getItem(PENDING_MEMO) === '1';
+      badge.textContent = show ? String(count) : '';
+      badge.style.display = show ? 'inline-flex' : 'none';
     } catch (e) {
       /* ignore */
     }
   }
 
   function syncFavoritesBadge() {
+    applyNavBadgeSessionContext();
     var badge = document.getElementById('favorites-badge');
     if (!badge) return;
     try {
       var raw = localStorage.getItem(FAVORITES_KEY);
       var items = raw ? JSON.parse(raw) : [];
       var count = Array.isArray(items) ? items.length : 0;
-      badge.textContent = count > 0 ? String(count) : '';
-      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+      var show = count > 0 && sessionStorage.getItem(PENDING_FAV) === '1';
+      badge.textContent = show ? String(count) : '';
+      badge.style.display = show ? 'inline-flex' : 'none';
     } catch (e) {
       /* ignore */
     }
@@ -140,7 +172,11 @@
 
     /* bfcache 復帰時にメニュー開状態が残ると、下層が暗く見えたり操作できないことがある */
     window.addEventListener('pageshow', function (e) {
-      if (e.persisted) close();
+      if (e.persisted) {
+        close();
+        syncMemoBadge();
+        syncFavoritesBadge();
+      }
     });
 
     function toggle() {

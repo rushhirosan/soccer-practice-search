@@ -20,12 +20,6 @@
       return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text || '';
-      return div.innerHTML;
-    }
-
     function readList(key) {
       try {
         const s = localStorage.getItem(key);
@@ -132,17 +126,11 @@
           const actions = document.createElement('div');
           actions.className = 'record-actions no-print';
 
-          const printBtn = document.createElement('button');
-          printBtn.type = 'button';
-          printBtn.textContent = '印刷';
-          printBtn.addEventListener('click', () => printEntry(entry));
-
           const deleteBtn = document.createElement('button');
           deleteBtn.type = 'button';
           deleteBtn.textContent = '削除';
           deleteBtn.addEventListener('click', () => deleteEntry(entry.type, entry.id));
 
-          actions.appendChild(printBtn);
           actions.appendChild(deleteBtn);
 
           header.appendChild(left);
@@ -176,74 +164,6 @@
         writeList(SAVED_DAILY_NOTES_KEY, daily);
       }
       renderSavedRecords();
-    }
-
-    function buildPrintHtmlMatch(entry) {
-      const dateStr = formatISOToJa(entry.date);
-      const opponent = entry.opponent || '-';
-      const score = entry.score || '-';
-      const events = entry.events || '';
-
-      return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>試合結果（${escapeHtml(dateStr)}）</title>
-  <style>
-    body { font-family: sans-serif; padding: 24px; max-width: 800px; margin: 0 auto; }
-    h1 { font-size: 20px; margin-bottom: 6px; }
-    .meta { color: #666; margin-bottom: 14px; }
-    .box { border: 1px solid #ddd; border-radius: 8px; padding: 12px 14px; white-space: pre-wrap; line-height: 1.6; }
-  </style>
-</head>
-<body>
-  <h1>試合結果</h1>
-  <div class="meta">${escapeHtml(dateStr)} / ${escapeHtml(opponent)} / ${escapeHtml(score)}</div>
-  <h2 style="font-size:16px;margin:12px 0 8px;">得点者・失点者 / 主な出来事</h2>
-  <div class="box">${escapeHtml(events)}</div>
-  <script>window.onload=function(){window.print();}</script>
-</body>
-</html>`;
-    }
-
-    function buildPrintHtmlDaily(entry) {
-      const dateStr = formatISOToJa(entry.date);
-      const content = entry.content || '';
-      return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>日々の気づき（${escapeHtml(dateStr)}）</title>
-  <style>
-    body { font-family: sans-serif; padding: 24px; max-width: 800px; margin: 0 auto; }
-    h1 { font-size: 20px; margin-bottom: 6px; }
-    .meta { color: #666; margin-bottom: 14px; }
-    .box { border: 1px solid #ddd; border-radius: 8px; padding: 12px 14px; white-space: pre-wrap; line-height: 1.6; }
-  </style>
-</head>
-<body>
-  <h1>日々の気づき</h1>
-  <div class="meta">${escapeHtml(dateStr)}</div>
-  <div class="box">${escapeHtml(content)}</div>
-  <script>window.onload=function(){window.print();}</script>
-</body>
-</html>`;
-    }
-
-    function printEntry(entry) {
-      const w = window.open('', '_blank');
-      if (!w) {
-        alert('印刷ウィンドウを開けませんでした。ポップアップを許可してください。');
-        return;
-      }
-      const html = entry.type === 'match' ? buildPrintHtmlMatch(entry) : buildPrintHtmlDaily(entry);
-      w.document.write(html);
-      w.document.close();
-      w.focus();
-      setTimeout(() => {
-        try { w.print(); } catch (_) {}
-        try { w.close(); } catch (_) {}
-      }, 300);
     }
 
     function bindUi() {

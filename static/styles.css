@@ -2136,6 +2136,71 @@ footer a:hover {
   transform: translateY(0);
 }
 
+/* 初回ログイン時の同期選択モーダル（user-sync.js） */
+.soccer-sync-choice-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.soccer-sync-choice-modal__panel {
+  width: min(36rem, 100%);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1rem 1rem 1.1rem;
+}
+
+.soccer-sync-choice-modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.soccer-sync-choice-modal__text {
+  margin: 0.5rem 0 0;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  font-size: 0.93rem;
+}
+
+.soccer-sync-choice-modal__text--warn {
+  color: #92400e;
+}
+
+.soccer-sync-choice-modal__actions {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.95rem;
+}
+
+.soccer-sync-choice-modal__btn {
+  appearance: none;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  padding: 0.72rem 0.82rem;
+  font-size: 0.92rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.soccer-sync-choice-modal__btn--primary {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.soccer-sync-choice-modal__btn--outline {
+  background: #fff;
+  color: var(--text-primary);
+}
+
 /* アカウント削除（折りたたみ・デフォルトは閉じる） */
 .account-danger-zone {
   width: 100%;

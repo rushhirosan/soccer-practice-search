@@ -7,10 +7,9 @@
  *
  * 未ログインのみの利用では soccer_account_local_mirror を立てない（ゲストの local は消さない）。
  *
- * マージ規約（初回 pull）:
- * - サーバー payload が空オブジェクト → ローカルを PUT でアップロード（初回ログイン・新規端末）。
- * - サーバーにキーが1つでもあれば → サーバー側を applyPayload で localStorage に反映（サーバー優先）。
- * 以降の編集は debounce 付き PUT でサーバーへ反映。
+ * 初回同期規約（ログイン直後）:
+ * - 自動マージはしない。サーバー優先/この端末のデータ取り込みをユーザーに選んでもらう。
+ * - 以降の編集は debounce 付き PUT でサーバーへ反映。
  */
 (function () {
   'use strict';
@@ -34,6 +33,7 @@
   var POST_AUTH_TOAST_MS = 6500;
   /** サーバーでログイン済みのときだけ立つ。セッション切れ検知に使う（ゲストと区別）。 */
   var ACCOUNT_LOCAL_MIRROR_KEY = 'soccer_account_local_mirror';
+  var syncChoiceModalPromise = null;
 
   function showGlobalAuthToast(message) {
     if (!message) return;
@@ -88,14 +88,16 @@
   function setLoggedInFlag(on) {
     if (document.body) document.body.dataset.soccerLoggedIn = on ? '1' : '';
     window.__soccerLoggedIn = !!on;
-    if (on) {
-      try {
-        localStorage.setItem(ACCOUNT_LOCAL_MIRROR_KEY, '1');
-      } catch (e) {}
-    }
   }
 
-  function clearLocalSyncedUserData() {
+  function markAccountLocalMirror() {
+    try {
+      localStorage.setItem(ACCOUNT_LOCAL_MIRROR_KEY, '1');
+    } catch (e) {}
+  }
+
+  function clearLocalSyncedUserData(options) {
+    var preserveAccountMirror = !!(options && options.preserveAccountMirror);
     if (pushTimer) {
       clearTimeout(pushTimer);
       pushTimer = null;
@@ -105,9 +107,11 @@
         localStorage.removeItem(SYNC_KEYS[i]);
       } catch (e) {}
     }
-    try {
-      localStorage.removeItem(ACCOUNT_LOCAL_MIRROR_KEY);
-    } catch (e) {}
+    if (!preserveAccountMirror) {
+      try {
+        localStorage.removeItem(ACCOUNT_LOCAL_MIRROR_KEY);
+      } catch (e) {}
+    }
     refreshBadgesFromStorage();
     try {
       window.dispatchEvent(new CustomEvent('soccerUserDataSynced'));
@@ -141,6 +145,21 @@
       } catch (e) {}
     }
     return out;
+  }
+
+  function payloadHasMeaningfulData(payload) {
+    if (!payload || typeof payload !== 'object') return false;
+    var keys = Object.keys(payload);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (SYNC_KEYS.indexOf(k) === -1) continue;
+      var val = payload[k];
+      if (Array.isArray(val) && val.length > 0) return true;
+      if (val && typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length > 0) return true;
+      if (typeof val === 'string' && val.trim() !== '' && val !== '[]' && val !== '{}') return true;
+      if (typeof val === 'number' || typeof val === 'boolean') return true;
+    }
+    return false;
   }
 
   function applyPayload(payload) {
@@ -222,7 +241,7 @@
     else syncBadgesFallback();
   }
 
-  function pullFromServer() {
+  function fetchServerPayload() {
     return fetch('/api/user-data', { credentials: 'same-origin' })
       .then(function (r) {
         if (r.status === 401) return null;
@@ -230,17 +249,98 @@
         return r.json();
       })
       .then(function (j) {
-        if (!j) return;
-        var payload = j.payload || {};
-        var keys = Object.keys(payload);
-        if (keys.length === 0) {
-          return pushToServer(true);
-        }
-        applyPayload(payload);
+        if (!j) return null;
+        return j.payload || {};
       })
       .catch(function (e) {
-        console.warn('pullFromServer', e);
+        console.warn('fetchServerPayload', e);
+        return null;
       });
+  }
+
+  function ensureSyncChoiceModal() {
+    var existing = document.getElementById('soccer-sync-choice-modal');
+    if (existing) return existing;
+    var root = document.createElement('div');
+    root.id = 'soccer-sync-choice-modal';
+    root.className = 'soccer-sync-choice-modal hidden';
+    root.innerHTML = ''
+      + '<div class="soccer-sync-choice-modal__panel" role="dialog" aria-modal="true" aria-labelledby="soccer-sync-choice-title">'
+      +   '<h2 id="soccer-sync-choice-title" class="soccer-sync-choice-modal__title">同期方法を選んでください</h2>'
+      +   '<p class="soccer-sync-choice-modal__text">この端末には未ログイン時のデータがあります。別の人のデータが混ざる事故を防ぐため、同期方法を選んでください。</p>'
+      +   '<p class="soccer-sync-choice-modal__text soccer-sync-choice-modal__text--warn">推奨: 既存のアカウントデータを使う（この端末のローカルデータは破棄）。</p>'
+      +   '<div class="soccer-sync-choice-modal__actions">'
+      +     '<button type="button" id="soccer-sync-choice-server" class="soccer-sync-choice-modal__btn soccer-sync-choice-modal__btn--primary">既存のアカウントデータを使う（推奨）</button>'
+      +     '<button type="button" id="soccer-sync-choice-local" class="soccer-sync-choice-modal__btn soccer-sync-choice-modal__btn--outline">この端末のデータをこのアカウントに取り込む</button>'
+      +   '</div>'
+      + '</div>';
+    document.body.appendChild(root);
+    return root;
+  }
+
+  function askSyncChoice() {
+    if (syncChoiceModalPromise) return syncChoiceModalPromise;
+    var modal = ensureSyncChoiceModal();
+    modal.classList.remove('hidden');
+    syncChoiceModalPromise = new Promise(function (resolve) {
+      var btnServer = document.getElementById('soccer-sync-choice-server');
+      var btnLocal = document.getElementById('soccer-sync-choice-local');
+      function choose(kind) {
+        modal.classList.add('hidden');
+        btnServer && btnServer.removeEventListener('click', onServer);
+        btnLocal && btnLocal.removeEventListener('click', onLocal);
+        syncChoiceModalPromise = null;
+        resolve(kind);
+      }
+      function onServer() { choose('server'); }
+      function onLocal() { choose('local'); }
+      if (btnServer) btnServer.addEventListener('click', onServer);
+      if (btnLocal) btnLocal.addEventListener('click', onLocal);
+    });
+    return syncChoiceModalPromise;
+  }
+
+  function handleLoginSyncFlow() {
+    var hasMirror = false;
+    try {
+      hasMirror = localStorage.getItem(ACCOUNT_LOCAL_MIRROR_KEY) === '1';
+    } catch (e) {}
+    if (hasMirror) {
+      return fetchServerPayload().then(function (payload) {
+        if (payloadHasMeaningfulData(payload)) {
+          applyPayload(payload);
+        }
+        markAccountLocalMirror();
+      });
+    }
+
+    var localPayload = collectPayload();
+    var hasLocalData = payloadHasMeaningfulData(localPayload);
+    return fetchServerPayload().then(function (serverPayload) {
+      var hasServerData = payloadHasMeaningfulData(serverPayload);
+      if (!hasLocalData && hasServerData) {
+        applyPayload(serverPayload);
+        markAccountLocalMirror();
+        return;
+      }
+      if (!hasLocalData && !hasServerData) {
+        markAccountLocalMirror();
+        return;
+      }
+      return askSyncChoice().then(function (choice) {
+        if (choice === 'local') {
+          return pushToServer(true).then(function () {
+            markAccountLocalMirror();
+          });
+        }
+        if (hasServerData) {
+          applyPayload(serverPayload);
+        } else {
+          clearLocalSyncedUserData({ preserveAccountMirror: true });
+        }
+        markAccountLocalMirror();
+      });
+    });
   }
 
   function pushToServer(force) {
@@ -305,7 +405,7 @@
         if (j && j.logged_in) {
           setLoggedInFlag(true);
           setTimeout(closeHeaderNavIfOpen, 0);
-          return pullFromServer().then(function () {
+          return handleLoginSyncFlow().then(function () {
             consumePostAuthToastIfAny();
           });
         }
@@ -336,7 +436,7 @@
       if (j && j.logged_in) {
         setLoggedInFlag(true);
         setTimeout(closeHeaderNavIfOpen, 0);
-        return pullFromServer().then(function () {
+        return handleLoginSyncFlow().then(function () {
           consumePostAuthToastIfAny();
         });
       }

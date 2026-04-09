@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>サッカートレーニング検索サイト - 練習メニューを簡単検索</title>
+    <title>少年サッカードリル - 練習ドリル動画を簡単検索</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="サッカーの練習メニューを目的、人数、レベル別に検索できるサイト。小学生から大人まで、サッカーコーチやプレイヤー向けのトレーニング動画を簡単に見つけられます。">
-    <meta name="keywords" content="サッカー,練習,トレーニング,メニュー,コーチ,小学生,検索,動画,YouTube,サッカー練習,サッカートレーニング,サッカーコーチ,サッカー指導,サッカー技術,サッカー戦術">
-    <meta name="author" content="サッカートレーニング検索サイト">
+    <meta name="description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
+    <meta name="keywords" content="少年サッカー,サッカー,ドリル,練習,メニュー,コーチ,小学生,ジュニア,検索,動画,YouTube,指導,サッカー練習,サッカーコーチ">
+    <meta name="author" content="少年サッカードリル">
     <meta name="robots" content="index, follow">
     <meta name="language" content="ja">
     <meta name="revisit-after" content="7 days">
@@ -25,20 +25,20 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="サッカートレーニング検索サイト - 練習メニューを簡単検索">
-    <meta property="og:description" content="サッカーの練習メニューを目的、人数、レベル別に検索できるサイト。小学生から大人まで、サッカーコーチやプレイヤー向けのトレーニング動画を簡単に見つけられます。">
+    <meta property="og:title" content="少年サッカードリル - 練習ドリル動画を簡単検索">
+    <meta property="og:description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://soccer-practice-search.fly.dev">
     <meta property="og:image" content="https://soccer-practice-search.fly.dev/static/soccer-og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="サッカートレーニング検索サイト">
+    <meta property="og:site_name" content="少年サッカードリル">
     <meta property="og:locale" content="ja_JP">
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="サッカートレーニング検索サイト - 練習メニューを簡単検索">
-    <meta name="twitter:description" content="サッカーの練習メニューを目的、人数、レベル別に検索できるサイト。小学生から大人まで、サッカーコーチやプレイヤー向けのトレーニング動画を簡単に見つけられます。">
+    <meta name="twitter:title" content="少年サッカードリル - 練習ドリル動画を簡単検索">
+    <meta name="twitter:description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
     <meta name="twitter:image" content="https://soccer-practice-search.fly.dev/static/soccer-og-image.jpg">
     <meta name="twitter:site" content="@soccer_practice_search">
     
@@ -47,8 +47,8 @@
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "サッカートレーニング検索サイト",
-        "description": "サッカーの練習メニューを目的、人数、レベル別に検索できるサイト。小学生から大人まで、サッカーコーチやプレイヤー向けのトレーニング動画を簡単に見つけられます。",
+        "name": "少年サッカードリル",
+        "description": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。",
         "url": "https://soccer-practice-search.fly.dev",
         "potentialAction": {
             "@type": "SearchAction",
@@ -57,7 +57,7 @@
         },
         "publisher": {
             "@type": "Organization",
-            "name": "サッカートレーニング検索サイト",
+            "name": "少年サッカードリル",
             "url": "https://soccer-practice-search.fly.dev"
         },
         "inLanguage": "ja",
@@ -69,12 +69,12 @@
     {
         "@context": "https://schema.org",
         "@type": "SportsActivity",
-        "name": "サッカートレーニング",
-        "description": "サッカーの練習メニューとトレーニング動画の検索サービス",
+        "name": "少年サッカーのドリル",
+        "description": "少年サッカー向けの練習ドリル動画の検索と整理",
         "sport": "サッカー",
         "audience": {
             "@type": "Audience",
-            "audienceType": "サッカーコーチ、プレイヤー、小学生から大人まで"
+            "audienceType": "少年サッカーのコーチ、指導者、プレイヤー"
         },
         "offers": {
             "@type": "Offer",
@@ -168,7 +168,7 @@
                         <!-- メインコンテンツ -->
                         <section class="main-content" aria-label="検索結果">
                             <div id="search-prompt" class="search-prompt">
-                                キーワードを入力して検索ボタンを押すか、Enterキーでサッカーのトレーニングを検索できます。</div>
+                                キーワードを入力して検索ボタンを押すか、Enterキーで少年サッカーの練習ドリルを検索できます。</div>
                             <div id="loading-indicator" class="loading-indicator hidden" aria-live="polite" aria-label="検索中">
                                 <div class="spinner"></div>
                                 <p>検索中...</p>
@@ -195,7 +195,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 サッカートレーニング検索サイト. All rights reserved.</p>
+        <p>&copy; 2026 少年サッカードリル. All rights reserved.</p>
         <p><a href="/board">ボード</a> | <a href="/favorites">お気に入り</a> | <a href="/practice-notes">メモ帳</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
     </footer>
 

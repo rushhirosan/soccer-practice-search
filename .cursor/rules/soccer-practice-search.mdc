@@ -1,12 +1,12 @@
 ---
-description: Soccer Practice Search — product scope, stack, architecture, and development conventions
+description: 少年サッカードリル (soccer-practice-search) — product scope, stack, architecture, and development conventions
 alwaysApply: true
 ---
 
-# Project: Soccer Practice Search
+# Project: 少年サッカードリル (`soccer-practice-search`)
 
 ## Project Overview
-- Web app to search soccer training videos (YouTube) by keyword, purpose, player count, level, and channel
+- Web app (Japanese product name: **少年サッカードリル**) to search youth soccer drill videos (YouTube) by keyword, purpose, player count, level, and channel
 - Japanese-first UX; mobile-friendly layout matters
 - Data lives in PostgreSQL (production); local dev uses `utilities/.env.local` when present
 - Deployed on Fly.io (`soccer-practice-search`)

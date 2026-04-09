@@ -225,6 +225,57 @@
             font-size: 0.95rem;
         }
 
+        .match-games-block {
+            grid-column: 1 / -1;
+        }
+        .match-games-block > .match-games-heading {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .match-games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+        .match-game-row {
+            padding: 0.85rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+        }
+        .match-game-row__label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .match-game-row__grid {
+            display: grid;
+            gap: 0.6rem;
+            min-width: 0;
+        }
+        .match-game-row__actions {
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .match-game-row__remove {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--danger-color, #b91c1c);
+            background: transparent;
+            color: var(--danger-color, #b91c1c);
+            cursor: pointer;
+        }
+        .btn-add-match-game {
+            width: 100%;
+            max-width: 16rem;
+        }
+
         /* モバイル最適化（タップ領域・余白・崩れ回避） */
         @media (max-width: 768px) {
             .practice-notes-page {
@@ -355,22 +406,11 @@
                             </span>
                         </label>
 
-                        <label class="form-field">
-                            <span>勝敗/スコア</span>
-                            <span class="form-field-control">
-                                <input type="text" id="match-score" placeholder="例: 2-1（勝ち）" autocomplete="off" />
-                            </span>
-                        </label>
-
-                        <label class="form-field">
-                            <span>得点者・失点者 / 主な出来事</span>
-                            <span class="form-field-control">
-                                <textarea id="match-events" class="memo-textarea" placeholder="例：
-得点者: ...
-失点者: ...
-主な出来事: ..."></textarea>
-                            </span>
-                        </label>
+                        <div class="match-games-block form-field">
+                            <span class="match-games-heading">各試合（同じ日・同じ相手で複数試合がある場合は「試合を追加」）</span>
+                            <div id="match-games-list" class="match-games-list" aria-label="試合一覧入力"></div>
+                            <button type="button" id="btn-add-match-game" class="btn-secondary btn-add-match-game no-print">試合を追加</button>
+                        </div>
                     </div>
 
                     <div class="action-buttons no-print">
@@ -423,6 +463,6 @@
 
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=7"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=5"></script>
+    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=6"></script>
 </body>
 </html>

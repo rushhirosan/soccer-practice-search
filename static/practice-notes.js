@@ -60,6 +60,48 @@
       return dates.map((date) => ({ date, items: map.get(date) || [] }));
     }
 
+    /** 旧形式（score/events のみ）と新形式（games 配列）を統一 */
+    function normalizeMatchGames(entry) {
+      if (!entry || typeof entry !== 'object') return [];
+      if (Array.isArray(entry.games) && entry.games.length > 0) {
+        return entry.games.map((g, i) => ({
+          n: typeof g.n === 'number' ? g.n : i + 1,
+          score: (g.score != null ? String(g.score) : '').trim(),
+          events: (g.events != null ? String(g.events) : '').trim()
+        }));
+      }
+      const score = entry.score != null ? String(entry.score).trim() : '';
+      const events = entry.events != null ? String(entry.events).trim() : '';
+      if (score || events) {
+        return [{ n: 1, score, events }];
+      }
+      return [];
+    }
+
+    function matchRecordTitleText(entry) {
+      const opponent = entry.opponent ? `vs ${entry.opponent}` : 'vs（未設定）';
+      const games = normalizeMatchGames(entry);
+      if (games.length === 0) return opponent;
+      if (games.length === 1 && games[0].score) {
+        return `${opponent} / ${games[0].score}`;
+      }
+      return `${opponent}（${games.length}試合）`;
+    }
+
+    function matchRecordSummaryText(entry) {
+      const games = normalizeMatchGames(entry);
+      if (games.length === 0) return '';
+      return games
+        .map((g, i) => {
+          const n = g.n || i + 1;
+          const parts = [`${n}試合目`];
+          if (g.score) parts.push(g.score);
+          if (g.events) parts.push(g.events);
+          return parts.join(' ');
+        })
+        .join('\n');
+    }
+
     function renderSavedRecords() {
       const container = document.getElementById('saved-records-container');
       const empty = document.getElementById('empty-records');
@@ -113,9 +155,7 @@
           const title = document.createElement('div');
           title.className = 'record-title';
           if (entry.type === 'match') {
-            const opponent = entry.opponent ? `vs ${entry.opponent}` : 'vs（未設定）';
-            const score = entry.score ? ` / ${entry.score}` : '';
-            title.textContent = `${opponent}${score}`;
+            title.textContent = matchRecordTitleText(entry);
           } else {
             title.textContent = '今日の気づき';
           }
@@ -139,7 +179,7 @@
           const summary = document.createElement('div');
           summary.className = 'record-summary';
           if (entry.type === 'match') {
-            summary.textContent = entry.events || '';
+            summary.textContent = matchRecordSummaryText(entry);
           } else {
             summary.textContent = entry.content || '';
           }
@@ -188,14 +228,75 @@
 
       const matchDate = document.getElementById('match-date');
       const matchOpponent = document.getElementById('match-opponent');
-      const matchScore = document.getElementById('match-score');
-      const matchEvents = document.getElementById('match-events');
+      const matchGamesList = document.getElementById('match-games-list');
+      const btnAddMatchGame = document.getElementById('btn-add-match-game');
 
       const dailyDate = document.getElementById('daily-date');
       const dailyContent = document.getElementById('daily-content');
 
       if (matchDate) matchDate.value = toTodayISO();
       if (dailyDate) dailyDate.value = toTodayISO();
+
+      function refreshMatchGameRowLabels() {
+        if (!matchGamesList) return;
+        matchGamesList.querySelectorAll('.match-game-row').forEach((row, i) => {
+          const lab = row.querySelector('.match-game-row__label');
+          if (lab) lab.textContent = `${i + 1}試合目`;
+          const btn = row.querySelector('.match-game-row__remove');
+          if (btn) btn.style.display = matchGamesList.querySelectorAll('.match-game-row').length > 1 ? 'inline-block' : 'none';
+        });
+      }
+
+      function createMatchGameRow() {
+        const row = document.createElement('div');
+        row.className = 'match-game-row';
+        row.innerHTML = `
+          <div class="match-game-row__label"></div>
+          <div class="match-game-row__grid">
+            <label class="form-field" style="margin:0">
+              <span>スコア</span>
+              <span class="form-field-control">
+                <input type="text" class="match-game-score" placeholder="例: 1-0、2-1（勝ち）" autocomplete="off" />
+              </span>
+            </label>
+            <label class="form-field" style="margin:0">
+              <span>得点者・失点 / 出来事</span>
+              <span class="form-field-control">
+                <textarea class="match-game-events memo-textarea" rows="3" placeholder="例：得点者 YY、失点の経緯…"></textarea>
+              </span>
+            </label>
+          </div>
+          <div class="match-game-row__actions">
+            <button type="button" class="match-game-row__remove no-print" aria-label="この試合行を削除">この試合を削除</button>
+          </div>`;
+        const removeBtn = row.querySelector('.match-game-row__remove');
+        removeBtn.addEventListener('click', () => {
+          if (!matchGamesList || matchGamesList.querySelectorAll('.match-game-row').length <= 1) return;
+          row.remove();
+          refreshMatchGameRowLabels();
+        });
+        return row;
+      }
+
+      function resetMatchGameRows() {
+        if (!matchGamesList) return;
+        matchGamesList.innerHTML = '';
+        matchGamesList.appendChild(createMatchGameRow());
+        refreshMatchGameRowLabels();
+      }
+
+      if (matchGamesList && !matchGamesList.querySelector('.match-game-row')) {
+        resetMatchGameRows();
+      } else if (matchGamesList) {
+        refreshMatchGameRowLabels();
+      }
+
+      if (btnAddMatchGame && matchGamesList) {
+        btnAddMatchGame.addEventListener('click', () => {
+          matchGamesList.appendChild(createMatchGameRow());
+          refreshMatchGameRowLabels();
+        });
+      }
 
       const btnSaveMatch = document.getElementById('btn-save-match');
       const btnClearMatch = document.getElementById('btn-clear-match');
@@ -204,21 +305,29 @@
         btnSaveMatch.addEventListener('click', () => {
           const date = (matchDate && matchDate.value) ? matchDate.value : '';
           const opponent = (matchOpponent && matchOpponent.value ? matchOpponent.value : '').trim();
-          const score = (matchScore && matchScore.value ? matchScore.value : '').trim();
-          const events = (matchEvents && matchEvents.value ? matchEvents.value : '').trim();
+          const games = [];
+          if (matchGamesList) {
+            matchGamesList.querySelectorAll('.match-game-row').forEach((row) => {
+              const score = (row.querySelector('.match-game-score')?.value || '').trim();
+              const events = (row.querySelector('.match-game-events')?.value || '').trim();
+              if (score && events) games.push({ score, events });
+            });
+          }
 
-          if (!date || !opponent || !score || !events) {
-            alert('日付・対戦相手・勝敗/スコア・出来事を入力してください。');
+          if (!date || !opponent) {
+            alert('日付と対戦相手を入力してください。');
+            return;
+          }
+          if (games.length === 0) {
+            alert('少なくとも1試合ぶん、スコアと得点者・出来事の両方を入力してください。');
             return;
           }
 
           const entry = {
             id: 'match-' + Date.now(),
-            type: 'match',
             date,
             opponent,
-            score,
-            events,
+            games: games.map((g, i) => ({ n: i + 1, score: g.score, events: g.events })),
             createdAt: new Date().toISOString()
           };
 
@@ -227,9 +336,8 @@
           writeList(SAVED_MATCH_RESULTS_KEY, list);
 
           if (matchOpponent) matchOpponent.value = '';
-          if (matchScore) matchScore.value = '';
-          if (matchEvents) matchEvents.value = '';
           if (matchDate) matchDate.value = toTodayISO();
+          resetMatchGameRows();
 
           renderSavedRecords();
         });
@@ -238,9 +346,8 @@
       if (btnClearMatch) {
         btnClearMatch.addEventListener('click', () => {
           if (matchOpponent) matchOpponent.value = '';
-          if (matchScore) matchScore.value = '';
-          if (matchEvents) matchEvents.value = '';
           if (matchDate) matchDate.value = toTodayISO();
+          resetMatchGameRows();
         });
       }
 

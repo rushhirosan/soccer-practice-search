@@ -57,6 +57,119 @@
   min-height: 1.2em;
 }
 
+/* メンバー仮登録・控え */
+.roster-group .roster-add-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.roster-group .roster-add-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+}
+
+.roster-group .roster-add-btn {
+  flex-shrink: 0;
+  width: auto;
+  min-width: 3rem;
+  padding: 0.45rem 0.5rem;
+}
+
+.roster-group #roster-hint {
+  margin-top: 0.35rem;
+}
+
+.roster-section-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin: 0.5rem 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.roster-bench-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 11rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.roster-bench-empty {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+  padding: 0.35rem 0;
+  line-height: 1.35;
+}
+
+.roster-bench-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.roster-bench-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.45rem;
+  font-size: 0.78rem;
+  text-align: left;
+  color: var(--text-color, #1e293b);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--background-color, #f8fafc);
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.roster-bench-pick:hover {
+  border-color: var(--primary-color, #16a34a);
+  background: white;
+}
+
+.roster-bench-pick.selected {
+  background: rgba(22, 163, 74, 0.14);
+  border-color: var(--primary-color, #16a34a);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+  font-weight: 600;
+}
+
+.roster-bench-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roster-bench-delete {
+  flex-shrink: 0;
+  width: 2rem;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.roster-bench-delete:hover {
+  color: var(--danger-color, #dc2626);
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
 .tool-btn {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;

@@ -51,6 +51,10 @@
   /** soccerUserDataSynced で localStorage の生文字列と比較し、同じなら再 setData しない */
   let lastAppliedBoardStorageRaw;
 
+  /** メンバー仮登録（自チーム）。ピッチ配置時は players[].rosterId / label で紐づけ */
+  let roster = [];
+  let selectedRosterId = null;
+
   // Konva のステージ（キャンバス）を画面幅に合わせてスケールする（モバイル横溢れ防止）
   let stageFitScale = 1;
   let stageFitRafId = null;
@@ -80,6 +84,90 @@
   function scheduleFitStageToCanvasSection() {
     if (stageFitRafId) cancelAnimationFrame(stageFitRafId);
     stageFitRafId = requestAnimationFrame(fitStageToCanvasSection);
+  }
+
+  function newRosterId() {
+    return 'r-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function getUsedRosterIdsInCurrentScene() {
+    const scene = scenes[currentSceneIndex];
+    const used = new Set();
+    (scene?.players || []).forEach(p => {
+      if (p.rosterId) used.add(p.rosterId);
+    });
+    return used;
+  }
+
+  function isRosterIdUsedInAnyScene(rid) {
+    if (!rid) return false;
+    return scenes.some(s => (s.players || []).some(p => p.rosterId === rid));
+  }
+
+  function renderRosterPanel() {
+    const listEl = document.getElementById('roster-bench-list');
+    const hintEl = document.getElementById('roster-hint');
+    if (!listEl) return;
+
+    const used = getUsedRosterIdsInCurrentScene();
+    const bench = roster.filter(r => !used.has(r.id));
+
+    if (bench.length === 0) {
+      listEl.innerHTML = '<p class="roster-bench-empty">控えにいるメンバーはいません（未登録か、全員ピッチ上です）</p>';
+    } else {
+      listEl.innerHTML = bench.map(r => {
+        const sel = r.id === selectedRosterId ? ' selected' : '';
+        const eid = escapeHtml(r.id);
+        const ename = escapeHtml(r.name);
+        return (
+          '<div class="roster-bench-row" role="listitem" data-roster-id="' + eid + '">' +
+          '<button type="button" class="roster-bench-pick' + sel + '" data-roster-id="' + eid + '" title="選択して👤で配置">' +
+          '<span class="roster-bench-name">' + ename + '</span></button>' +
+          '<button type="button" class="roster-bench-delete" data-roster-id="' + eid + '" title="リストから削除" aria-label="削除">×</button>' +
+          '</div>'
+        );
+      }).join('');
+    }
+
+    if (hintEl) {
+      if (selectedRosterId) {
+        const entry = roster.find(x => x.id === selectedRosterId);
+        hintEl.textContent = entry
+          ? '「' + entry.name + '」を配置: 👤でピッチをタップ（Escで解除）'
+          : '控えから選び、👤でピッチをタップして配置';
+      } else {
+        hintEl.textContent = '控えから選び、👤でピッチをタップして配置';
+      }
+    }
+  }
+
+  function addRosterFromInput() {
+    const input = document.getElementById('roster-name-input');
+    if (!input) return;
+    const name = String(input.value || '').trim().slice(0, 24);
+    if (!name) return;
+    roster.push({ id: newRosterId(), name });
+    input.value = '';
+    renderRosterPanel();
+  }
+
+  function getPlayerCircleText(p, index, r) {
+    const raw = (p.label != null && String(p.label).trim() !== '') ? String(p.label).trim() : '';
+    if (raw) {
+      const chars = Array.from(raw);
+      const text = chars.slice(0, 3).join('');
+      const fontSize = text.length >= 3 ? Math.max(9, r * 0.5) : Math.max(10, r * 0.72);
+      return { text, fontSize };
+    }
+    return { text: String(p.number ?? index + 1), fontSize: r * 0.9 };
   }
 
   function getCurrentTool() {
@@ -308,6 +396,9 @@
   function init(initialStorageRaw) {
     if (!document.getElementById('tactical-container')) return;
 
+    roster = [];
+    selectedRosterId = null;
+
     scenes = [createEmptyScene()];
     scenes[0].name = '1';
     currentSceneIndex = 0;
@@ -375,6 +466,7 @@
     setupEventListeners();
     setupKeyboardShortcuts();
     renderSequenceList();
+    renderRosterPanel();
     const hint = document.getElementById('tool-hint');
     if (hint) hint.textContent = 'ドラッグで移動';
     const canvasSection = document.getElementById('canvas-section');
@@ -537,8 +629,12 @@
     group.add(new Konva.Circle({
       radius: r, fill: p.color || PLAYER_COLORS.home, stroke: sel ? '#3b82f6' : '#1e293b', strokeWidth: sel ? 4 : 2,
     }));
+    const circleLabel = getPlayerCircleText(p, index, r);
     group.add(new Konva.Text({
-      text: String(p.number ?? index + 1), fontSize: r * 0.9, fontFamily: 'Arial', fill: 'white',
+      text: circleLabel.text,
+      fontSize: circleLabel.fontSize,
+      fontFamily: 'Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif',
+      fill: 'white',
       align: 'center', verticalAlign: 'middle', width: r * 2, height: r * 2, x: -r, y: -r, listening: false,
     }));
     group.on('dragstart', () => { group._startX = group.x(); group._startY = group.y(); });
@@ -793,6 +889,7 @@
     playersLayer.batchDraw();
     drawLayer.batchDraw();
     renderSelectionBox();
+    renderRosterPanel();
   }
 
   function applyFormation(key) {
@@ -830,7 +927,17 @@
     const s = scenes[currentSceneIndex];
     if (!s) return;
     pushUndo();
-    s.players.push({ x, y, number: (s.players?.length || 0) + 1, color: PLAYER_COLORS.home });
+    const nextNum = (s.players?.length || 0) + 1;
+    const base = { x, y, number: nextNum, color: PLAYER_COLORS.home };
+    if (selectedRosterId) {
+      const entry = roster.find(r => r.id === selectedRosterId);
+      if (entry) {
+        base.label = entry.name;
+        base.rosterId = entry.id;
+      }
+      selectedRosterId = null;
+    }
+    s.players.push(base);
     renderCurrentScene();
     renderSequenceList();
   }
@@ -1248,6 +1355,38 @@
     });
     document.getElementById('file-input')?.addEventListener('change', loadFromFile);
 
+    document.getElementById('roster-add-btn')?.addEventListener('click', () => addRosterFromInput());
+    document.getElementById('roster-name-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addRosterFromInput();
+      }
+    });
+    document.getElementById('roster-bench-list')?.addEventListener('click', (e) => {
+      const del = e.target.closest('.roster-bench-delete');
+      if (del) {
+        e.preventDefault();
+        const rid = del.dataset.rosterId;
+        if (!rid) return;
+        if (isRosterIdUsedInAnyScene(rid)) {
+          alert('このメンバーはピッチ上にいます。先にコマを削除するか、別の場面でピッチから外れていることを確認してからリストから削除してください。');
+          return;
+        }
+        roster = roster.filter(r => r.id !== rid);
+        if (selectedRosterId === rid) selectedRosterId = null;
+        renderRosterPanel();
+        return;
+      }
+      const pick = e.target.closest('.roster-bench-pick');
+      if (pick) {
+        const rid = pick.dataset.rosterId;
+        if (!rid) return;
+        selectedRosterId = selectedRosterId === rid ? null : rid;
+        renderRosterPanel();
+        if (selectedRosterId) document.querySelector('.tool-btn[data-tool="player"]')?.click();
+      }
+    });
+
     document.getElementById('btn-play')?.addEventListener('click', () => {
       isPlaying ? pauseAnimation() : playAnimation();
     });
@@ -1256,7 +1395,11 @@
 
   function setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { clearBoardSelection(); return; }
+      if (e.key === 'Escape') {
+        selectedRosterId = null;
+        clearBoardSelection();
+        return;
+      }
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
         else if (e.key === 'y') { e.preventDefault(); redo(); }
@@ -1374,6 +1517,7 @@
       boardType,
       tacticalFormation,
       practiceFormation,
+      roster: roster.map(r => ({ id: r.id, name: r.name })),
       scenes: scenes.map(s => ({ ...s, players: [...(s.players || [])], opponents: [...(s.opponents || [])], balls: [...(s.balls || [])], arrows: [...(s.arrows || [])], lines: [...(s.lines || [])] })),
       currentSceneIndex,
     };
@@ -1384,6 +1528,11 @@
     boardType = data.boardType === 'practice' ? 'practice' : 'tactical';
     tacticalFormation = data.tacticalFormation || DEFAULT_TACTICAL_FORMATION;
     practiceFormation = data.practiceFormation || '';
+    roster = (Array.isArray(data.roster) ? data.roster : []).map(e => ({
+      id: (e.id != null && String(e.id).trim()) ? String(e.id).trim() : newRosterId(),
+      name: (e.name != null ? String(e.name) : '').trim().slice(0, 24),
+    })).filter(e => e.name);
+    selectedRosterId = null;
     clearBoardSelection();
     scenes = (data.scenes || [createEmptyScene()]).map(s => ({
       id: s.id || 's-' + Date.now(), name: s.name || '', players: s.players || [], opponents: s.opponents || [], balls: s.balls || [], arrows: s.arrows || [], lines: s.lines || [],

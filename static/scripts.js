@@ -97,7 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             populateSelect("players-input", "players");
         }, 100);
 
-        setupRealtimeSearch();
         setupSearchHistory();
 
         setTimeout(() => {
@@ -847,61 +846,6 @@ async function submitFeedback(formData) {
         // 送信完了後にボタンを再有効化
         submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
-    });
-}
-
-// リアルタイム検索（debounce 400ms、オプションでオフ可能）
-const REALTIME_SEARCH_KEY = 'soccer_realtime_search';
-
-function isRealtimeSearchEnabled() {
-    try {
-        const stored = localStorage.getItem(REALTIME_SEARCH_KEY);
-        return stored === 'true'; // 明示的に有効にしたときだけON
-    } catch {
-        return false;
-    }
-}
-
-function setupRealtimeSearch() {
-    const searchInput = document.getElementById('search-input');
-    const toggleEl = document.getElementById('realtime-search-toggle');
-    if (!searchInput) return;
-
-    if (toggleEl) {
-        toggleEl.checked = isRealtimeSearchEnabled();
-        toggleEl.addEventListener('change', () => {
-            try {
-                localStorage.setItem(REALTIME_SEARCH_KEY, String(toggleEl.checked));
-                if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
-            } catch (e) {
-                console.warn('設定の保存に失敗:', e);
-            }
-        });
-    }
-    
-    let debounceTimer = null;
-    const DEBOUNCE_MS = 400;
-    
-    searchInput.addEventListener('input', () => {
-        if (toggleEl && !toggleEl.checked) return;
-        clearTimeout(debounceTimer);
-        const query = (searchInput.value || '').trim();
-        if (query.length === 0) {
-            const searchPrompt = document.querySelector('.search-prompt');
-            const cardContainer = document.querySelector('.card-container');
-            if (searchPrompt && cardContainer) {
-                cardContainer.innerHTML = '';
-                searchPrompt.style.display = 'block';
-                searchPrompt.textContent = 
-                    'キーワードを入力して検索ボタンを押すか、Enterキーでサッカーのトレーニングを検索できます。';
-            }
-            hideLoading();
-            hideError();
-            return;
-        }
-        debounceTimer = setTimeout(() => {
-            search(true);
-        }, DEBOUNCE_MS);
     });
 }
 

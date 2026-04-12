@@ -563,22 +563,6 @@ main {
   transform: translateY(0);
 }
 
-.search-option-realtime {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  user-select: none;
-}
-
-.search-option-realtime input[type="checkbox"] {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--primary-color);
-}
-
 /* 詳細条件 - 折りたたみ */
 .search-details {
   margin-top: 0.75rem;

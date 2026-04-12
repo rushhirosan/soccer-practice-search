@@ -21,7 +21,6 @@
     'soccer_saved_match_results',
     'soccer_saved_daily_notes',
     'soccer_tactical_board',
-    'soccer_realtime_search',
     'soccer_search_history',
     'soccer_pending_board_for_plan'
   ];

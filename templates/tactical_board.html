@@ -9,7 +9,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=54">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=10">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=12">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -31,14 +31,14 @@
             </div>
 
             <div class="tool-group roster-group">
-                <h3>メンバー（自チーム）</h3>
+                <h3>メンバー</h3>
                 <div class="roster-add-row">
-                    <input type="text" id="roster-name-input" maxlength="24" placeholder="仮名（例: GK・8番）" autocomplete="off" aria-label="メンバー仮名" enterkeyhint="done">
+                    <input type="text" id="roster-name-input" maxlength="24" placeholder="名前・番号など" title="ピッチ上のコマに表示する仮の呼び名（例: GK、8番）" autocomplete="off" aria-label="メンバー表示名" enterkeyhint="done">
                     <button type="button" id="roster-add-btn" class="action-btn small roster-add-btn">追加</button>
                 </div>
-                <p class="tool-hint" id="roster-hint">控えから選び、👤でピッチをタップして配置</p>
-                <div class="roster-section-label" id="roster-section-label">控え・交代候補</div>
-                <div id="roster-bench-list" class="roster-bench-list" role="list" aria-label="控えメンバー"></div>
+                <p class="tool-hint" id="roster-hint">一覧から選び、👤でピッチをタップして配置</p>
+                <div class="roster-section-label" id="roster-section-label">出場メンバー</div>
+                <div id="roster-bench-list" class="roster-bench-list" role="list" aria-label="出場メンバー"></div>
             </div>
 
             <div class="tool-group">
@@ -143,6 +143,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=7"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=14"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=16"></script>
 </body>
 </html>

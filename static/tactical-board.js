@@ -51,7 +51,7 @@
   /** soccerUserDataSynced で localStorage の生文字列と比較し、同じなら再 setData しない */
   let lastAppliedBoardStorageRaw;
 
-  /** メンバー仮登録（自チーム）。ピッチ配置時は players[].rosterId / label で紐づけ */
+  /** メンバー仮登録。ピッチ配置時は players[].rosterId / label で紐づけ */
   let roster = [];
   let selectedRosterId = null;
 
@@ -121,7 +121,7 @@
     const bench = roster.filter(r => !used.has(r.id));
 
     if (bench.length === 0) {
-      listEl.innerHTML = '<p class="roster-bench-empty">控えにいるメンバーはいません（未登録か、全員ピッチ上です）</p>';
+      listEl.innerHTML = '<p class="roster-bench-empty">出場メンバーはいません（未登録か、全員ピッチ上です）</p>';
     } else {
       listEl.innerHTML = bench.map(r => {
         const sel = r.id === selectedRosterId ? ' selected' : '';
@@ -142,9 +142,9 @@
         const entry = roster.find(x => x.id === selectedRosterId);
         hintEl.textContent = entry
           ? '「' + entry.name + '」を配置: 👤でピッチをタップ（Escで解除）'
-          : '控えから選び、👤でピッチをタップして配置';
+          : '一覧から選び、👤でピッチをタップして配置';
       } else {
-        hintEl.textContent = '控えから選び、👤でピッチをタップして配置';
+        hintEl.textContent = '一覧から選び、👤でピッチをタップして配置';
       }
     }
   }
@@ -1165,9 +1165,8 @@
       if (!pos) return;
 
       const tool = getCurrentTool();
-      if (tool === 'player') addPlayerAt(pos.x, pos.y);
-      else if (tool === 'ball') addBallAt(pos.x, pos.y);
-      else if (tool === 'arrow' || tool === 'line') {
+      // 選手・ボールの配置は click/tap のみ（mousedown と併用すると同一クリックで2重追加になる）
+      if (tool === 'arrow' || tool === 'line') {
         drawStart = { x: pos.x, y: pos.y };
       } else if (tool === 'select') {
         marqueeStart = { x: pos.x, y: pos.y };

@@ -1380,12 +1380,6 @@ def sitemap():
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://soccer-practice-search.fly.dev/#search</loc>
-        <lastmod>{current_time}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
         <loc>https://soccer-practice-search.fly.dev/board</loc>
         <lastmod>{current_time}</lastmod>
         <changefreq>weekly</changefreq>

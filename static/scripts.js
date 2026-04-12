@@ -99,6 +99,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         setupSearchHistory();
 
+        // URL の ?q= で共有・検索（Search Console / JSON-LD SearchAction と一致）
+        try {
+            const q = new URLSearchParams(window.location.search).get('q');
+            if (q && typeof q === 'string') {
+                const trimmed = q.trim().substring(0, 200);
+                if (trimmed) {
+                    searchInput.value = trimmed;
+                    search();
+                }
+            }
+        } catch (_) { /* ignore */ }
+
         setTimeout(() => {
             console.log("Fallback: Re-populating dropdowns...");
             populateChannelSelect();

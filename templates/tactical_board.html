@@ -97,6 +97,19 @@
                     </div>
                 </div>
             </div>
+
+            <div class="tool-group saved-board-group">
+                <h3>定番ボード</h3>
+                <div class="saved-board-add-row">
+                    <input type="text" id="saved-board-name-input" maxlength="32" placeholder="例: 3対2の崩し" aria-label="定番ボード名" autocomplete="off" enterkeyhint="done">
+                    <button type="button" id="saved-board-save-btn" class="action-btn small">保存</button>
+                </div>
+                <div class="saved-board-actions">
+                    <button type="button" id="saved-board-overwrite-btn" class="action-btn small" title="選択中の定番ボードを現在の配置で更新">選択を上書き</button>
+                </div>
+                <p class="tool-hint" id="saved-board-hint">保存するとログイン中アカウントに同期されます</p>
+                <div id="saved-board-list" class="saved-board-list" role="list" aria-label="定番ボード一覧"></div>
+            </div>
         </aside>
 
         <section class="canvas-section" id="canvas-section">
@@ -141,8 +154,8 @@
     <input type="file" id="file-input" accept=".json" style="display: none">
 
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=7"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=16"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=17"></script>
 </body>
 </html>

@@ -174,6 +174,125 @@
   border-color: rgba(220, 38, 38, 0.35);
 }
 
+/* 定番ボード */
+.saved-board-group .saved-board-add-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.saved-board-group .saved-board-add-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  text-overflow: ellipsis;
+}
+
+.saved-board-group .saved-board-actions {
+  margin-top: 0.35rem;
+}
+
+.saved-board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: min(12rem, 40vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.saved-board-empty {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+  padding: 0.3rem 0;
+  line-height: 1.35;
+}
+
+.saved-board-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.saved-board-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.38rem 0.45rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--background-color, #f8fafc);
+  color: var(--text-color, #1e293b);
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.saved-board-pick:hover {
+  border-color: var(--primary-color, #16a34a);
+  background: white;
+}
+
+.saved-board-pick.selected {
+  background: rgba(22, 163, 74, 0.14);
+  border-color: var(--primary-color, #16a34a);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.saved-board-name {
+  width: 100%;
+  font-size: 0.78rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-board-date {
+  width: 100%;
+  font-size: 0.68rem;
+  color: var(--text-secondary, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-board-load,
+.saved-board-delete {
+  flex-shrink: 0;
+  width: 2.25rem;
+  padding: 0;
+  font-size: 0.74rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+  background: white;
+  color: var(--text-color, #1e293b);
+  cursor: pointer;
+  transition: var(--transition, all 0.2s);
+}
+
+.saved-board-load:hover {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: var(--primary-color, #16a34a);
+}
+
+.saved-board-delete {
+  color: var(--text-muted, #94a3b8);
+}
+
+.saved-board-delete:hover {
+  color: var(--danger-color, #dc2626);
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
 .tool-btn {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;

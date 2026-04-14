@@ -20,6 +20,7 @@
     'soccer_saved_practice_plans',
     'soccer_saved_match_results',
     'soccer_saved_daily_notes',
+    'soccer_saved_boards',
     'soccer_tactical_board',
     'soccer_search_history',
     'soccer_pending_board_for_plan'

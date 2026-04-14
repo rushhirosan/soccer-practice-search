@@ -7,6 +7,7 @@
   'use strict';
 
   const STORAGE_KEY = 'soccer_tactical_board';
+  const SAVED_BOARDS_KEY = 'soccer_saved_boards';
   const PITCH_COLOR = '#2d5016';
   const LINE_COLOR = '#ffffff';
   const PLAYER_COLORS = { home: '#3b82f6', away: '#ef4444' };
@@ -54,6 +55,8 @@
   /** メンバー仮登録。ピッチ配置時は players[].rosterId / label で紐づけ */
   let roster = [];
   let selectedRosterId = null;
+  let savedBoards = [];
+  let selectedSavedBoardId = null;
 
   // Konva のステージ（キャンバス）を画面幅に合わせてスケールする（モバイル横溢れ防止）
   let stageFitScale = 1;
@@ -90,12 +93,201 @@
     return 'r-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
   }
 
+  function newSavedBoardId() {
+    return 'sb-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function formatSavedBoardTimestamp(isoString) {
+    try {
+      const dt = new Date(isoString);
+      if (Number.isNaN(dt.getTime())) return '日時不明';
+      return dt.toLocaleString('ja-JP', {
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (_) {
+      return '日時不明';
+    }
+  }
+
+  function readSavedBoardsFromStorage() {
+    try {
+      const raw = localStorage.getItem(SAVED_BOARDS_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map(item => {
+          const name = String(item?.name || '').trim().slice(0, 32);
+          const data = item?.data;
+          if (!name || !data || !Array.isArray(data.scenes) || data.scenes.length === 0) return null;
+          return {
+            id: String(item.id || newSavedBoardId()),
+            name,
+            updatedAt: String(item.updatedAt || ''),
+            data,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function persistCurrentBoardSilently(scheduleSync) {
+    try {
+      const raw = JSON.stringify(getData());
+      localStorage.setItem(STORAGE_KEY, raw);
+      lastAppliedBoardStorageRaw = raw;
+      if (scheduleSync && typeof window.soccerScheduleUserDataPush === 'function') {
+        window.soccerScheduleUserDataPush();
+      }
+      return true;
+    } catch (e) {
+      console.warn('persistCurrentBoardSilently', e);
+      return false;
+    }
+  }
+
+  function writeSavedBoardsToStorage(scheduleSync) {
+    try {
+      localStorage.setItem(SAVED_BOARDS_KEY, JSON.stringify(savedBoards));
+      if (scheduleSync && typeof window.soccerScheduleUserDataPush === 'function') {
+        window.soccerScheduleUserDataPush();
+      }
+      return true;
+    } catch (e) {
+      alert('定番ボードの保存に失敗しました: ' + e.message);
+      return false;
+    }
+  }
+
+  function cloneBoardData(data) {
+    try {
+      return JSON.parse(JSON.stringify(data));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function renderSavedBoardsPanel() {
+    const listEl = document.getElementById('saved-board-list');
+    if (!listEl) return;
+    if (!savedBoards.length) {
+      listEl.innerHTML = '<p class="saved-board-empty">まだ定番ボードはありません</p>';
+      return;
+    }
+    listEl.innerHTML = savedBoards.map(item => {
+      const selected = item.id === selectedSavedBoardId ? ' selected' : '';
+      const id = escapeHtml(item.id);
+      return (
+        '<div class="saved-board-row" role="listitem" data-saved-board-id="' + id + '">' +
+        '<button type="button" class="saved-board-pick' + selected + '" data-saved-board-id="' + id + '" title="上書き対象として選択">' +
+        '<span class="saved-board-name">' + escapeHtml(item.name) + '</span>' +
+        '<span class="saved-board-date">' + escapeHtml(formatSavedBoardTimestamp(item.updatedAt)) + '</span>' +
+        '</button>' +
+        '<button type="button" class="saved-board-load" data-saved-board-id="' + id + '" title="この定番ボードを読込">読込</button>' +
+        '<button type="button" class="saved-board-delete" data-saved-board-id="' + id + '" title="この定番ボードを削除" aria-label="削除">×</button>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function saveCurrentAsSavedBoard() {
+    const input = document.getElementById('saved-board-name-input');
+    if (!input) return;
+    const name = String(input.value || '').trim().slice(0, 32);
+    if (!name) {
+      alert('定番ボード名を入力してください');
+      return;
+    }
+    const entry = {
+      id: newSavedBoardId(),
+      name,
+      updatedAt: new Date().toISOString(),
+      data: cloneBoardData(getData()),
+    };
+    if (!entry.data) {
+      alert('定番ボードの保存に失敗しました');
+      return;
+    }
+    savedBoards = [entry, ...savedBoards].slice(0, 60);
+    selectedSavedBoardId = entry.id;
+    input.value = '';
+    if (!writeSavedBoardsToStorage(true)) return;
+    renderSavedBoardsPanel();
+    alert('定番ボードに保存しました');
+  }
+
+  function overwriteSelectedSavedBoard() {
+    if (!selectedSavedBoardId) {
+      alert('上書きする定番ボードを一覧から選択してください');
+      return;
+    }
+    const target = savedBoards.find(item => item.id === selectedSavedBoardId);
+    if (!target) {
+      alert('選択中の定番ボードが見つかりません');
+      selectedSavedBoardId = null;
+      renderSavedBoardsPanel();
+      return;
+    }
+    if (!confirm('「' + target.name + '」を現在の配置で上書きしますか？')) return;
+    const nextData = cloneBoardData(getData());
+    if (!nextData) {
+      alert('定番ボードの上書きに失敗しました');
+      return;
+    }
+    target.data = nextData;
+    target.updatedAt = new Date().toISOString();
+    savedBoards = savedBoards
+      .filter(item => item.id !== target.id);
+    savedBoards.unshift(target);
+    if (!writeSavedBoardsToStorage(true)) return;
+    renderSavedBoardsPanel();
+    alert('定番ボードを上書きしました');
+  }
+
+  function loadSavedBoardById(id) {
+    const target = savedBoards.find(item => item.id === id);
+    if (!target) {
+      alert('定番ボードが見つかりません');
+      return;
+    }
+    if (!target?.data?.scenes?.length) {
+      alert('この定番ボードの内容が壊れているため読込できません');
+      return;
+    }
+    const loaded = cloneBoardData(target.data);
+    if (!loaded) {
+      alert('この定番ボードは読込できません');
+      return;
+    }
+    setData(loaded);
+    selectedSavedBoardId = target.id;
+    renderSavedBoardsPanel();
+    persistCurrentBoardSilently(true);
+    alert('定番ボードを読込ました');
+  }
+
+  function deleteSavedBoardById(id) {
+    const target = savedBoards.find(item => item.id === id);
+    if (!target) return;
+    if (!confirm('「' + target.name + '」を削除しますか？')) return;
+    savedBoards = savedBoards.filter(item => item.id !== id);
+    if (selectedSavedBoardId === id) selectedSavedBoardId = null;
+    if (!writeSavedBoardsToStorage(true)) return;
+    renderSavedBoardsPanel();
   }
 
   function getUsedRosterIdsInCurrentScene() {
@@ -398,6 +590,8 @@
 
     roster = [];
     selectedRosterId = null;
+    savedBoards = readSavedBoardsFromStorage();
+    selectedSavedBoardId = null;
 
     scenes = [createEmptyScene()];
     scenes[0].name = '1';
@@ -467,6 +661,7 @@
     setupKeyboardShortcuts();
     renderSequenceList();
     renderRosterPanel();
+    renderSavedBoardsPanel();
     const hint = document.getElementById('tool-hint');
     if (hint) hint.textContent = 'ドラッグで移動';
     const canvasSection = document.getElementById('canvas-section');
@@ -1354,6 +1549,39 @@
     });
     document.getElementById('file-input')?.addEventListener('change', loadFromFile);
 
+    document.getElementById('saved-board-save-btn')?.addEventListener('click', saveCurrentAsSavedBoard);
+    document.getElementById('saved-board-overwrite-btn')?.addEventListener('click', overwriteSelectedSavedBoard);
+    document.getElementById('saved-board-name-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveCurrentAsSavedBoard();
+      }
+    });
+    document.getElementById('saved-board-list')?.addEventListener('click', (e) => {
+      const del = e.target.closest('.saved-board-delete');
+      if (del) {
+        e.preventDefault();
+        const id = del.dataset.savedBoardId;
+        if (id) deleteSavedBoardById(id);
+        return;
+      }
+      const load = e.target.closest('.saved-board-load');
+      if (load) {
+        e.preventDefault();
+        const id = load.dataset.savedBoardId;
+        if (id) loadSavedBoardById(id);
+        return;
+      }
+      const pick = e.target.closest('.saved-board-pick');
+      if (pick) {
+        e.preventDefault();
+        const id = pick.dataset.savedBoardId;
+        if (!id) return;
+        selectedSavedBoardId = selectedSavedBoardId === id ? null : id;
+        renderSavedBoardsPanel();
+      }
+    });
+
     document.getElementById('roster-add-btn')?.addEventListener('click', () => addRosterFromInput());
     document.getElementById('roster-name-input')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -1551,7 +1779,7 @@
     renderSequenceList();
   }
 
-  function saveToStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(getData())); lastAppliedBoardStorageRaw = localStorage.getItem(STORAGE_KEY); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush(); alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
+  function saveToStorage() { try { if (!persistCurrentBoardSilently(true)) return; alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
   function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert('保存データがありません'); return; } setData(JSON.parse(r)); lastAppliedBoardStorageRaw = r; alert('読込ました'); } catch (e) { alert('読込失敗: ' + e.message); } }
   function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert('読込ました'); } catch (err) { alert('読込失敗'); } }; r.readAsText(f); e.target.value = ''; }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
@@ -1610,6 +1838,12 @@
     /* user-sync の applyPayload のたびに発火するが、内容が同じなら setData しない（ログイン直後のちらつき防止） */
     window.addEventListener('soccerUserDataSynced', () => {
       try {
+        savedBoards = readSavedBoardsFromStorage();
+        if (selectedSavedBoardId && !savedBoards.some(item => item.id === selectedSavedBoardId)) {
+          selectedSavedBoardId = null;
+        }
+        renderSavedBoardsPanel();
+
         const r = localStorage.getItem(STORAGE_KEY);
         if (!r) {
           if (lastAppliedBoardStorageRaw === undefined) return;

@@ -338,6 +338,13 @@ main {
   color: var(--text-secondary);
 }
 
+.home-screen-hint__text--secondary {
+  margin-top: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 /* タブパネル */
 .tab-panel {
     display: none;

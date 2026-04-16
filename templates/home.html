@@ -15,8 +15,8 @@
     <meta name="distribution" content="global">
     <meta name="rating" content="general">
     
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://soccer-practice-search.fly.dev">
+    <!-- Canonical URL（末尾スラッシュはサイトマップのトップURLと一致） -->
+    <link rel="canonical" href="{{ site_base_url }}/">
     
     <!-- Favicon（classic soccer ball style） -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -28,8 +28,8 @@
     <meta property="og:title" content="少年サッカードリル - 練習ドリル動画を簡単検索">
     <meta property="og:description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://soccer-practice-search.fly.dev">
-    <meta property="og:image" content="https://soccer-practice-search.fly.dev/static/soccer-og-image.jpg">
+    <meta property="og:url" content="{{ site_base_url }}/">
+    <meta property="og:image" content="{{ site_base_url }}/static/soccer-og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="少年サッカードリル">
@@ -39,7 +39,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="少年サッカードリル - 練習ドリル動画を簡単検索">
     <meta name="twitter:description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
-    <meta name="twitter:image" content="https://soccer-practice-search.fly.dev/static/soccer-og-image.jpg">
+    <meta name="twitter:image" content="{{ site_base_url }}/static/soccer-og-image.jpg">
     <meta name="twitter:site" content="@soccer_practice_search">
     
     <!-- Structured Data (JSON-LD) -->
@@ -49,16 +49,16 @@
         "@type": "WebSite",
         "name": "少年サッカードリル",
         "description": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。",
-        "url": "https://soccer-practice-search.fly.dev",
+        "url": {{ site_base_url | tojson }},
         "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://soccer-practice-search.fly.dev/?q={search_term_string}",
+            "target": {{ (site_base_url ~ '/?q={search_term_string}') | tojson }},
             "query-input": "required name=search_term_string"
         },
         "publisher": {
             "@type": "Organization",
             "name": "少年サッカードリル",
-            "url": "https://soccer-practice-search.fly.dev"
+            "url": {{ site_base_url | tojson }}
         },
         "inLanguage": "ja",
         "isAccessibleForFree": true
@@ -68,20 +68,15 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "SportsActivity",
-        "name": "少年サッカーのドリル",
-        "description": "少年サッカー向けの練習ドリル動画の検索と整理",
-        "sport": "サッカー",
-        "audience": {
-            "@type": "Audience",
-            "audienceType": "少年サッカーのコーチ、指導者、プレイヤー"
-        },
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "JPY",
-            "availability": "https://schema.org/InStock"
-        }
+        "@type": "WebApplication",
+        "name": "少年サッカードリル",
+        "description": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。",
+        "url": {{ site_base_url | tojson }},
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "inLanguage": "ja",
+        "isAccessibleForFree": true
     }
     </script>
     
@@ -106,6 +101,7 @@
         <div class="tab-container">
             <div class="home-screen-hint" role="region" aria-label="この画面でできること">
                 <p class="home-screen-hint__text">キーワードや目的・人数・レベルで練習動画を検索し、一覧から動画を開けます。☆ お気に入りに保存して整理できます。</p>
+                <p class="home-screen-hint__text home-screen-hint__text--secondary">少年サッカーのコーチ・指導者向けに、複数チャンネルの練習ドリルを横断して探せる検索です。メニュー選びの下調べや練習前のイメージづくりに使えます。</p>
             </div>
             <div class="tab-content">
                 <div id="tab1" class="tab-panel active" role="region" aria-label="検索と結果">

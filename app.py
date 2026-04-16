@@ -28,6 +28,16 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 DATABASE = 'soccer_content.db'
 
+# 公開URL（canonical / OG / sitemap / robots）。独自ドメイン運用時は fly secrets set SITE_BASE_URL=https://example.com
+_DEFAULT_SITE_BASE_URL = "https://soccer-practice-search.fly.dev"
+
+
+def get_site_base_url() -> str:
+    raw = (os.getenv("SITE_BASE_URL") or _DEFAULT_SITE_BASE_URL).strip().rstrip("/")
+    if not raw.lower().startswith(("http://", "https://")):
+        raw = "https://" + raw.lstrip("/")
+    return raw.rstrip("/")
+
 # セキュリティ: CSRF保護の設定
 # SECRET_KEYは環境変数から取得、なければランダムに生成（本番環境では必ず環境変数で設定すること）
 _secret_key_env = os.getenv("SECRET_KEY")
@@ -50,6 +60,11 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 
 # CSRF保護を有効化
 csrf = CSRFProtect(app)
+
+
+@app.context_processor
+def inject_site_base_url():
+    return {"site_base_url": get_site_base_url()}
 
 # セッション（ニックネームログイン）
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
@@ -1314,14 +1329,12 @@ def robots():
     """robots.txtを生成"""
     from flask import make_response
     
-    robots_txt = '''User-agent: *
+    base = get_site_base_url()
+    robots_txt = f"""User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://soccer-practice-search.fly.dev/sitemap.xml
-
-# Crawl-delay
-Crawl-delay: 1'''
+Sitemap: {base}/sitemap.xml
+"""
     
     response = make_response(robots_txt)
     response.headers['Content-Type'] = 'text/plain'
@@ -1370,46 +1383,32 @@ def sitemap():
     # 現在の日時を取得
     current_time = datetime.now().strftime('%Y-%m-%d')
     
-    # サイトマップのXMLを生成
-    sitemap_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-        <loc>https://soccer-practice-search.fly.dev/</loc>
+    base = get_site_base_url()
+    paths = [
+        ("/", "weekly", "1.0"),
+        ("/board", "weekly", "0.8"),
+        ("/favorites", "weekly", "0.75"),
+        ("/practice-notes", "weekly", "0.7"),
+        ("/about", "monthly", "0.7"),
+        ("/privacy", "monthly", "0.5"),
+    ]
+    url_entries = []
+    for path, changefreq, priority in paths:
+        loc = f"{base}{path}" if path != "/" else f"{base}/"
+        url_entries.append(
+            f"""    <url>
+        <loc>{loc}</loc>
         <lastmod>{current_time}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>1.0</priority>
-    </url>
-    <url>
-        <loc>https://soccer-practice-search.fly.dev/board</loc>
-        <lastmod>{current_time}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://soccer-practice-search.fly.dev/favorites</loc>
-        <lastmod>{current_time}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.75</priority>
-    </url>
-    <url>
-        <loc>https://soccer-practice-search.fly.dev/practice-notes</loc>
-        <lastmod>{current_time}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>https://soccer-practice-search.fly.dev/about</loc>
-        <lastmod>{current_time}</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>https://soccer-practice-search.fly.dev/privacy</loc>
-        <lastmod>{current_time}</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>
-    </url>
-</urlset>'''
+        <changefreq>{changefreq}</changefreq>
+        <priority>{priority}</priority>
+    </url>"""
+        )
+    sitemap_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(url_entries)
+        + "\n</urlset>"
+    )
     
     response = make_response(sitemap_xml)
     response.headers['Content-Type'] = 'application/xml'

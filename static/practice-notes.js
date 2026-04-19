@@ -102,6 +102,156 @@
         .join('\n');
     }
 
+    let editingMatchId = null;
+    let editingDailyId = null;
+
+    function getMatchGamesListEl() {
+      return document.getElementById('match-games-list');
+    }
+
+    function createMatchGameRow(initial) {
+      const matchGamesList = getMatchGamesListEl();
+      const row = document.createElement('div');
+      row.className = 'match-game-row';
+      row.innerHTML = `
+          <div class="match-game-row__label"></div>
+          <div class="match-game-row__grid">
+            <label class="form-field" style="margin:0">
+              <span>スコア</span>
+              <span class="form-field-control">
+                <input type="text" class="match-game-score" placeholder="例: 1-0、2-1（勝ち）" autocomplete="off" />
+              </span>
+            </label>
+            <label class="form-field" style="margin:0">
+              <span>得点者・失点 / 出来事</span>
+              <span class="form-field-control">
+                <textarea class="match-game-events memo-textarea" rows="3" placeholder="例：得点者 YY、失点の経緯…"></textarea>
+              </span>
+            </label>
+          </div>
+          <div class="match-game-row__actions">
+            <button type="button" class="match-game-row__remove no-print" aria-label="この試合行を削除">この試合を削除</button>
+          </div>`;
+      const scoreInput = row.querySelector('.match-game-score');
+      const eventsTa = row.querySelector('.match-game-events');
+      if (initial && scoreInput && eventsTa) {
+        scoreInput.value = initial.score != null ? String(initial.score) : '';
+        eventsTa.value = initial.events != null ? String(initial.events) : '';
+      }
+      const removeBtn = row.querySelector('.match-game-row__remove');
+      removeBtn.addEventListener('click', () => {
+        if (!matchGamesList || matchGamesList.querySelectorAll('.match-game-row').length <= 1) return;
+        row.remove();
+        refreshMatchGameRowLabels();
+      });
+      return row;
+    }
+
+    function refreshMatchGameRowLabels() {
+      const matchGamesList = getMatchGamesListEl();
+      if (!matchGamesList) return;
+      matchGamesList.querySelectorAll('.match-game-row').forEach((row, i) => {
+        const lab = row.querySelector('.match-game-row__label');
+        if (lab) lab.textContent = `${i + 1}試合目`;
+        const btn = row.querySelector('.match-game-row__remove');
+        if (btn) btn.style.display = matchGamesList.querySelectorAll('.match-game-row').length > 1 ? 'inline-block' : 'none';
+      });
+    }
+
+    function resetMatchGameRows() {
+      const matchGamesList = getMatchGamesListEl();
+      if (!matchGamesList) return;
+      matchGamesList.innerHTML = '';
+      matchGamesList.appendChild(createMatchGameRow());
+      refreshMatchGameRowLabels();
+    }
+
+    function fillMatchFormFromEntry(entry) {
+      const matchDate = document.getElementById('match-date');
+      const matchOpponent = document.getElementById('match-opponent');
+      const matchGamesList = getMatchGamesListEl();
+      if (matchDate) matchDate.value = entry.date || toTodayISO();
+      if (matchOpponent) matchOpponent.value = entry.opponent ? String(entry.opponent) : '';
+      const games = normalizeMatchGames(entry);
+      if (!matchGamesList) return;
+      matchGamesList.innerHTML = '';
+      if (games.length === 0) {
+        matchGamesList.appendChild(createMatchGameRow());
+      } else {
+        games.forEach((g) => {
+          matchGamesList.appendChild(createMatchGameRow({ score: g.score, events: g.events }));
+        });
+      }
+      refreshMatchGameRowLabels();
+    }
+
+    function activateNotesTab(panelId) {
+      const tabBtns = document.querySelectorAll('.notes-tab');
+      const panels = document.querySelectorAll('.notes-tab-panel');
+      tabBtns.forEach((btn) => {
+        const target = btn.getAttribute('data-target');
+        const isActive = target === panelId;
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      panels.forEach((p) => {
+        p.classList.toggle('is-active', p.id === panelId);
+      });
+    }
+
+    function syncEditUi() {
+      const hint = document.getElementById('practice-notes-edit-hint');
+      const btnMatch = document.getElementById('btn-save-match');
+      const btnDaily = document.getElementById('btn-save-daily');
+      if (btnMatch) btnMatch.textContent = editingMatchId ? '更新' : '保存';
+      if (btnDaily) btnDaily.textContent = editingDailyId ? '更新' : '保存';
+      if (hint) {
+        if (editingMatchId) {
+          hint.hidden = false;
+          hint.textContent = '試合結果を編集中です。「更新」で上書き保存、「クリア」で編集をやめます。';
+        } else if (editingDailyId) {
+          hint.hidden = false;
+          hint.textContent = '日々の気づきを編集中です。「更新」で上書き保存、「クリア」で編集をやめます。';
+        } else {
+          hint.hidden = true;
+          hint.textContent = '';
+        }
+      }
+    }
+
+    function clearEditing() {
+      editingMatchId = null;
+      editingDailyId = null;
+      syncEditUi();
+    }
+
+    function beginEditMatch(id) {
+      const list = readList(SAVED_MATCH_RESULTS_KEY);
+      const entry = list.find((m) => m.id === id);
+      if (!entry) return;
+      editingMatchId = id;
+      editingDailyId = null;
+      fillMatchFormFromEntry(entry);
+      activateNotesTab('tab-match');
+      syncEditUi();
+      document.getElementById('record-input-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function beginEditDaily(id) {
+      const list = readList(SAVED_DAILY_NOTES_KEY);
+      const entry = list.find((d) => d.id === id);
+      if (!entry) return;
+      editingDailyId = id;
+      editingMatchId = null;
+      const dailyDate = document.getElementById('daily-date');
+      const dailyContent = document.getElementById('daily-content');
+      if (dailyDate) dailyDate.value = entry.date || toTodayISO();
+      if (dailyContent) dailyContent.value = entry.content != null ? String(entry.content) : '';
+      activateNotesTab('tab-daily');
+      syncEditUi();
+      document.getElementById('record-input-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function renderSavedRecords() {
       const container = document.getElementById('saved-records-container');
       const empty = document.getElementById('empty-records');
@@ -166,11 +316,20 @@
           const actions = document.createElement('div');
           actions.className = 'record-actions no-print';
 
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.textContent = '編集';
+          editBtn.addEventListener('click', () => {
+            if (entry.type === 'match') beginEditMatch(entry.id);
+            else beginEditDaily(entry.id);
+          });
+
           const deleteBtn = document.createElement('button');
           deleteBtn.type = 'button';
           deleteBtn.textContent = '削除';
           deleteBtn.addEventListener('click', () => deleteEntry(entry.type, entry.id));
 
+          actions.appendChild(editBtn);
           actions.appendChild(deleteBtn);
 
           header.appendChild(left);
@@ -199,36 +358,26 @@
       if (type === 'match') {
         const matches = readList(SAVED_MATCH_RESULTS_KEY).filter((m) => m.id !== id);
         writeList(SAVED_MATCH_RESULTS_KEY, matches);
+        if (id === editingMatchId) clearEditing();
       } else {
         const daily = readList(SAVED_DAILY_NOTES_KEY).filter((d) => d.id !== id);
         writeList(SAVED_DAILY_NOTES_KEY, daily);
+        if (id === editingDailyId) clearEditing();
       }
       renderSavedRecords();
     }
 
     function bindUi() {
-      // tabs
-      const tabBtns = document.querySelectorAll('.notes-tab');
-      const panels = document.querySelectorAll('.notes-tab-panel');
-      tabBtns.forEach((btn) => {
+      document.querySelectorAll('.notes-tab').forEach((btn) => {
         btn.addEventListener('click', () => {
-          tabBtns.forEach((b) => {
-            b.classList.remove('is-active');
-            b.setAttribute('aria-selected', 'false');
-          });
-          panels.forEach((p) => p.classList.remove('is-active'));
-
-          btn.classList.add('is-active');
-          btn.setAttribute('aria-selected', 'true');
           const targetId = btn.getAttribute('data-target');
-          const panel = document.getElementById(targetId);
-          panel && panel.classList.add('is-active');
+          if (targetId) activateNotesTab(targetId);
         });
       });
 
       const matchDate = document.getElementById('match-date');
       const matchOpponent = document.getElementById('match-opponent');
-      const matchGamesList = document.getElementById('match-games-list');
+      const matchGamesList = getMatchGamesListEl();
       const btnAddMatchGame = document.getElementById('btn-add-match-game');
 
       const dailyDate = document.getElementById('daily-date');
@@ -236,54 +385,6 @@
 
       if (matchDate) matchDate.value = toTodayISO();
       if (dailyDate) dailyDate.value = toTodayISO();
-
-      function refreshMatchGameRowLabels() {
-        if (!matchGamesList) return;
-        matchGamesList.querySelectorAll('.match-game-row').forEach((row, i) => {
-          const lab = row.querySelector('.match-game-row__label');
-          if (lab) lab.textContent = `${i + 1}試合目`;
-          const btn = row.querySelector('.match-game-row__remove');
-          if (btn) btn.style.display = matchGamesList.querySelectorAll('.match-game-row').length > 1 ? 'inline-block' : 'none';
-        });
-      }
-
-      function createMatchGameRow() {
-        const row = document.createElement('div');
-        row.className = 'match-game-row';
-        row.innerHTML = `
-          <div class="match-game-row__label"></div>
-          <div class="match-game-row__grid">
-            <label class="form-field" style="margin:0">
-              <span>スコア</span>
-              <span class="form-field-control">
-                <input type="text" class="match-game-score" placeholder="例: 1-0、2-1（勝ち）" autocomplete="off" />
-              </span>
-            </label>
-            <label class="form-field" style="margin:0">
-              <span>得点者・失点 / 出来事</span>
-              <span class="form-field-control">
-                <textarea class="match-game-events memo-textarea" rows="3" placeholder="例：得点者 YY、失点の経緯…"></textarea>
-              </span>
-            </label>
-          </div>
-          <div class="match-game-row__actions">
-            <button type="button" class="match-game-row__remove no-print" aria-label="この試合行を削除">この試合を削除</button>
-          </div>`;
-        const removeBtn = row.querySelector('.match-game-row__remove');
-        removeBtn.addEventListener('click', () => {
-          if (!matchGamesList || matchGamesList.querySelectorAll('.match-game-row').length <= 1) return;
-          row.remove();
-          refreshMatchGameRowLabels();
-        });
-        return row;
-      }
-
-      function resetMatchGameRows() {
-        if (!matchGamesList) return;
-        matchGamesList.innerHTML = '';
-        matchGamesList.appendChild(createMatchGameRow());
-        refreshMatchGameRowLabels();
-      }
 
       if (matchGamesList && !matchGamesList.querySelector('.match-game-row')) {
         resetMatchGameRows();
@@ -323,28 +424,48 @@
             return;
           }
 
-          const entry = {
-            id: 'match-' + Date.now(),
-            date,
-            opponent,
-            games: games.map((g, i) => ({ n: i + 1, score: g.score, events: g.events })),
-            createdAt: new Date().toISOString()
-          };
-
+          const gamesPayload = games.map((g, i) => ({ n: i + 1, score: g.score, events: g.events }));
           const list = readList(SAVED_MATCH_RESULTS_KEY);
-          list.unshift(entry);
-          writeList(SAVED_MATCH_RESULTS_KEY, list);
 
+          if (editingMatchId) {
+            const idx = list.findIndex((m) => m.id === editingMatchId);
+            if (idx === -1) {
+              alert('編集対象の記録が見つかりませんでした。');
+              clearEditing();
+              return;
+            }
+            const prev = list[idx];
+            list[idx] = {
+              id: editingMatchId,
+              date,
+              opponent,
+              games: gamesPayload,
+              createdAt: prev.createdAt || new Date().toISOString()
+            };
+            writeList(SAVED_MATCH_RESULTS_KEY, list);
+          } else {
+            const entry = {
+              id: 'match-' + Date.now(),
+              date,
+              opponent,
+              games: gamesPayload,
+              createdAt: new Date().toISOString()
+            };
+            list.unshift(entry);
+            writeList(SAVED_MATCH_RESULTS_KEY, list);
+          }
+
+          clearEditing();
           if (matchOpponent) matchOpponent.value = '';
           if (matchDate) matchDate.value = toTodayISO();
           resetMatchGameRows();
-
           renderSavedRecords();
         });
       }
 
       if (btnClearMatch) {
         btnClearMatch.addEventListener('click', () => {
+          clearEditing();
           if (matchOpponent) matchOpponent.value = '';
           if (matchDate) matchDate.value = toTodayISO();
           resetMatchGameRows();
@@ -364,18 +485,37 @@
             return;
           }
 
-          const entry = {
-            id: 'daily-' + Date.now(),
-            type: 'daily',
-            date,
-            content,
-            createdAt: new Date().toISOString()
-          };
-
           const list = readList(SAVED_DAILY_NOTES_KEY);
-          list.unshift(entry);
-          writeList(SAVED_DAILY_NOTES_KEY, list);
 
+          if (editingDailyId) {
+            const idx = list.findIndex((d) => d.id === editingDailyId);
+            if (idx === -1) {
+              alert('編集対象の記録が見つかりませんでした。');
+              clearEditing();
+              return;
+            }
+            const prev = list[idx];
+            list[idx] = {
+              id: editingDailyId,
+              type: 'daily',
+              date,
+              content,
+              createdAt: prev.createdAt || new Date().toISOString()
+            };
+            writeList(SAVED_DAILY_NOTES_KEY, list);
+          } else {
+            const entry = {
+              id: 'daily-' + Date.now(),
+              type: 'daily',
+              date,
+              content,
+              createdAt: new Date().toISOString()
+            };
+            list.unshift(entry);
+            writeList(SAVED_DAILY_NOTES_KEY, list);
+          }
+
+          clearEditing();
           if (dailyContent) dailyContent.value = '';
           if (dailyDate) dailyDate.value = toTodayISO();
           renderSavedRecords();
@@ -384,10 +524,13 @@
 
       if (btnClearDaily) {
         btnClearDaily.addEventListener('click', () => {
+          clearEditing();
           if (dailyContent) dailyContent.value = '';
           if (dailyDate) dailyDate.value = toTodayISO();
         });
       }
+
+      syncEditUi();
     }
 
     function setup() {

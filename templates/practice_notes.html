@@ -20,6 +20,17 @@
         }
         .practice-notes-page h1 { margin-bottom: 0.5rem; }
         .practice-notes-page .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+        .practice-notes-edit-hint {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: rgba(13, 148, 136, 0.1);
+            border: 1px solid rgba(13, 148, 136, 0.28);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 0.85rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
         .notes-section {
             background: var(--surface-color);
             border-radius: var(--radius-xl);
@@ -377,6 +388,7 @@
     <main class="practice-notes-page">
         <h1>練習メモ・記録帳</h1>
         <p class="subtitle">練習試合の結果と、日々の練習で思ったこと（気づき）を保存できます。</p>
+        <p id="practice-notes-edit-hint" class="practice-notes-edit-hint no-print" role="status" aria-live="polite" hidden></p>
 
         <section class="notes-section" id="record-input-section">
             <div class="notes-tabs no-print" role="tablist" aria-label="記録の種類">
@@ -463,6 +475,6 @@
 
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=6"></script>
+    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=7"></script>
 </body>
 </html>

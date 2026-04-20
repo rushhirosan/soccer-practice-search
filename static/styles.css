@@ -136,6 +136,30 @@ main {
   margin-left: auto;
 }
 
+.site-header__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.site-header__lang a {
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.12);
+}
+.site-header__lang a:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+.site-header__lang a.is-active {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .site-header__brand {
   display: inline-flex;
   align-items: center;

@@ -12,7 +12,7 @@ async function getCsrfToken() {
         csrfToken = data.csrf_token;
         return csrfToken;
     } catch (error) {
-        console.error('CSRFトークンの取得に失敗しました:', error);
+        console.error((typeof uiS === 'function' ? uiS('js_csrf_fetch_failed') : 'CSRF error'), error);
         return null;
     }
 }
@@ -76,8 +76,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         const isMac = /Mac|iPhone|iPad/.test(navigator.platform || '');
-        searchInput.placeholder = 'キーワードで検索';
-        searchInput.title = isMac ? 'Cmd+K でフォーカス、クリックで履歴' : 'Ctrl+K でフォーカス、クリックで履歴';
+        searchInput.placeholder = typeof uiS === 'function' ? uiS('js_search_placeholder') : 'キーワードで検索';
+        searchInput.title = isMac
+            ? (typeof uiS === 'function' ? uiS('js_search_input_title_mac') : 'Cmd+K でフォーカス、クリックで履歴')
+            : (typeof uiS === 'function' ? uiS('js_search_input_title_pc') : 'Ctrl+K でフォーカス、クリックで履歴');
         const shortcutKbd = document.getElementById('search-shortcut-kbd');
         if (shortcutKbd) {
             shortcutKbd.textContent = isMac ? '⌘K' : 'Ctrl+K';
@@ -88,6 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupSearchHandler(); // 検索の初期設定
         setupKeyboardShortcuts(); // キーボードショートカットの設定
         setupFocusManagement(); // フォーカス管理の設定
+        updateVideoCount(0, 0);
 
         setTimeout(() => {
             console.log("Populating dropdowns...");
@@ -147,7 +150,9 @@ function populateSelect(selectId, columnName) {
             select.innerHTML = '';
             const defaultOption = document.createElement("option");
             defaultOption.value = "";
-            defaultOption.textContent = selectId === "type-input" ? "カテゴリを選択" : "プレイヤー数を選択";
+            defaultOption.textContent = selectId === "type-input"
+                ? (typeof uiS === 'function' ? uiS('js_select_category') : 'カテゴリを選択')
+                : (typeof uiS === 'function' ? uiS('js_select_players') : 'プレイヤー数を選択');
             select.appendChild(defaultOption);
 
             if (!Array.isArray(data) || data.length === 0) {
@@ -222,7 +227,9 @@ function populateSelect(selectId, columnName) {
                 select.innerHTML = '';
                 const defaultOption = document.createElement("option");
                 defaultOption.value = "";
-                defaultOption.textContent = selectId === "type-input" ? "カテゴリを選択" : "プレイヤー数を選択";
+                defaultOption.textContent = selectId === "type-input"
+                ? (typeof uiS === 'function' ? uiS('js_select_category') : 'カテゴリを選択')
+                : (typeof uiS === 'function' ? uiS('js_select_players') : 'プレイヤー数を選択');
                 select.appendChild(defaultOption);
                 
                 if (selectId === "type-input") {
@@ -263,7 +270,7 @@ function populateLevelSelect() {
             select.innerHTML = '';
             const defaultOption = document.createElement("option");
             defaultOption.value = "";
-            defaultOption.textContent = "レベルを選択";
+            defaultOption.textContent = typeof uiS === 'function' ? uiS('js_select_level') : 'レベルを選択';
             select.appendChild(defaultOption);
             
             if (!Array.isArray(data) || data.length === 0) {
@@ -299,7 +306,7 @@ function populateLevelSelect() {
                 select.innerHTML = '';
                 const defaultOption = document.createElement("option");
                 defaultOption.value = "";
-                defaultOption.textContent = "レベルを選択";
+                defaultOption.textContent = typeof uiS === 'function' ? uiS('js_select_level') : 'レベルを選択';
                 select.appendChild(defaultOption);
                 
                 const defaultLevels = ["小学生以上", "中学生", "高校生", "ユース"];
@@ -335,7 +342,7 @@ function populateChannelSelect() {
             select.innerHTML = '';
             const defaultOption = document.createElement("option");
             defaultOption.value = "";
-            defaultOption.textContent = "チャンネルを選択";
+            defaultOption.textContent = typeof uiS === 'function' ? uiS('js_select_channel') : 'チャンネルを選択';
             select.appendChild(defaultOption);
             
             if (!Array.isArray(data) || data.length === 0) {
@@ -388,7 +395,7 @@ function populateChannelSelect() {
                 select.innerHTML = '';
                 const defaultOption = document.createElement("option");
                 defaultOption.value = "";
-                defaultOption.textContent = "チャンネルを選択";
+                defaultOption.textContent = typeof uiS === 'function' ? uiS('js_select_channel') : 'チャンネルを選択';
                 select.appendChild(defaultOption);
                 
                 const defaultChannels = ["サッカーチャンネル1", "サッカーチャンネル2"];
@@ -405,7 +412,8 @@ function populateChannelSelect() {
 // 数値フォーマット関数（例: 1000 → 1,000）
 function formatNumber(num) {
     if (!num && num !== 0) return '0';
-    return Number(num).toLocaleString('ja-JP');
+    const loc = (typeof window !== 'undefined' && window.__UI_LOCALE__ === 'en') ? 'en-US' : 'ja-JP';
+    return Number(num).toLocaleString(loc);
 }
 
 // エラーメッセージを表示する関数
@@ -463,7 +471,7 @@ function displayCards(data, limit = 10) {
 
     if (!data || data.length === 0) {
         searchPrompt.style.display = 'block';
-        searchPrompt.textContent = '検索結果が見つかりませんでした。検索条件を変更してお試しください。';
+        searchPrompt.textContent = typeof uiS === 'function' ? uiS('js_no_results') : '検索結果が見つかりませんでした。検索条件を変更してお試しください。';
         return;
     }
 
@@ -509,19 +517,19 @@ function buildVideoCard(activity, options = {}) {
     infoDiv.className = 'info';
 
     const uploadDateDiv = document.createElement('div');
-    uploadDateDiv.textContent = `アップロード日: ${activity.upload_date || ''}`;
+    uploadDateDiv.textContent = (typeof uiS === 'function' ? uiS('js_uploaded_label') : 'アップロード日: ') + (activity.upload_date || '');
 
     const viewCountDiv = document.createElement('div');
-    viewCountDiv.textContent = `再生回数: ${formatNumber(activity.view_count || 0)}`;
+    viewCountDiv.textContent = (typeof uiS === 'function' ? uiS('js_views_label') : '再生回数: ') + formatNumber(activity.view_count || 0);
 
     const likeCountDiv = document.createElement('div');
-    likeCountDiv.textContent = `いいね: ${formatNumber(activity.like_count || 0)}`;
+    likeCountDiv.textContent = (typeof uiS === 'function' ? uiS('js_likes_label') : 'いいね: ') + formatNumber(activity.like_count || 0);
 
     const durationDiv = document.createElement('div');
-    durationDiv.textContent = `動画時間: ${activity.duration || ''}`;
+    durationDiv.textContent = (typeof uiS === 'function' ? uiS('js_duration_label') : '動画時間: ') + (activity.duration || '');
 
     const channelDiv = document.createElement('div');
-    channelDiv.textContent = `チャネル名: ${activity.channel_category || ''}`;
+    channelDiv.textContent = (typeof uiS === 'function' ? uiS('js_channel_label') : 'チャネル名: ') + (activity.channel_category || '');
 
     infoDiv.appendChild(uploadDateDiv);
     infoDiv.appendChild(viewCountDiv);
@@ -541,11 +549,15 @@ function buildVideoCard(activity, options = {}) {
         favoriteBtn.classList.toggle('is-favorite', fav);
         favoriteBtn.setAttribute('aria-pressed', fav ? 'true' : 'false');
         if (listContext === 'favorites') {
-            favoriteBtn.setAttribute('aria-label', 'お気に入りから外す');
-            favoriteBtn.textContent = '★ お気に入りから外す';
+            favoriteBtn.setAttribute('aria-label', typeof uiS === 'function' ? uiS('js_fav_remove') : 'お気に入りから外す');
+            favoriteBtn.textContent = typeof uiS === 'function' ? uiS('js_fav_remove_short') : '★ お気に入りから外す';
         } else {
-            favoriteBtn.setAttribute('aria-label', fav ? 'お気に入りから外す' : 'お気に入りに追加');
-            favoriteBtn.textContent = fav ? '★ お気に入り済み' : '☆ お気に入り';
+            favoriteBtn.setAttribute('aria-label', fav
+                ? (typeof uiS === 'function' ? uiS('js_fav_remove') : 'お気に入りから外す')
+                : (typeof uiS === 'function' ? uiS('js_fav_add_aria') : 'お気に入りに追加'));
+            favoriteBtn.textContent = fav
+                ? (typeof uiS === 'function' ? uiS('js_fav_in') : '★ お気に入り済み')
+                : (typeof uiS === 'function' ? uiS('js_fav_add') : '☆ お気に入り');
         }
     }
     syncFavoriteBtn();
@@ -586,7 +598,8 @@ function buildVideoCard(activity, options = {}) {
 function updateVideoCount(currentCount, totalCount) {
     const videoCountElement = document.getElementById('video-count');
     if (videoCountElement) {
-        videoCountElement.innerText = `表示中: ${currentCount} / ${totalCount} 件`;
+        const tpl = typeof uiS === 'function' ? uiS('js_video_count') : '表示中: {cur} / {total} 件';
+        videoCountElement.innerText = tpl.replace('{cur}', String(currentCount)).replace('{total}', String(totalCount));
     }
 }
 
@@ -599,11 +612,12 @@ function fetchData(endpoint, queryParams, limit) {
             if (!response.ok) {
                 // HTTPエラーの処理
                 if (response.status === 500) {
-                    throw new Error('サーバーエラーが発生しました。しばらくしてから再度お試しください。');
+                    throw new Error(typeof uiS === 'function' ? uiS('js_err_server') : 'サーバーエラーが発生しました。しばらくしてから再度お試しください。');
                 } else if (response.status === 400) {
-                    throw new Error('リクエストが無効です。検索条件を確認してください。');
+                    throw new Error(typeof uiS === 'function' ? uiS('js_err_bad_request') : 'リクエストが無効です。検索条件を確認してください。');
                 } else {
-                    throw new Error(`エラーが発生しました（ステータスコード: ${response.status}）`);
+                    const st = typeof uiS === 'function' ? uiS('js_err_status') : 'エラーが発生しました（ステータスコード: {code}）';
+                    throw new Error(st.replace('{code}', String(response.status)));
                 }
             }
             return response.json();
@@ -626,16 +640,16 @@ function fetchData(endpoint, queryParams, limit) {
             console.error('エラー:', error);
             
             // ユーザー向けエラーメッセージを表示
-            let errorMessage = '検索中にエラーが発生しました。';
+            let errorMessage = typeof uiS === 'function' ? uiS('js_err_search') : '検索中にエラーが発生しました。';
             let errorDetails = '';
             
             if (error.message) {
                 errorMessage = error.message;
             } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                errorMessage = 'ネットワークエラーが発生しました。';
-                errorDetails = 'インターネット接続を確認してください。';
+                errorMessage = typeof uiS === 'function' ? uiS('js_err_network') : 'ネットワークエラーが発生しました。';
+                errorDetails = typeof uiS === 'function' ? uiS('js_err_network_detail') : 'インターネット接続を確認してください。';
             } else {
-                errorDetails = 'しばらくしてから再度お試しください。';
+                errorDetails = typeof uiS === 'function' ? uiS('js_err_retry') : 'しばらくしてから再度お試しください。';
             }
             
             showError(errorMessage, errorDetails);
@@ -662,9 +676,9 @@ function search(resetPage = true) {
     if (resetPage) currentPage = 1;
 
     // 検索ボタンを無効化（重複リクエスト防止）
-    const originalButtonText = '検索'; // 常に「検索」に戻す
+    const originalButtonText = typeof uiS === 'function' ? uiS('js_search') : '検索';
     searchButton.disabled = true;
-    searchButton.textContent = '検索中...';
+    searchButton.textContent = typeof uiS === 'function' ? uiS('js_searching') : '検索中...';
 
     // セキュリティ: 入力値の取得と基本的な検証
     const searchInput = searchInputEl;
@@ -808,7 +822,7 @@ async function submitFeedback(formData) {
     // セキュリティ: CSRFトークンを取得
     const token = await getCsrfToken();
     if (!token) {
-        alert('セキュリティトークンの取得に失敗しました。ページを再読み込みしてください。');
+        alert(typeof uiS === 'function' ? uiS('js_csrf_alert') : 'セキュリティトークンの取得に失敗しました。ページを再読み込みしてください。');
         return;
     }
     
@@ -816,7 +830,7 @@ async function submitFeedback(formData) {
     const submitButton = document.querySelector('#feedbackForm button[type="submit"]');
     const originalButtonText = submitButton.textContent;
     submitButton.disabled = true;
-    submitButton.textContent = '送信中...';
+    submitButton.textContent = typeof uiS === 'function' ? uiS('js_feedback_sending') : '送信中...';
     
     fetch('/submit-feedback', {
         method: 'POST',
@@ -844,15 +858,15 @@ async function submitFeedback(formData) {
             if (response.status === 400) {
                 // CSRFエラーの可能性がある場合はトークンを再取得
                 csrfToken = null;
-                alert('送信に失敗しました。もう一度お試しください。');
+                alert(typeof uiS === 'function' ? uiS('js_feedback_fail') : '送信に失敗しました。もう一度お試しください。');
             } else {
-                alert('送信に失敗しました。もう一度お試しください。');
+                alert(typeof uiS === 'function' ? uiS('js_feedback_fail') : '送信に失敗しました。もう一度お試しください。');
             }
         }
     })
     .catch(error => {
         console.error('エラー:', error);
-        alert('送信に失敗しました。もう一度お試しください。');
+        alert(typeof uiS === 'function' ? uiS('js_feedback_fail') : '送信に失敗しました。もう一度お試しください。');
     })
     .finally(() => {
         // 送信完了後にボタンを再有効化
@@ -912,7 +926,7 @@ function saveSelectedMenus(items) {
         localStorage.setItem(SELECTED_MENUS_KEY, JSON.stringify(items));
         return true;
     } catch (e) {
-        console.warn('選んだメニューの保存に失敗:', e);
+        console.warn((typeof uiS === 'function' ? uiS('js_sel_history_warn') : '選んだメニューの保存に失敗:'), e);
         return false;
     }
 }
@@ -971,7 +985,7 @@ function saveFavorites(items) {
         localStorage.setItem(FAVORITES_KEY, JSON.stringify(items));
         return true;
     } catch (e) {
-        console.warn('お気に入りの保存に失敗:', e);
+        console.warn((typeof uiS === 'function' ? uiS('js_sel_fav_warn') : 'お気に入りの保存に失敗:'), e);
         return false;
     }
 }
@@ -1026,8 +1040,12 @@ function resyncSearchResultsFavoriteButtons() {
         const fav = isFavorite(card.dataset.activityId);
         btn.classList.toggle('is-favorite', fav);
         btn.setAttribute('aria-pressed', fav ? 'true' : 'false');
-        btn.setAttribute('aria-label', fav ? 'お気に入りから外す' : 'お気に入りに追加');
-        btn.textContent = fav ? '★ お気に入り済み' : '☆ お気に入り';
+        btn.setAttribute('aria-label', fav
+            ? (typeof uiS === 'function' ? uiS('js_fav_remove') : 'お気に入りから外す')
+            : (typeof uiS === 'function' ? uiS('js_fav_add_aria') : 'お気に入りに追加'));
+        btn.textContent = fav
+            ? (typeof uiS === 'function' ? uiS('js_fav_in') : '★ お気に入り済み')
+            : (typeof uiS === 'function' ? uiS('js_fav_add') : '☆ お気に入り');
     });
 }
 
@@ -1085,20 +1103,27 @@ function setupSearchHistory() {
         historyEl = document.createElement('div');
         historyEl.id = 'search-history-dropdown';
         historyEl.className = 'search-history-dropdown hidden';
-        historyEl.setAttribute('aria-label', '検索履歴');
+        historyEl.setAttribute('aria-label', typeof uiS === 'function' ? uiS('js_search_history_aria') : '検索履歴');
         historyParent.appendChild(historyEl);
     }
     
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function showHistory() {
         const history = getSearchHistory();
         if (history.length === 0) {
             historyEl.classList.add('hidden');
             return;
         }
+        const rm = (typeof uiS === 'function' ? uiS('js_history_remove_aria') : 'この履歴を削除').replace(/"/g, '&quot;');
         historyEl.innerHTML = history.map(q =>
             `<div class="search-history-row" data-query="${q.replace(/"/g, '&quot;')}">
                 <button type="button" class="search-history-item">${escapeHtml(q)}</button>
-                <button type="button" class="search-history-delete" aria-label="この履歴を削除">×</button>
+                <button type="button" class="search-history-delete" aria-label="${rm}">×</button>
             </div>`
         ).join('');
         historyEl.classList.remove('hidden');
@@ -1106,12 +1131,6 @@ function setupSearchHistory() {
     
     function hideHistory() {
         setTimeout(() => historyEl.classList.add('hidden'), 150);
-    }
-    
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
     
     let ignoreNextBlur = false;

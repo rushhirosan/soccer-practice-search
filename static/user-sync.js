@@ -74,8 +74,8 @@
     if (!kind) return;
     if (!window.__soccerLoggedIn) return;
     var messages = {
-      login: 'ログインしました。お気に入り・メモなどを同期します。',
-      register: '登録ありがとうございます。回復用キーは安全な場所に保管してください。'
+      login: typeof uiS === 'function' ? uiS('js_toast_after_login') : 'ログインしました。お気に入り・メモなどを同期します。',
+      register: typeof uiS === 'function' ? uiS('js_toast_after_register') : '登録ありがとうございます。回復用キーは安全な場所に保管してください。'
     };
     showGlobalAuthToast(messages[kind] || messages.login);
   }
@@ -264,14 +264,28 @@
     var root = document.createElement('div');
     root.id = 'soccer-sync-choice-modal';
     root.className = 'soccer-sync-choice-modal hidden';
+    var L = {
+      title: '同期方法を選んでください',
+      body: 'この端末には未ログイン時のデータがあります。別の人のデータが混ざる事故を防ぐため、同期方法を選んでください。',
+      warn: '推奨: 既存のアカウントデータを使う（この端末のローカルデータは破棄）。',
+      btnServer: '既存のアカウントデータを使う（推奨）',
+      btnLocal: 'この端末のデータをこのアカウントに取り込む'
+    };
+    if (typeof uiS === 'function') {
+      L.title = uiS('js_sync_modal_title');
+      L.body = uiS('js_sync_modal_body');
+      L.warn = uiS('js_sync_modal_warn');
+      L.btnServer = uiS('js_sync_btn_server');
+      L.btnLocal = uiS('js_sync_btn_local');
+    }
     root.innerHTML = ''
       + '<div class="soccer-sync-choice-modal__panel" role="dialog" aria-modal="true" aria-labelledby="soccer-sync-choice-title">'
-      +   '<h2 id="soccer-sync-choice-title" class="soccer-sync-choice-modal__title">同期方法を選んでください</h2>'
-      +   '<p class="soccer-sync-choice-modal__text">この端末には未ログイン時のデータがあります。別の人のデータが混ざる事故を防ぐため、同期方法を選んでください。</p>'
-      +   '<p class="soccer-sync-choice-modal__text soccer-sync-choice-modal__text--warn">推奨: 既存のアカウントデータを使う（この端末のローカルデータは破棄）。</p>'
+      +   '<h2 id="soccer-sync-choice-title" class="soccer-sync-choice-modal__title">' + L.title + '</h2>'
+      +   '<p class="soccer-sync-choice-modal__text">' + L.body + '</p>'
+      +   '<p class="soccer-sync-choice-modal__text soccer-sync-choice-modal__text--warn">' + L.warn + '</p>'
       +   '<div class="soccer-sync-choice-modal__actions">'
-      +     '<button type="button" id="soccer-sync-choice-server" class="soccer-sync-choice-modal__btn soccer-sync-choice-modal__btn--primary">既存のアカウントデータを使う（推奨）</button>'
-      +     '<button type="button" id="soccer-sync-choice-local" class="soccer-sync-choice-modal__btn soccer-sync-choice-modal__btn--outline">この端末のデータをこのアカウントに取り込む</button>'
+      +     '<button type="button" id="soccer-sync-choice-server" class="soccer-sync-choice-modal__btn soccer-sync-choice-modal__btn--primary">' + L.btnServer + '</button>'
+      +     '<button type="button" id="soccer-sync-choice-local" class="soccer-sync-choice-modal__btn soccer-sync-choice-modal__btn--outline">' + L.btnLocal + '</button>'
       +   '</div>'
       + '</div>';
     document.body.appendChild(root);

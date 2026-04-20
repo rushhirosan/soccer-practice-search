@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ html_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ボード - 少年サッカードリル</title>
-    <meta name="description" content="少年サッカーコーチ向けボード。戦術ボードと練習ボードを切り替えながら、フォーメーション作成、練習人数に応じた配置、動きのアニメーションができます。">
+    <title>{{ _('board_title') }}</title>
+    <meta name="description" content="{{ _('board_meta_desc') }}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ site_base_url }}/board">
     <!-- Favicon -->
@@ -18,99 +18,99 @@
     {% include 'partials/site_header.html' %}
 
     <main class="tactical-main">
-        <aside class="toolbar" aria-label="ツール">
+        <aside class="toolbar" aria-label="{{ _('toolbar_aria') }}">
             <div class="tool-group">
-                <h3>配置</h3>
+                <h3>{{ _('tb_placement') }}</h3>
                 <div class="tool-buttons tool-buttons-compact">
-                    <button type="button" class="tool-btn active" data-tool="select" title="選択・移動 (V)">👆</button>
-                    <button type="button" class="tool-btn" data-tool="player" title="選手を追加 (P)">👤</button>
-                    <button type="button" class="tool-btn" data-tool="ball" title="ボールを置く (B)">⚽</button>
-                    <button type="button" class="tool-btn" data-tool="arrow" title="矢印 (A)">➡️</button>
-                    <button type="button" class="tool-btn" data-tool="line" title="ライン (L)">／</button>
-                    <button type="button" class="tool-btn" data-tool="delete" title="削除 (D)">🗑️</button>
+                    <button type="button" class="tool-btn active" data-tool="select" title="{{ _('tb_tool_select') }}">👆</button>
+                    <button type="button" class="tool-btn" data-tool="player" title="{{ _('tb_tool_player') }}">👤</button>
+                    <button type="button" class="tool-btn" data-tool="ball" title="{{ _('tb_tool_ball') }}">⚽</button>
+                    <button type="button" class="tool-btn" data-tool="arrow" title="{{ _('tb_tool_arrow') }}">➡️</button>
+                    <button type="button" class="tool-btn" data-tool="line" title="{{ _('tb_tool_line') }}">／</button>
+                    <button type="button" class="tool-btn" data-tool="delete" title="{{ _('tb_tool_delete') }}">🗑️</button>
                 </div>
-                <p class="tool-hint" id="tool-hint">ピッチをクリックで配置</p>
+                <p class="tool-hint" id="tool-hint">{{ _('tb_hint_initial') }}</p>
             </div>
 
             <div class="tool-group roster-group">
-                <h3>メンバー</h3>
+                <h3>{{ _('tb_members') }}</h3>
                 <div class="roster-add-row">
-                    <input type="text" id="roster-name-input" maxlength="24" placeholder="名前・番号など" title="ピッチ上のコマに表示する仮の呼び名（例: GK、8番）" autocomplete="off" aria-label="メンバー表示名" enterkeyhint="done">
-                    <button type="button" id="roster-add-btn" class="action-btn small roster-add-btn">追加</button>
+                    <input type="text" id="roster-name-input" maxlength="24" placeholder="{{ _('tb_roster_ph') }}" title="{{ _('tb_roster_title') }}" autocomplete="off" aria-label="{{ _('tb_roster_aria') }}" enterkeyhint="done">
+                    <button type="button" id="roster-add-btn" class="action-btn small roster-add-btn">{{ _('tb_add') }}</button>
                 </div>
-                <p class="tool-hint" id="roster-hint">一覧から選び、👤でピッチをタップして配置</p>
-                <div class="roster-section-label" id="roster-section-label">出場メンバー</div>
-                <div id="roster-bench-list" class="roster-bench-list" role="list" aria-label="出場メンバー"></div>
+                <p class="tool-hint" id="roster-hint">{{ _('tb_roster_hint') }}</p>
+                <div class="roster-section-label" id="roster-section-label">{{ _('tb_roster_section') }}</div>
+                <div id="roster-bench-list" class="roster-bench-list" role="list" aria-label="{{ _('tb_roster_section') }}"></div>
             </div>
 
             <div class="tool-group">
-                <h3>ボード</h3>
-                <select id="board-type-select" aria-label="ボード種別">
-                    <option value="tactical">戦術ボード</option>
-                    <option value="practice" selected>練習ボード</option>
+                <h3>{{ _('tb_board_kind') }}</h3>
+                <select id="board-type-select" aria-label="{{ _('tb_board_type_aria') }}">
+                    <option value="tactical">{{ _('tb_board_tactical') }}</option>
+                    <option value="practice" selected>{{ _('tb_board_practice') }}</option>
                 </select>
             </div>
 
             <div class="tool-group">
-                <h3 id="formation-label">フォーメーション</h3>
-                <select id="formation-select" aria-label="フォーメーション選択">
-                    <option value="">フォーメーションを選択</option>
-                    <optgroup label="11人制">
+                <h3 id="formation-label">{{ _('tb_formation_heading') }}</h3>
+                <select id="formation-select" aria-label="{{ _('tb_formation_heading') }}">
+                    <option value="">{{ _('tb_formation_default') }}</option>
+                    <optgroup label="{{ _('js_tb_optgroup_11') }}">
                         <option value="4-4-2">4-4-2</option>
                         <option value="4-3-3">4-3-3</option>
                         <option value="3-5-2">3-5-2</option>
                         <option value="4-2-3-1">4-2-3-1</option>
                     </optgroup>
-                    <optgroup label="8人制（少年）">
+                    <optgroup label="{{ _('js_tb_optgroup_8') }}">
                         <option value="3-3-1" selected>3-3-1</option>
                         <option value="2-3-2">2-3-2</option>
                         <option value="3-2-2">3-2-2</option>
                         <option value="2-2-3">2-2-3</option>
                     </optgroup>
                 </select>
-                <p class="tool-hint" id="formation-hint">戦術ボード用のフォーメーションを選択</p>
+                <p class="tool-hint" id="formation-hint">{{ _('tb_formation_hint') }}</p>
             </div>
 
             <div class="tool-group tool-group-row">
                 <div>
-                    <h3>コート</h3>
-                    <select id="court-mode" aria-label="コートモード">
-                        <option value="8">8人制</option>
-                        <option value="11">11人制</option>
+                    <h3>{{ _('tb_court') }}</h3>
+                    <select id="court-mode" aria-label="{{ _('tb_court') }}">
+                        <option value="8">{{ _('tb_court_8') }}</option>
+                        <option value="11">{{ _('tb_court_11') }}</option>
                     </select>
                 </div>
                 <div>
-                    <h3>編集</h3>
-                    <button type="button" id="btn-clear" class="action-btn small" title="現在の状態をクリア">🗑 クリア</button>
+                    <h3>{{ _('tb_edit') }}</h3>
+                    <button type="button" id="btn-clear" class="action-btn small" title="{{ _('tb_clear_title') }}">{{ _('tb_clear_btn') }}</button>
                 </div>
             </div>
 
             <div class="tool-group save-dropdown-group">
-                <h3>保存・読込</h3>
+                <h3>{{ _('tb_save_load_heading') }}</h3>
                 <div class="save-dropdown">
-                    <button type="button" id="save-dropdown-btn" class="action-btn dropdown-trigger">保存・読込 ▾</button>
+                    <button type="button" id="save-dropdown-btn" class="action-btn dropdown-trigger">{{ _('tb_save_menu') }}</button>
                     <div class="save-dropdown-menu" id="save-dropdown-menu" aria-hidden="true">
-                        <button type="button" data-action="save" title="ブラウザに保存（次回自動読込）">💾 保存</button>
-                        <button type="button" data-action="load" title="保存したデータを読込">📂 読込</button>
-                        <button type="button" data-action="export-json" title="JSONファイルでダウンロード">📄 JSON保存</button>
-                        <button type="button" data-action="import" title="JSONファイルから読込">📁 ファイル読込</button>
-                        <button type="button" data-action="export-png" title="画像としてダウンロード">🖼️ PNG保存</button>
-                        <button type="button" data-action="add-to-notes" title="練習メモ帳にこの図を追加">📝 メニュー帳に追加</button>
+                        <button type="button" data-action="save" title="{{ _('tb_save_browser_title') }}">{{ _('tb_save_browser') }}</button>
+                        <button type="button" data-action="load" title="{{ _('tb_load_browser_title') }}">{{ _('tb_load_browser') }}</button>
+                        <button type="button" data-action="export-json" title="{{ _('tb_export_json_title') }}">{{ _('tb_export_json') }}</button>
+                        <button type="button" data-action="import" title="{{ _('tb_import_json_title') }}">{{ _('tb_import_json') }}</button>
+                        <button type="button" data-action="export-png" title="{{ _('tb_export_png_title') }}">{{ _('tb_export_png') }}</button>
+                        <button type="button" data-action="add-to-notes" title="{{ _('tb_add_notes_title') }}">{{ _('tb_add_notes') }}</button>
                     </div>
                 </div>
             </div>
 
             <div class="tool-group saved-board-group">
-                <h3>定番ボード</h3>
+                <h3>{{ _('tb_saved_boards') }}</h3>
                 <div class="saved-board-add-row">
-                    <input type="text" id="saved-board-name-input" maxlength="32" placeholder="例: 3対2の崩し" aria-label="定番ボード名" autocomplete="off" enterkeyhint="done">
-                    <button type="button" id="saved-board-save-btn" class="action-btn small">保存</button>
+                    <input type="text" id="saved-board-name-input" maxlength="32" placeholder="{{ _('tb_saved_board_ph') }}" aria-label="{{ _('tb_saved_board_name_aria') }}" autocomplete="off" enterkeyhint="done">
+                    <button type="button" id="saved-board-save-btn" class="action-btn small">{{ _('tb_saved_board_save') }}</button>
                 </div>
                 <div class="saved-board-actions">
-                    <button type="button" id="saved-board-overwrite-btn" class="action-btn small" title="選択中の定番ボードを現在の配置で更新">選択を上書き</button>
+                    <button type="button" id="saved-board-overwrite-btn" class="action-btn small" title="{{ _('tb_overwrite_title') }}">{{ _('tb_overwrite_selected') }}</button>
                 </div>
-                <p class="tool-hint" id="saved-board-hint">保存するとログイン中アカウントに同期されます</p>
-                <div id="saved-board-list" class="saved-board-list" role="list" aria-label="定番ボード一覧"></div>
+                <p class="tool-hint" id="saved-board-hint">{{ _('tb_saved_board_hint') }}</p>
+                <div id="saved-board-list" class="saved-board-list" role="list" aria-label="{{ _('tb_saved_list_aria') }}"></div>
             </div>
         </aside>
 
@@ -118,46 +118,47 @@
             <div id="tactical-container"></div>
         </section>
 
-        <aside class="scene-panel animation-panel" aria-label="場面と再生">
-            <h2 class="animation-panel-title">場面</h2>
+        <aside class="scene-panel animation-panel" aria-label="{{ _('panel_scenes_aria') }}">
+            <h2 class="animation-panel-title">{{ _('tb_scenes') }}</h2>
             <div class="animation-list-toolbar">
-                <span class="animation-section-title">一覧</span>
-                <button type="button" id="btn-add-effect" class="action-btn add-effect-btn" title="現在の配置を場面として追加">+ 追加</button>
+                <span class="animation-section-title">{{ _('tb_scene_list') }}</span>
+                <button type="button" id="btn-add-effect" class="action-btn add-effect-btn" title="{{ _('tb_add_scene_title') }}">{{ _('tb_add_scene') }}</button>
             </div>
             <div class="animation-list-group">
                 <div id="animation-list" class="animation-list" role="list"></div>
             </div>
 
             <div class="animation-playback-group">
-                <div class="animation-section-title">再生</div>
+                <div class="animation-section-title">{{ _('tb_playback') }}</div>
                 <div class="animation-controls-row">
-                    <button type="button" id="btn-play" class="anim-btn play-btn" title="再生 (Space)">再生</button>
-                    <button type="button" id="btn-stop" class="anim-btn stop-btn" title="停止">⏹ 停止</button>
+                    <button type="button" id="btn-play" class="anim-btn play-btn" title="{{ _('tb_play_title') }}">{{ _('tb_play') }}</button>
+                    <button type="button" id="btn-stop" class="anim-btn stop-btn" title="{{ _('tb_stop_title') }}">{{ _('tb_stop') }}</button>
                 </div>
                 <div class="timing-group">
-                    <label for="anim-speed">表示時間:</label>
-                    <select id="anim-speed" aria-label="フレーム間の表示時間">
-                        <option value="0.5">0.5秒</option>
-                        <option value="1" selected>1秒</option>
-                        <option value="1.5">1.5秒</option>
-                        <option value="2">2秒</option>
-                        <option value="3">3秒</option>
+                    <label for="anim-speed">{{ _('tb_frame_duration') }}</label>
+                    <select id="anim-speed" aria-label="{{ _('tb_speed_aria') }}">
+                        <option value="0.5">{{ _('tb_sec_half') }}</option>
+                        <option value="1" selected>{{ _('tb_sec_1') }}</option>
+                        <option value="1.5">{{ _('tb_sec_1_5') }}</option>
+                        <option value="2">{{ _('tb_sec_2') }}</option>
+                        <option value="3">{{ _('tb_sec_3') }}</option>
                     </select>
                 </div>
-                <p class="shortcut-hint">Space: 再生/一時停止</p>
+                <p class="shortcut-hint">{{ _('tb_shortcut_space') }}</p>
             </div>
         </aside>
     </main>
 
     <footer class="tactical-footer">
-        <p><a href="/">ホーム</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p>{{ _('footer_rights', year=2026) }}</p>
+        <p><a href="/">{{ _('nav_home') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
     <input type="file" id="file-input" accept=".json" style="display: none">
 
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
-    <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=17"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=18"></script>
 </body>
 </html>

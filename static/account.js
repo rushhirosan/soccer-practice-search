@@ -152,15 +152,15 @@
         return j;
       }
       if (r.status === 401) {
-        throw new Error('ニックネームまたはパスワードが正しくありません');
+        throw new Error(typeof uiS === 'function' ? uiS('js_acc_wrong_password') : 'ニックネームまたはパスワードが正しくありません');
       }
       if (r.status === 400 || r.status === 403) {
-        throw new Error('セキュリティトークンが無効です。ページを再読み込みしてからお試しください。');
+        throw new Error(typeof uiS === 'function' ? uiS('js_acc_csrf_invalid') : 'セキュリティトークンが無効です。ページを再読み込みしてからお試しください。');
       }
       if (r.status === 429) {
-        throw new Error('試行回数が多すぎます。しばらく待ってからお試しください。');
+        throw new Error(typeof uiS === 'function' ? uiS('js_acc_rate_limit') : '試行回数が多すぎます。しばらく待ってからお試しください。');
       }
-      throw new Error('サーバーから予期しない応答でした。しばらくしてからお試しください。');
+      throw new Error(typeof uiS === 'function' ? uiS('js_acc_server_error') : 'サーバーから予期しない応答でした。しばらくしてからお試しください。');
     });
   }
 
@@ -196,7 +196,7 @@
           password: document.getElementById('reg-pw').value
         }).then(function (r) {
           return parsePostJsonResponse(r).then(function (j) {
-            if (!r.ok) throw new Error(j.error || '登録に失敗しました');
+            if (!r.ok) throw new Error(j.error || (typeof uiS === 'function' ? uiS('js_acc_register_fail') : '登録に失敗しました'));
             return j;
           });
         }).then(function (j) {
@@ -204,7 +204,7 @@
             showLoggedIn(j.nickname || '');
             if (window.soccerRefreshAuthAndSync) window.soccerRefreshAuthAndSync();
             showRecoveryModal(j.recovery_secret);
-            msg(elMsg, '回復用キーを必ず保存してください。');
+            msg(elMsg, typeof uiS === 'function' ? uiS('js_acc_save_recovery') : '回復用キーを必ず保存してください。');
           } else {
             stayOnAccountAfterAuth('register', j.nickname || '');
           }
@@ -221,7 +221,7 @@
         if (!ta) return;
         ta.select();
         document.execCommand('copy');
-        msg(elMsg, 'クリップボードにコピーしました。');
+        msg(elMsg, typeof uiS === 'function' ? uiS('js_acc_copied') : 'クリップボードにコピーしました。');
       });
     }
 
@@ -244,7 +244,7 @@
           password: document.getElementById('login-pw').value
         }).then(function (r) {
           return parsePostJsonResponse(r).then(function (j) {
-            if (!r.ok) throw new Error(j.error || 'ログインに失敗しました');
+            if (!r.ok) throw new Error(j.error || (typeof uiS === 'function' ? uiS('js_acc_login_fail') : 'ログインに失敗しました'));
             return j;
           });
         }).then(function (j) {
@@ -266,11 +266,11 @@
           new_password: document.getElementById('reset-newpw').value
         }).then(function (r) {
           return parsePostJsonResponse(r).then(function (j) {
-            if (!r.ok) throw new Error(j.error || '再設定に失敗しました');
+            if (!r.ok) throw new Error(j.error || (typeof uiS === 'function' ? uiS('js_acc_reset_fail') : '再設定に失敗しました'));
             return j;
           });
         }).then(function () {
-          msg(elMsg, 'パスワードを再設定しました。ログインしてください。');
+          msg(elMsg, typeof uiS === 'function' ? uiS('js_acc_reset_ok') : 'パスワードを再設定しました。ログインしてください。');
           setTab('login');
           var det = document.getElementById('account-reset-details');
           if (det) det.removeAttribute('open');
@@ -290,7 +290,7 @@
           }
           showLoggedOut();
           setTab('login');
-          msg(elMsg, 'ログアウトしました。');
+          msg(elMsg, typeof uiS === 'function' ? uiS('js_acc_logged_out') : 'ログアウトしました。');
           if (window.soccerRefreshAuthAndSync) window.soccerRefreshAuthAndSync();
         });
       });
@@ -306,11 +306,11 @@
           new_password: document.getElementById('new-pw').value
         }).then(function (r) {
           return parsePostJsonResponse(r).then(function (j) {
-            if (!r.ok) throw new Error(j.error || '変更に失敗しました');
+            if (!r.ok) throw new Error(j.error || (typeof uiS === 'function' ? uiS('js_acc_change_fail') : '変更に失敗しました'));
             return j;
           });
         }).then(function () {
-          msg(elMsg, 'パスワードを変更しました。');
+          msg(elMsg, typeof uiS === 'function' ? uiS('js_acc_change_ok') : 'パスワードを変更しました。');
           document.getElementById('old-pw').value = '';
           document.getElementById('new-pw').value = '';
         }).catch(function (err) {
@@ -323,17 +323,17 @@
     if (formDel) {
       formDel.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (!window.confirm('本当にアカウントと同期データを削除しますか？')) return;
+        if (!window.confirm(typeof uiS === 'function' ? uiS('js_acc_delete_confirm') : '本当にアカウントと同期データを削除しますか？')) return;
         msg(elMsg, '');
         postJsonAuth('/auth/delete-account', {
           password: document.getElementById('delete-pw').value
         }).then(function (r) {
           return parsePostJsonResponse(r).then(function (j) {
-            if (!r.ok) throw new Error(j.error || '削除に失敗しました');
+            if (!r.ok) throw new Error(j.error || (typeof uiS === 'function' ? uiS('js_acc_delete_fail') : '削除に失敗しました'));
             return j;
           });
         }).then(function () {
-          msg(elMsg, 'アカウントを削除しました。');
+          msg(elMsg, typeof uiS === 'function' ? uiS('js_acc_deleted') : 'アカウントを削除しました。');
           if (typeof window.soccerClearSyncedUserDataOnLogout === 'function') {
             window.soccerClearSyncedUserDataOnLogout();
           }

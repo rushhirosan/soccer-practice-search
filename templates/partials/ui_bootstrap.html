@@ -1,0 +1,6 @@
+<script>
+  window.__UI_LOCALE__ = {{ ui_locale | tojson }};
+  window.__UI_STRINGS__ = {{ ui_js_strings | tojson }};
+  window.__FORMATION_LABELS__ = {{ ui_formation_labels | tojson }};
+</script>
+<script src="{{ url_for('static', filename='ui-i18n.js') }}?v=1"></script>

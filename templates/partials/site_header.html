@@ -1,41 +1,46 @@
 {# active_nav: home | board | favorites | notes | account | about | privacy（その他は未選択） #}
+{% include 'partials/ui_bootstrap.html' %}
 {% set nav = active_nav|default('') %}
 <header class="site-header">
   <div class="site-header__inner">
     <a href="/" class="site-header__brand">
       <span class="site-header__brand-mark" aria-hidden="true">⚽</span>
       <span class="site-header__brand-text">
-        <span class="site-header__title">少年サッカードリル</span>
-        <span class="site-header__beta" aria-label="ベータ版">Beta</span>
+        <span class="site-header__title">{{ _('brand_title') }}</span>
+        <span class="site-header__beta" aria-label="{{ _('beta_aria') }}">Beta</span>
       </span>
     </a>
     <div class="site-header__end">
+    <div class="site-header__lang" role="navigation" aria-label="{{ _('lang_switch_aria') }}">
+      <a href="{{ url_for('set_language', code='ja') }}" class="{% if ui_locale == 'ja' %}is-active{% endif %}">{{ _('lang_switch_ja') }}</a>
+      <a href="{{ url_for('set_language', code='en') }}" class="{% if ui_locale == 'en' %}is-active{% endif %}">{{ _('lang_switch_en') }}</a>
+    </div>
     <a href="/account" id="site-header-auth-chip" class="site-header__auth-chip hidden" aria-hidden="true">
       <span class="site-header__auth-dot" aria-hidden="true"></span>
-      <span id="site-header-auth-label" class="site-header__auth-label">ログイン中</span>
+      <span id="site-header-auth-label" class="site-header__auth-label">{{ _('js_logged_in') }}</span>
     </a>
-    <button type="button" class="site-header__menu-btn" id="site-header-menu-btn" aria-expanded="false" aria-controls="site-header-nav" aria-label="メニューを開く">
+    <button type="button" class="site-header__menu-btn" id="site-header-menu-btn" aria-expanded="false" aria-controls="site-header-nav" aria-label="{{ _('nav_open') }}">
       <span class="site-header__menu-icon" aria-hidden="true"></span>
     </button>
-    <nav class="site-header__nav" id="site-header-nav" aria-label="メインナビゲーション">
+    <nav class="site-header__nav" id="site-header-nav" aria-label="{{ _('nav_main') }}">
       <ul class="site-header__list">
         <li>
-          <a href="/" class="site-header__link{% if nav == 'home' %} is-active{% endif %}"{% if nav == 'home' %} aria-current="page"{% endif %}>ホーム</a>
+          <a href="/" class="site-header__link{% if nav == 'home' %} is-active{% endif %}"{% if nav == 'home' %} aria-current="page"{% endif %}>{{ _('nav_home') }}</a>
         </li>
         <li>
-          <a href="/board" class="site-header__link{% if nav == 'board' %} is-active{% endif %}"{% if nav == 'board' %} aria-current="page"{% endif %}>ボード</a>
+          <a href="/board" class="site-header__link{% if nav == 'board' %} is-active{% endif %}"{% if nav == 'board' %} aria-current="page"{% endif %}>{{ _('nav_board') }}</a>
         </li>
         <li>
-          <a href="/favorites" class="site-header__link nav-with-badge{% if nav == 'favorites' %} is-active{% endif %}"{% if nav == 'favorites' %} aria-current="page"{% endif %}>お気に入り<span id="favorites-badge" class="nav-badge" aria-label="お気に入りの動画数" style="display:none;"></span></a>
+          <a href="/favorites" class="site-header__link nav-with-badge{% if nav == 'favorites' %} is-active{% endif %}"{% if nav == 'favorites' %} aria-current="page"{% endif %}>{{ _('nav_favorites') }}<span id="favorites-badge" class="nav-badge" aria-label="{{ _('nav_favorites_badge_aria') }}" style="display:none;"></span></a>
         </li>
         <li>
-          <a href="/practice-notes" id="practice-notes-link" class="site-header__link nav-with-badge{% if nav == 'notes' %} is-active{% endif %}"{% if nav == 'notes' %} aria-current="page"{% endif %}>メモ帳<span id="practice-notes-badge" class="nav-badge" aria-label="選んだメニュー数" style="display:none;"></span></a>
+          <a href="/practice-notes" id="practice-notes-link" class="site-header__link nav-with-badge{% if nav == 'notes' %} is-active{% endif %}"{% if nav == 'notes' %} aria-current="page"{% endif %}>{{ _('nav_notes') }}<span id="practice-notes-badge" class="nav-badge" aria-label="{{ _('nav_notes_badge_aria') }}" style="display:none;"></span></a>
         </li>
         <li>
-          <a href="/account" class="site-header__link{% if nav == 'account' %} is-active{% endif %}"{% if nav == 'account' %} aria-current="page"{% endif %}>アカウント</a>
+          <a href="/account" class="site-header__link{% if nav == 'account' %} is-active{% endif %}"{% if nav == 'account' %} aria-current="page"{% endif %}>{{ _('nav_account') }}</a>
         </li>
         <li>
-          <a href="/about" class="site-header__link{% if nav == 'about' %} is-active{% endif %}"{% if nav == 'about' %} aria-current="page"{% endif %}>このサイトについて</a>
+          <a href="/about" class="site-header__link{% if nav == 'about' %} is-active{% endif %}"{% if nav == 'about' %} aria-current="page"{% endif %}>{{ _('nav_about') }}</a>
         </li>
       </ul>
     </nav>

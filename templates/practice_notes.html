@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ html_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>練習メモ帳 - 少年サッカードリル</title>
-    <meta name="description" content="検索した練習メニューを選んでメモを付けられるメニュー帳。練習計画の記録・保存も可能です。">
+    <title>{{ _('notes_title') }}</title>
+    <meta name="description" content="{{ _('notes_meta_desc') }}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ site_base_url }}/practice-notes">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -388,95 +388,93 @@
     {% include 'partials/site_header.html' %}
 
     <main class="practice-notes-page">
-        <h1>練習メモ・記録帳</h1>
-        <p class="subtitle">練習試合の結果と、日々の練習で思ったこと（気づき）を保存できます。</p>
+        <h1>{{ _('notes_h1') }}</h1>
+        <p class="subtitle">{{ _('notes_sub') }}</p>
         <p id="practice-notes-edit-hint" class="practice-notes-edit-hint no-print" role="status" aria-live="polite" hidden></p>
 
         <section class="notes-section" id="record-input-section">
-            <div class="notes-tabs no-print" role="tablist" aria-label="記録の種類">
+            <div class="notes-tabs no-print" role="tablist" aria-label="{{ _('notes_tabs_aria') }}">
                 <button type="button" class="notes-tab is-active" id="tab-btn-match" data-target="tab-match" role="tab" aria-selected="true" aria-controls="tab-match">
-                    試合結果
+                    {{ _('tab_match') }}
                 </button>
                 <button type="button" class="notes-tab" id="tab-btn-daily" data-target="tab-daily" role="tab" aria-selected="false" aria-controls="tab-daily">
-                    日々の気づき
+                    {{ _('tab_daily') }}
                 </button>
             </div>
 
             <div class="notes-tab-panels">
                 <div id="tab-match" class="notes-tab-panel is-active" role="tabpanel" aria-labelledby="tab-btn-match">
-                    <h2>試合結果</h2>
+                    <h2>{{ _('notes_match_h2') }}</h2>
                     <div class="form-grid">
                         <label class="form-field">
-                            <span>日付</span>
+                            <span>{{ _('label_date') }}</span>
                             <span class="form-field-control form-field-control--date">
                                 <input type="date" id="match-date" />
                             </span>
                         </label>
 
                         <label class="form-field">
-                            <span>対戦相手</span>
+                            <span>{{ _('label_opponent') }}</span>
                             <span class="form-field-control">
-                                <input type="text" id="match-opponent" placeholder="例: ○○SC" autocomplete="off" />
+                                <input type="text" id="match-opponent" placeholder="{{ _('ph_opponent') }}" autocomplete="off" />
                             </span>
                         </label>
 
                         <div class="match-games-block form-field">
-                            <span class="match-games-heading">各試合（同じ日・同じ相手で複数試合がある場合は「試合を追加」）</span>
-                            <div id="match-games-list" class="match-games-list" aria-label="試合一覧入力"></div>
-                            <button type="button" id="btn-add-match-game" class="btn-secondary btn-add-match-game no-print">試合を追加</button>
+                            <span class="match-games-heading">{{ _('match_games_heading') }}</span>
+                            <div id="match-games-list" class="match-games-list" aria-label="{{ _('notes_match_h2') }}"></div>
+                            <button type="button" id="btn-add-match-game" class="btn-secondary btn-add-match-game no-print">{{ _('btn_add_game') }}</button>
                         </div>
                     </div>
 
                     <div class="action-buttons no-print">
-                        <button type="button" id="btn-save-match" class="btn-primary">保存</button>
-                        <button type="button" id="btn-clear-match" class="btn-secondary">クリア</button>
+                        <button type="button" id="btn-save-match" class="btn-primary">{{ _('btn_save') }}</button>
+                        <button type="button" id="btn-clear-match" class="btn-secondary">{{ _('btn_clear') }}</button>
                     </div>
                 </div>
 
                 <div id="tab-daily" class="notes-tab-panel" role="tabpanel" aria-labelledby="tab-btn-daily">
-                    <h2>日々の気づき</h2>
+                    <h2>{{ _('notes_daily_h2') }}</h2>
                     <div class="form-grid">
                         <label class="form-field">
-                            <span>日付</span>
+                            <span>{{ _('label_date') }}</span>
                             <span class="form-field-control form-field-control--date">
                                 <input type="date" id="daily-date" />
                             </span>
                         </label>
 
                         <label class="form-field">
-                            <span>メモ</span>
+                            <span>{{ _('label_memo') }}</span>
                             <span class="form-field-control">
-                                <textarea id="daily-content" class="memo-textarea" placeholder="例：
-・今日の狙い
-・うまくいった点
-・次回への改善"></textarea>
+                                <textarea id="daily-content" class="memo-textarea" placeholder="{{ _('daily_memo_placeholder') }}"></textarea>
                             </span>
                         </label>
                     </div>
 
                     <div class="action-buttons no-print">
-                        <button type="button" id="btn-save-daily" class="btn-primary">保存</button>
-                        <button type="button" id="btn-clear-daily" class="btn-secondary">クリア</button>
+                        <button type="button" id="btn-save-daily" class="btn-primary">{{ _('btn_save') }}</button>
+                        <button type="button" id="btn-clear-daily" class="btn-secondary">{{ _('btn_clear') }}</button>
                     </div>
                 </div>
             </div>
         </section>
 
         <section class="notes-section" id="saved-records-section">
-            <h2>保存した記録</h2>
+            <h2>{{ _('saved_records_h2') }}</h2>
             <div id="empty-records" class="empty-state">
-                <p>保存した記録はありません。</p>
+                <p>{{ _('empty_records') }}</p>
             </div>
             <div id="saved-records-container"></div>
         </section>
     </main>
 
     <footer>
-        <p><a href="/">ホーム</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p>{{ _('footer_rights', year=2026) }}</p>
+        <p><a href="/">{{ _('nav_home') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
-    <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=7"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
+    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=8"></script>
 </body>
 </html>

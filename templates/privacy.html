@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ html_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>プライバシーポリシー - 少年サッカードリル</title>
+    <title>{{ _('privacy_title') }}</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="少年サッカードリルのプライバシーポリシーです。当サイトでの個人情報の取り扱いについて説明しています。">
-    <meta name="keywords" content="プライバシーポリシー,個人情報,少年サッカー,少年サッカードリル">
-    <meta name="author" content="少年サッカードリル">
+    <meta name="description" content="{{ _('privacy_meta_desc') }}">
+    <meta name="keywords" content="{{ _('home_meta_keywords') }}">
+    <meta name="author" content="{{ _('meta_author') }}">
     <meta name="robots" content="index, follow">
     
     <!-- Canonical URL -->
@@ -21,10 +21,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="プライバシーポリシー - 少年サッカードリル">
-    <meta property="og:description" content="少年サッカードリルのプライバシーポリシーです。当サイトでの個人情報の取り扱いについて説明しています。">
+    <meta property="og:title" content="{{ _('privacy_title') }}">
+    <meta property="og:description" content="{{ _('privacy_meta_desc') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ site_base_url }}/privacy">
+    <meta property="og:locale" content="{{ og_locale }}">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=54">
     
@@ -44,53 +45,53 @@
     <main>
         <div class="content-wrapper">
             <section class="privacy-section">
-                <h2>1. 個人情報の収集について</h2>
-                <p>当サイトでは、以下の場合に個人情報を収集する場合があります：</p>
+                <h2>{{ _('privacy_h1') }}</h2>
+                <p>{{ _('privacy_p1') }}</p>
                 <ul>
-                    <li>フィードバックフォームからの送信時（名前、メールアドレス、メッセージ）</li>
-                    <li>Google Analyticsによるアクセス解析</li>
-                    <li>任意の「アカウント」登録時（ニックネーム、パスワードのハッシュ、回復用キーのハッシュ、およびお気に入り・メモ帳などの同期データ）。メールアドレスは収集しません。</li>
+                    <li>{{ _('privacy_li1') }}</li>
+                    <li>{{ _('privacy_li2') }}</li>
+                    <li>{{ _('privacy_li3') }}</li>
                 </ul>
                 
-                <h2>2. 個人情報の利用目的</h2>
-                <p>収集した個人情報は以下の目的で利用します：</p>
+                <h2>{{ _('privacy_h2') }}</h2>
+                <p>{{ _('privacy_p2') }}</p>
                 <ul>
-                    <li>サイトの改善とユーザー体験の向上</li>
-                    <li>お問い合わせへの対応</li>
-                    <li>アクセス解析によるサイト運営の最適化</li>
-                    <li>ログインした利用者の同期データの保存・表示（アカウントページから削除可能）</li>
+                    <li>{{ _('privacy_u2a') }}</li>
+                    <li>{{ _('privacy_u2b') }}</li>
+                    <li>{{ _('privacy_u2c') }}</li>
+                    <li>{{ _('privacy_u2d') }}</li>
                 </ul>
                 
-                <h2>3. 個人情報の管理</h2>
-                <p>当サイトでは、個人情報の正確性及び安全性確保のために、セキュリティに万全の対策を講じています。</p>
+                <h2>{{ _('privacy_h3') }}</h2>
+                <p>{{ _('privacy_p3') }}</p>
                 
-                <h2>4. 個人情報の第三者への開示・提供の禁止</h2>
-                <p>当サイトでは、ユーザーよりお預かりした個人情報を適切に管理し、以下のいずれかに該当する場合を除き、個人情報を第三者に開示いたしません。</p>
+                <h2>{{ _('privacy_h4') }}</h2>
+                <p>{{ _('privacy_p4') }}</p>
                 <ul>
-                    <li>ユーザーの同意がある場合</li>
-                    <li>法令に基づき開示することが必要である場合</li>
+                    <li>{{ _('privacy_u4a') }}</li>
+                    <li>{{ _('privacy_u4b') }}</li>
                 </ul>
                 
-                <h2>5. アクセス解析ツールについて</h2>
-                <p>当サイトでは、Googleによるアクセス解析ツール「Google Analytics」を利用しています。このGoogle Analyticsはトラフィックデータの収集のためにCookieを使用しています。このトラフィックデータは匿名で収集されており、個人を特定するものではありません。</p>
+                <h2>{{ _('privacy_h5') }}</h2>
+                <p>{{ _('privacy_p5') }}</p>
                 
-                <h2>6. プライバシーポリシーの変更について</h2>
-                <p>当サイトは、必要に応じて、このプライバシーポリシーの内容を変更することがあります。その場合、変更内容をサイト上でお知らせいたします。</p>
+                <h2>{{ _('privacy_h6') }}</h2>
+                <p>{{ _('privacy_p6') }}</p>
                 
-                <h2>7. お問い合わせ</h2>
-                <p>当サイトのプライバシーポリシーに関するお問い合わせは、<a href="/about">お問い合わせフォーム</a>からお願いいたします。</p>
+                <h2>{{ _('privacy_h7') }}</h2>
+                <p>{{ _('privacy_p7') }}<a href="/about">{{ _('privacy_contact_link') }}</a>{{ _('privacy_p7_suffix') }}</p>
                 
-                <p><strong>制定日：2024年1月1日</strong></p>
+                <p><strong>{{ _('privacy_effective') }}</strong></p>
             </section>
         </div>
     </main>
     
     <footer>
-        <p>&copy; 2026 少年サッカードリル. All rights reserved.</p>
-        <p><a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p>{{ _('footer_rights', year=2026) }}</p>
+        <p><a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
-    <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
 </body>
 </html>

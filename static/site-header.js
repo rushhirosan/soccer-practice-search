@@ -108,7 +108,7 @@
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'password-field__toggle';
-      btn.setAttribute('aria-label', 'パスワードを表示');
+      btn.setAttribute('aria-label', typeof uiS === 'function' ? uiS('js_pw_show') : 'パスワードを表示');
       btn.setAttribute('aria-pressed', 'false');
       btn.innerHTML = SVG_EYE + SVG_EYE_OFF;
       wrap.appendChild(btn);
@@ -117,7 +117,9 @@
         var visible = input.type === 'text';
         wrap.classList.toggle('is-visible', visible);
         btn.setAttribute('aria-pressed', visible ? 'true' : 'false');
-        btn.setAttribute('aria-label', visible ? 'パスワードを隠す' : 'パスワードを表示');
+        btn.setAttribute('aria-label', visible
+          ? (typeof uiS === 'function' ? uiS('js_pw_hide') : 'パスワードを隠す')
+          : (typeof uiS === 'function' ? uiS('js_pw_show') : 'パスワードを表示'));
       }
 
       btn.addEventListener('click', function (e) {
@@ -205,13 +207,18 @@
     var label = document.getElementById('site-header-auth-label');
     if (!chip || !label) return;
     if (j && j.logged_in && j.nickname) {
-      label.textContent = 'ログイン中 · ' + j.nickname;
+      var nick = j.nickname;
+      label.textContent = typeof uiS === 'function'
+        ? uiS('js_auth_chip').replace('{nick}', nick)
+        : ('ログイン中 · ' + nick);
       chip.classList.remove('hidden');
       chip.setAttribute('aria-hidden', 'false');
-      chip.setAttribute('aria-label', 'ログイン中: ' + j.nickname + '。アカウントページへ');
+      chip.setAttribute('aria-label', typeof uiS === 'function'
+        ? uiS('js_logged_in_chip').replace('{nick}', nick)
+        : ('ログイン中: ' + nick + '。アカウントページへ'));
     } else {
       chip.classList.add('hidden');
-      label.textContent = 'ログイン中';
+      label.textContent = typeof uiS === 'function' ? uiS('js_logged_in') : 'ログイン中';
       chip.setAttribute('aria-hidden', 'true');
       chip.removeAttribute('aria-label');
     }

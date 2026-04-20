@@ -11,6 +11,7 @@ import psycopg2
 from typing import Optional, Any
 from dotenv import load_dotenv
 from utilities import app_user_store
+from utilities import ui_i18n
 import threading
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -62,9 +63,47 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 csrf = CSRFProtect(app)
 
 
+@app.before_request
+def _apply_ui_locale():
+    raw = (request.args.get("lang") or "").strip().lower()
+    if raw in ui_i18n.SUPPORTED_LOCALES:
+        session[ui_i18n.UI_LOCALE_SESSION_KEY] = raw
+        session.permanent = True
+    g.ui_locale = ui_i18n.resolve_locale(request, session)
+
+
+@app.after_request
+def _persist_ui_locale_cookie(response):
+    loc = getattr(g, "ui_locale", None)
+    if loc in ui_i18n.SUPPORTED_LOCALES:
+        response.set_cookie(
+            ui_i18n.UI_LOCALE_COOKIE,
+            loc,
+            max_age=60 * 60 * 24 * 400,
+            samesite="Lax",
+            path="/",
+            httponly=False,
+        )
+    return response
+
+
 @app.context_processor
 def inject_site_base_url():
-    return {"site_base_url": get_site_base_url()}
+    loc = getattr(g, "ui_locale", ui_i18n.DEFAULT_LOCALE)
+
+    def _(key: str, **kwargs):
+        return ui_i18n.t(loc, key, **kwargs)
+
+    return {
+        "site_base_url": get_site_base_url(),
+        "ui_locale": loc,
+        "html_lang": loc,
+        "_": _,
+        "ui_js_strings": ui_i18n.js_bundle(loc),
+        "ui_formation_labels": ui_i18n.formation_display_map(loc),
+        "og_locale": "ja_JP" if loc == "ja" else "en_US",
+        "json_ld_lang": loc,
+    }
 
 # セッション（ニックネームログイン）
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
@@ -614,6 +653,28 @@ def close_db(e: Optional[Any] = None) -> None:
 def index():
     logger.info("Starting Flask application")
     return render_template('home.html')
+
+
+@app.route('/set-language/<code>')
+def set_language(code: str):
+    """Persist UI language (ja/en) and return to the previous same-origin page."""
+    c = (code or "").strip().lower()
+    if c in ui_i18n.SUPPORTED_LOCALES:
+        session[ui_i18n.UI_LOCALE_SESSION_KEY] = c
+        session.permanent = True
+    dest = '/'
+    ref = request.referrer or ''
+    try:
+        from urllib.parse import urlparse
+
+        pr = urlparse(ref)
+        origin = urlparse(request.url_root)
+        if pr.scheme in ('http', 'https') and pr.netloc == origin.netloc:
+            path = pr.path or '/'
+            dest = path + (('?' + pr.query) if pr.query else '')
+    except Exception:
+        pass
+    return redirect(dest)
 
 
 @app.route('/health')

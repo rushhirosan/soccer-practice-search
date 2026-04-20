@@ -6,6 +6,10 @@
 (function () {
   'use strict';
 
+  function tr(k) {
+    return typeof uiS === 'function' ? uiS(k) : k;
+  }
+
   // 新UI（試合結果 / 気づき）: `practice_notes.html` の場合のみこちらを有効化
   if (document.getElementById('saved-records-container')) {
     const SAVED_MATCH_RESULTS_KEY = 'soccer_saved_match_results';
@@ -34,7 +38,7 @@
         localStorage.setItem(key, JSON.stringify(list));
         if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       } catch (e) {
-        console.warn('保存失敗:', e);
+        console.warn(tr('js_pn_save_fail'), e);
       }
     }
 
@@ -44,7 +48,7 @@
         // isoDate = YYYY-MM-DD
         const [y, m, d] = isoDate.split('-').map(Number);
         const dt = new Date(y, m - 1, d);
-        return dt.toLocaleDateString('ja-JP');
+        return dt.toLocaleDateString((typeof window !== 'undefined' && window.__UI_LOCALE__ === 'en') ? 'en-US' : 'ja-JP');
       } catch {
         return isoDate || '-';
       }
@@ -79,13 +83,13 @@
     }
 
     function matchRecordTitleText(entry) {
-      const opponent = entry.opponent ? `vs ${entry.opponent}` : 'vs（未設定）';
+      const opponent = entry.opponent ? `vs ${entry.opponent}` : tr('js_pn_vs_unset');
       const games = normalizeMatchGames(entry);
       if (games.length === 0) return opponent;
       if (games.length === 1 && games[0].score) {
         return `${opponent} / ${games[0].score}`;
       }
-      return `${opponent}（${games.length}試合）`;
+      return `${opponent}${tr('js_pn_games_count').replace('{n}', String(games.length))}`;
     }
 
     function matchRecordSummaryText(entry) {
@@ -94,7 +98,7 @@
       return games
         .map((g, i) => {
           const n = g.n || i + 1;
-          const parts = [`${n}試合目`];
+          const parts = [tr('js_pn_game_n').replace('{n}', String(n))];
           if (g.score) parts.push(g.score);
           if (g.events) parts.push(g.events);
           return parts.join(' ');
@@ -117,20 +121,20 @@
           <div class="match-game-row__label"></div>
           <div class="match-game-row__grid">
             <label class="form-field" style="margin:0">
-              <span>スコア</span>
+              <span>${tr('js_pn_score')}</span>
               <span class="form-field-control">
-                <input type="text" class="match-game-score" placeholder="例: 1-0、2-1（勝ち）" autocomplete="off" />
+                <input type="text" class="match-game-score" placeholder="${tr('js_pn_score_ph')}" autocomplete="off" />
               </span>
             </label>
             <label class="form-field" style="margin:0">
-              <span>得点者・失点 / 出来事</span>
+              <span>${tr('js_pn_events')}</span>
               <span class="form-field-control">
-                <textarea class="match-game-events memo-textarea" rows="3" placeholder="例：得点者 YY、失点の経緯…"></textarea>
+                <textarea class="match-game-events memo-textarea" rows="3" placeholder="${tr('js_pn_events_ph')}"></textarea>
               </span>
             </label>
           </div>
           <div class="match-game-row__actions">
-            <button type="button" class="match-game-row__remove no-print" aria-label="この試合行を削除">この試合を削除</button>
+            <button type="button" class="match-game-row__remove no-print" aria-label="${tr('js_pn_remove_game_aria')}">${tr('js_pn_remove_game')}</button>
           </div>`;
       const scoreInput = row.querySelector('.match-game-score');
       const eventsTa = row.querySelector('.match-game-events');
@@ -152,7 +156,7 @@
       if (!matchGamesList) return;
       matchGamesList.querySelectorAll('.match-game-row').forEach((row, i) => {
         const lab = row.querySelector('.match-game-row__label');
-        if (lab) lab.textContent = `${i + 1}試合目`;
+        if (lab) lab.textContent = tr('js_pn_game_n').replace('{n}', String(i + 1));
         const btn = row.querySelector('.match-game-row__remove');
         if (btn) btn.style.display = matchGamesList.querySelectorAll('.match-game-row').length > 1 ? 'inline-block' : 'none';
       });
@@ -203,15 +207,15 @@
       const hint = document.getElementById('practice-notes-edit-hint');
       const btnMatch = document.getElementById('btn-save-match');
       const btnDaily = document.getElementById('btn-save-daily');
-      if (btnMatch) btnMatch.textContent = editingMatchId ? '更新' : '保存';
-      if (btnDaily) btnDaily.textContent = editingDailyId ? '更新' : '保存';
+      if (btnMatch) btnMatch.textContent = editingMatchId ? tr('js_pn_update') : tr('js_pn_save');
+      if (btnDaily) btnDaily.textContent = editingDailyId ? tr('js_pn_update') : tr('js_pn_save');
       if (hint) {
         if (editingMatchId) {
           hint.hidden = false;
-          hint.textContent = '試合結果を編集中です。「更新」で上書き保存、「クリア」で編集をやめます。';
+          hint.textContent = tr('js_pn_hint_match_edit');
         } else if (editingDailyId) {
           hint.hidden = false;
-          hint.textContent = '日々の気づきを編集中です。「更新」で上書き保存、「クリア」で編集をやめます。';
+          hint.textContent = tr('js_pn_hint_daily_edit');
         } else {
           hint.hidden = true;
           hint.textContent = '';
@@ -300,14 +304,14 @@
 
           const badge = document.createElement('div');
           badge.className = 'record-type-badge';
-          badge.textContent = entry.type === 'match' ? '試合結果' : '日々の気づき';
+          badge.textContent = entry.type === 'match' ? tr('js_pn_badge_match') : tr('js_pn_badge_daily');
 
           const title = document.createElement('div');
           title.className = 'record-title';
           if (entry.type === 'match') {
             title.textContent = matchRecordTitleText(entry);
           } else {
-            title.textContent = '今日の気づき';
+            title.textContent = tr('js_pn_daily_title');
           }
 
           left.appendChild(badge);
@@ -318,7 +322,7 @@
 
           const editBtn = document.createElement('button');
           editBtn.type = 'button';
-          editBtn.textContent = '編集';
+          editBtn.textContent = tr('js_pn_edit');
           editBtn.addEventListener('click', () => {
             if (entry.type === 'match') beginEditMatch(entry.id);
             else beginEditDaily(entry.id);
@@ -326,7 +330,7 @@
 
           const deleteBtn = document.createElement('button');
           deleteBtn.type = 'button';
-          deleteBtn.textContent = '削除';
+          deleteBtn.textContent = tr('js_pn_delete');
           deleteBtn.addEventListener('click', () => deleteEntry(entry.type, entry.id));
 
           actions.appendChild(editBtn);
@@ -353,7 +357,7 @@
 
     function deleteEntry(type, id) {
       if (!id) return;
-      if (!confirm('この記録を削除しますか？')) return;
+      if (!confirm(tr('js_pn_delete_record_confirm'))) return;
 
       if (type === 'match') {
         const matches = readList(SAVED_MATCH_RESULTS_KEY).filter((m) => m.id !== id);
@@ -416,11 +420,11 @@
           }
 
           if (!date || !opponent) {
-            alert('日付と対戦相手を入力してください。');
+            alert(tr('js_pn_alert_match_required'));
             return;
           }
           if (games.length === 0) {
-            alert('少なくとも1試合ぶん、スコアと得点者・出来事の両方を入力してください。');
+            alert(tr('js_pn_alert_match_game_required'));
             return;
           }
 
@@ -430,7 +434,7 @@
           if (editingMatchId) {
             const idx = list.findIndex((m) => m.id === editingMatchId);
             if (idx === -1) {
-              alert('編集対象の記録が見つかりませんでした。');
+              alert(tr('js_pn_alert_edit_missing'));
               clearEditing();
               return;
             }
@@ -481,7 +485,7 @@
           const content = (dailyContent && dailyContent.value ? dailyContent.value : '').trim();
 
           if (!date || !content) {
-            alert('日付とメモ本文を入力してください。');
+            alert(tr('js_pn_alert_daily_required'));
             return;
           }
 
@@ -490,7 +494,7 @@
           if (editingDailyId) {
             const idx = list.findIndex((d) => d.id === editingDailyId);
             if (idx === -1) {
-              alert('編集対象の記録が見つかりませんでした。');
+              alert(tr('js_pn_alert_edit_missing'));
               clearEditing();
               return;
             }
@@ -564,7 +568,7 @@
       if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       return true;
     } catch (e) {
-      console.warn('保存失敗:', e);
+      console.warn(tr('js_pn_save_fail'), e);
       return false;
     }
   }
@@ -584,7 +588,7 @@
       if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
       return true;
     } catch (e) {
-      console.warn('保存失敗:', e);
+      console.warn(tr('js_pn_save_fail'), e);
       return false;
     }
   }
@@ -634,9 +638,9 @@
       div.innerHTML = `
         <div class="menu-item-header">
           <span class="menu-item-title">${escapeHtml(item.title)}</span>
-          <button type="button" class="menu-item-remove" data-idx="${idx}" aria-label="削除">削除</button>
+          <button type="button" class="menu-item-remove" data-idx="${idx}" aria-label="${tr('js_pn_menu_remove_aria')}">${tr('js_pn_delete')}</button>
         </div>
-        <textarea class="menu-item-memo" placeholder="メモを入力..." data-idx="${idx}">${escapeHtml(item.memo || '')}</textarea>
+        <textarea class="menu-item-memo" placeholder="${tr('js_pn_memo_placeholder')}" data-idx="${idx}">${escapeHtml(item.memo || '')}</textarea>
       `;
       list.appendChild(div);
     });
@@ -687,21 +691,22 @@
     plans.forEach((plan, idx) => {
       const li = document.createElement('li');
       li.className = 'plan-card';
-      const dateStr = plan.date ? new Date(plan.date).toLocaleDateString('ja-JP') : '-';
+      const loc = (typeof window !== 'undefined' && window.__UI_LOCALE__ === 'en') ? 'en-US' : 'ja-JP';
+      const dateStr = plan.date ? new Date(plan.date).toLocaleDateString(loc) : '-';
       let boardHtml = '';
       if (plan.boardImage) {
-        boardHtml = `<img src="${plan.boardImage}" alt="ボード図" class="board-preview" style="max-width:200px;max-height:120px;">`;
+        boardHtml = `<img src="${plan.boardImage}" alt="${tr('js_pn_board_alt')}" class="board-preview" style="max-width:200px;max-height:120px;">`;
       }
       li.innerHTML = `
         <div class="plan-card-header">
-          <span class="plan-card-title">${escapeHtml(plan.title || '無題')}</span>
+          <span class="plan-card-title">${escapeHtml(plan.title || tr('js_pn_untitled'))}</span>
           <span class="plan-card-date">${escapeHtml(dateStr)}</span>
         </div>
-        <p style="font-size:0.9rem;color:var(--text-secondary);">${plan.items ? plan.items.length : 0} メニュー</p>
+        <p style="font-size:0.9rem;color:var(--text-secondary);">${tr('js_pn_menu_count').replace('{n}', String(plan.items ? plan.items.length : 0))}</p>
         ${boardHtml}
         <div class="plan-card-actions no-print">
-          <button type="button" class="btn-secondary plan-print-btn" data-idx="${idx}">印刷</button>
-          <button type="button" class="btn-secondary plan-delete-btn" data-idx="${idx}">削除</button>
+          <button type="button" class="btn-secondary plan-print-btn" data-idx="${idx}">${tr('js_pn_print')}</button>
+          <button type="button" class="btn-secondary plan-delete-btn" data-idx="${idx}">${tr('js_pn_delete')}</button>
         </div>
       `;
       ul.appendChild(li);
@@ -717,7 +722,7 @@
 
     ul.querySelectorAll('.plan-delete-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (!confirm('この練習計画を削除しますか？')) return;
+        if (!confirm(tr('js_pn_delete_plan_confirm'))) return;
         const idx = parseInt(btn.dataset.idx, 10);
         const plans = getSavedPlans();
         plans.splice(idx, 1);
@@ -730,12 +735,12 @@
   function importBoard() {
     const board = getPendingBoard();
     if (!board) {
-      alert('ボードから取り込むデータがありません。\nまずボードページで図を描き、「この図をメニュー帳に追加」をクリックしてください。');
+      alert(tr('js_pn_no_board_data'));
       return;
     }
     window.currentBoardData = board;
     clearPendingBoard();
-    alert('ボード図を取り込みました。練習計画として保存すると、この図も一緒に保存されます。');
+    alert(tr('js_pn_board_imported'));
   }
 
   function openSaveModal() {
@@ -749,10 +754,10 @@
   }
 
   function savePlan() {
-    const title = (document.getElementById('plan-title-input').value || '').trim() || '無題の練習計画';
+    const title = (document.getElementById('plan-title-input').value || '').trim() || tr('js_pn_untitled_plan');
     const items = getSelectedMenus();
     if (items.length === 0) {
-      alert('選んだメニューがありません。');
+      alert(tr('js_pn_no_menus'));
       return;
     }
 
@@ -788,7 +793,7 @@
   function printCurrentSelection() {
     const items = getSelectedMenus();
     if (items.length === 0) {
-      alert('印刷するメニューがありません。');
+      alert(tr('js_pn_no_print_menus'));
       return;
     }
 
@@ -817,7 +822,8 @@
   }
 
   function buildPrintHtml(items, boardInfo) {
-    const dateStr = new Date().toLocaleDateString('ja-JP');
+    const loc = (typeof window !== 'undefined' && window.__UI_LOCALE__ === 'en') ? 'en-US' : 'ja-JP';
+    const dateStr = new Date().toLocaleDateString(loc);
     let itemsHtml = items.map((it, i) => `
       <div style="margin-bottom:1rem;padding:0.75rem;border:1px solid #ddd;border-radius:8px;">
         <strong>${i + 1}. ${escapeHtml(it.title)}</strong>
@@ -828,13 +834,13 @@
 
     let boardHtml = '';
     if (boardInfo && boardInfo.imageDataUrl) {
-      boardHtml = `<div style="margin-top:1.5rem;page-break-inside:avoid;"><h3>練習ボード図</h3><img src="${boardInfo.imageDataUrl}" alt="ボード図" style="max-width:100%;max-height:400px;border:1px solid #ddd;"></div>`;
+      boardHtml = `<div style="margin-top:1.5rem;page-break-inside:avoid;"><h3>${tr('js_pn_print_board_heading')}</h3><img src="${boardInfo.imageDataUrl}" alt="${tr('js_pn_board_alt')}" style="max-width:100%;max-height:400px;border:1px solid #ddd;"></div>`;
     }
 
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>練習メニュー帳 - ${dateStr}</title></head><body style="font-family:sans-serif;padding:2rem;max-width:800px;margin:0 auto;">
-      <h1>練習メニュー帳</h1>
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${tr('js_pn_print_title').replace('{d}', dateStr)}</title></head><body style="font-family:sans-serif;padding:2rem;max-width:800px;margin:0 auto;">
+      <h1>${tr('js_pn_print_h1')}</h1>
       <p style="color:#666;">${dateStr}</p>
-      <h2>メニュー一覧</h2>
+      <h2>${tr('js_pn_print_menu_list')}</h2>
       ${itemsHtml}
       ${boardHtml}
       <script>window.onload=function(){window.print();}<\/script>

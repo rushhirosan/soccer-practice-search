@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ html_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>アカウント - 少年サッカードリル</title>
-    <meta name="description" content="ニックネームでログインし、お気に入りとメモを端末間で同期します。">
+    <title>{{ _('account_title') }}</title>
+    <meta name="description" content="{{ _('account_meta_desc') }}">
     <meta name="robots" content="noindex, follow">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=54">
@@ -17,49 +17,49 @@
     <main>
         <div class="content-wrapper account-page">
             <header class="account-page__header">
-                <h1 class="account-page__title">アカウント</h1>
-                <p class="account-page__lead">メールアドレスは不要です。ニックネームとパスワードでお気に入り・メモ帳などを同期できます。パスワード変更や削除はこのページからいつでも行えます。</p>
+                <h1 class="account-page__title">{{ _('account_h1') }}</h1>
+                <p class="account-page__lead">{{ _('account_lead') }}</p>
             </header>
 
             <!-- 登録直後のみ表示（ログイン後ビューに切り替わっても見える） -->
             <div id="account-recovery-modal" class="account-recovery-modal hidden" role="region" aria-labelledby="recovery-modal-title">
-                <h2 id="recovery-modal-title" class="account-recovery-modal__title">回復用キーを必ず保存してください</h2>
-                <p class="account-note">パスワードを忘れたときの再設定に必要です。紛失すると復旧できません。</p>
-                <textarea id="register-recovery-text" readonly rows="3" class="account-recovery__textarea" aria-label="回復用キー"></textarea>
+                <h2 id="recovery-modal-title" class="account-recovery-modal__title">{{ _('recovery_title') }}</h2>
+                <p class="account-note">{{ _('recovery_note') }}</p>
+                <textarea id="register-recovery-text" readonly rows="3" class="account-recovery__textarea" aria-label="{{ _('recovery_text_aria') }}"></textarea>
                 <div class="account-recovery-modal__actions">
-                    <button type="button" id="register-recovery-copy" class="account-btn-outline">コピー</button>
-                    <button type="button" id="register-recovery-dismiss" class="account-btn-primary">保存したので続行</button>
+                    <button type="button" id="register-recovery-copy" class="account-btn-outline">{{ _('btn_copy') }}</button>
+                    <button type="button" id="register-recovery-dismiss" class="account-btn-primary">{{ _('btn_saved_continue') }}</button>
                 </div>
             </div>
 
             <div id="account-logged-out" class="account-section">
                 <div class="account-card account-card--auth">
-                    <div class="account-tabs" role="tablist" aria-label="ログインまたは新規登録">
-                        <button type="button" class="account-tabs__btn is-active" role="tab" id="tab-login" aria-selected="true" aria-controls="panel-login" tabindex="0">ログイン</button>
-                        <button type="button" class="account-tabs__btn" role="tab" id="tab-register" aria-selected="false" aria-controls="panel-register" tabindex="-1">新規登録</button>
+                    <div class="account-tabs" role="tablist" aria-label="{{ _('account_tabs_aria') }}">
+                        <button type="button" class="account-tabs__btn is-active" role="tab" id="tab-login" aria-selected="true" aria-controls="panel-login" tabindex="0">{{ _('tab_login') }}</button>
+                        <button type="button" class="account-tabs__btn" role="tab" id="tab-register" aria-selected="false" aria-controls="panel-register" tabindex="-1">{{ _('tab_register') }}</button>
                     </div>
 
                     <div id="panel-login" role="tabpanel" aria-labelledby="tab-login" class="account-tab-panel" aria-hidden="false">
                         <form id="form-login" class="account-form" autocomplete="off">
-                            <label for="login-nick">ニックネーム</label>
+                            <label for="login-nick">{{ _('label_nickname') }}</label>
                             <input type="text" id="login-nick" name="nickname" required maxlength="24" autocomplete="username">
-                            <label for="login-pw">パスワード</label>
+                            <label for="login-pw">{{ _('label_password') }}</label>
                             <input type="password" id="login-pw" name="password" required autocomplete="current-password" data-password-enhanced>
-                            <button type="submit" class="account-btn-primary">ログイン</button>
+                            <button type="submit" class="account-btn-primary">{{ _('btn_do_login') }}</button>
                         </form>
 
                         <details class="account-details" id="account-reset-details">
-                            <summary class="account-details__summary">パスワードを忘れた場合</summary>
+                            <summary class="account-details__summary">{{ _('reset_summary') }}</summary>
                             <div class="account-details__body">
-                                <p class="account-note">登録時に表示した回復用キーが必要です。</p>
+                                <p class="account-note">{{ _('reset_note') }}</p>
                                 <form id="form-reset" class="account-form account-form--compact" autocomplete="off">
-                                    <label for="reset-nick">ニックネーム</label>
+                                    <label for="reset-nick">{{ _('label_reset_nick') }}</label>
                                     <input type="text" id="reset-nick" required maxlength="24">
-                                    <label for="reset-secret">回復用キー</label>
+                                    <label for="reset-secret">{{ _('label_recovery_key') }}</label>
                                     <input type="text" id="reset-secret" required autocomplete="off">
-                                    <label for="reset-newpw">新しいパスワード</label>
+                                    <label for="reset-newpw">{{ _('label_new_password') }}</label>
                                     <input type="password" id="reset-newpw" required minlength="8" autocomplete="new-password" data-password-enhanced>
-                                    <button type="submit" class="account-btn-primary account-btn-primary--secondary">パスワードを再設定</button>
+                                    <button type="submit" class="account-btn-primary account-btn-primary--secondary">{{ _('btn_reset_pw') }}</button>
                                 </form>
                             </div>
                         </details>
@@ -67,11 +67,11 @@
 
                     <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="account-tab-panel hidden" aria-hidden="true">
                         <form id="form-register" class="account-form" autocomplete="off">
-                            <label for="reg-nick">ニックネーム（2〜24文字）</label>
+                            <label for="reg-nick">{{ _('reg_nick_label') }}</label>
                             <input type="text" id="reg-nick" name="nickname" required maxlength="24" pattern="[\w\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\-]{2,24}" autocomplete="username">
-                            <label for="reg-pw">パスワード（8文字以上）</label>
+                            <label for="reg-pw">{{ _('reg_pw_label') }}</label>
                             <input type="password" id="reg-pw" name="password" required minlength="8" autocomplete="new-password" data-password-enhanced>
-                            <button type="submit" class="account-btn-primary">登録してログイン</button>
+                            <button type="submit" class="account-btn-primary">{{ _('btn_register_login') }}</button>
                         </form>
                     </div>
                 </div>
@@ -82,35 +82,35 @@
                     <div class="account-dashboard__user">
                         <span class="account-dashboard__avatar" aria-hidden="true">⚽</span>
                         <div>
-                            <p class="account-dashboard__label">ログイン中</p>
+                            <p class="account-dashboard__label">{{ _('dash_logged_in') }}</p>
                             <p id="account-nickname-line" class="account-dashboard__name"></p>
                         </div>
                     </div>
-                    <button type="button" id="btn-logout" class="account-btn-outline">ログアウト</button>
+                    <button type="button" id="btn-logout" class="account-btn-outline">{{ _('btn_logout') }}</button>
                 </div>
 
                 <section class="account-settings-card" aria-labelledby="account-security-heading">
-                    <h2 id="account-security-heading" class="account-settings-card__title">パスワード</h2>
+                    <h2 id="account-security-heading" class="account-settings-card__title">{{ _('settings_pw_heading') }}</h2>
                     <form id="form-change-pw" class="account-form account-form--compact">
-                        <label for="old-pw">現在のパスワード</label>
+                        <label for="old-pw">{{ _('label_old_pw') }}</label>
                         <input type="password" id="old-pw" required autocomplete="current-password" data-password-enhanced>
-                        <label for="new-pw">新しいパスワード</label>
+                        <label for="new-pw">{{ _('label_new_password') }}</label>
                         <input type="password" id="new-pw" required minlength="8" autocomplete="new-password" data-password-enhanced>
-                        <button type="submit" class="account-btn-primary">パスワードを変更</button>
+                        <button type="submit" class="account-btn-primary">{{ _('btn_change_pw') }}</button>
                     </form>
                 </section>
 
                 <details class="account-danger-zone" id="account-delete-details">
                     <summary class="account-danger-zone__summary" id="account-danger-heading">
-                        アカウントを削除
-                        <span class="account-danger-zone__hint">取り消せません。開いてから操作してください。</span>
+                        {{ _('delete_summary') }}
+                        <span class="account-danger-zone__hint">{{ _('delete_hint') }}</span>
                     </summary>
                     <div class="account-danger-zone__body">
-                        <p class="account-note account-note--danger">サーバーに保存した同期データもすべて削除されます。この操作は取り消せません。</p>
+                        <p class="account-note account-note--danger">{{ _('delete_warn') }}</p>
                         <form id="form-delete" class="account-form account-form--compact">
-                            <label for="delete-pw">パスワード（確認）</label>
+                            <label for="delete-pw">{{ _('label_delete_pw') }}</label>
                             <input type="password" id="delete-pw" required autocomplete="current-password" data-password-enhanced>
-                            <button type="submit" class="account-btn-danger account-btn-danger--full">アカウントを削除する</button>
+                            <button type="submit" class="account-btn-danger account-btn-danger--full">{{ _('btn_delete_account') }}</button>
                         </form>
                     </div>
                 </details>
@@ -121,12 +121,12 @@
     </main>
 
     <footer>
-        <p>&copy; 2026 少年サッカードリル. All rights reserved.</p>
-        <p><a href="/">ホーム</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p>{{ _('footer_rights', year=2026) }}</p>
+        <p><a href="/">{{ _('nav_home') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
-    <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
-    <script src="{{ url_for('static', filename='account.js') }}?v=5"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='account.js') }}?v=6"></script>
 </body>
 </html>

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ html_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>少年サッカードリル - 練習ドリル動画を簡単検索</title>
+    <title>{{ _('home_title') }}</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
-    <meta name="keywords" content="少年サッカー,サッカー,ドリル,練習,メニュー,コーチ,小学生,ジュニア,検索,動画,YouTube,指導,サッカー練習,サッカーコーチ">
-    <meta name="author" content="少年サッカードリル">
+    <meta name="description" content="{{ _('home_meta_desc') }}">
+    <meta name="keywords" content="{{ _('home_meta_keywords') }}">
+    <meta name="author" content="{{ _('meta_author') }}">
     <meta name="robots" content="index, follow">
-    <meta name="language" content="ja">
+    <meta name="language" content="{{ _('meta_language') }}">
     <meta name="revisit-after" content="7 days">
     <meta name="distribution" content="global">
     <meta name="rating" content="general">
@@ -25,20 +25,20 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="少年サッカードリル - 練習ドリル動画を簡単検索">
-    <meta property="og:description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
+    <meta property="og:title" content="{{ _('home_title') }}">
+    <meta property="og:description" content="{{ _('home_meta_desc') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ site_base_url }}/">
     <meta property="og:image" content="{{ site_base_url }}/static/soccer-og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="少年サッカードリル">
-    <meta property="og:locale" content="ja_JP">
+    <meta property="og:site_name" content="{{ _('brand_title') }}">
+    <meta property="og:locale" content="{{ og_locale }}">
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="少年サッカードリル - 練習ドリル動画を簡単検索">
-    <meta name="twitter:description" content="少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。">
+    <meta name="twitter:title" content="{{ _('home_title') }}">
+    <meta name="twitter:description" content="{{ _('home_meta_desc') }}">
     <meta name="twitter:image" content="{{ site_base_url }}/static/soccer-og-image.jpg">
     <meta name="twitter:site" content="@soccer_practice_search">
     
@@ -47,8 +47,8 @@
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "少年サッカードリル",
-        "description": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。",
+        "name": {{ _('brand_title') | tojson }},
+        "description": {{ _('home_meta_desc') | tojson }},
         "url": {{ site_base_url | tojson }},
         "potentialAction": {
             "@type": "SearchAction",
@@ -57,10 +57,10 @@
         },
         "publisher": {
             "@type": "Organization",
-            "name": "少年サッカードリル",
+            "name": {{ _('brand_title') | tojson }},
             "url": {{ site_base_url | tojson }}
         },
-        "inLanguage": "ja",
+        "inLanguage": {{ json_ld_lang | tojson }},
         "isAccessibleForFree": true
     }
     </script>
@@ -69,13 +69,13 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "少年サッカードリル",
-        "description": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。",
+        "name": {{ _('brand_title') | tojson }},
+        "description": {{ _('home_meta_desc') | tojson }},
         "url": {{ site_base_url | tojson }},
         "applicationCategory": "SportsApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript. Requires HTML5.",
-        "inLanguage": "ja",
+        "inLanguage": {{ json_ld_lang | tojson }},
         "isAccessibleForFree": true
     }
     </script>
@@ -99,58 +99,58 @@
     {% include 'partials/site_header.html' %}
     <main>
         <div class="tab-container">
-            <div class="home-screen-hint" role="region" aria-label="この画面でできること">
-                <p class="home-screen-hint__text">キーワードや目的・人数・レベルで練習動画を検索し、一覧から動画を開けます。☆ お気に入りに保存して整理できます。</p>
-                <p class="home-screen-hint__text home-screen-hint__text--secondary">少年サッカーのコーチ・指導者向けに、複数チャンネルの練習ドリルを横断して探せる検索です。メニュー選びの下調べや練習前のイメージづくりに使えます。</p>
+            <div class="home-screen-hint" role="region" aria-label="{{ _('home_screen_region') }}">
+                <p class="home-screen-hint__text">{{ _('home_hint_1') }}</p>
+                <p class="home-screen-hint__text home-screen-hint__text--secondary">{{ _('home_hint_2') }}</p>
             </div>
             <div class="tab-content">
-                <div id="tab1" class="tab-panel active" role="region" aria-label="検索と結果">
+                <div id="tab1" class="tab-panel active" role="region" aria-label="{{ _('results_region') }}">
                 <!-- tab1コンテンツ -->
                     <div class="content-wrapper">
                         <!-- サイドペイン - Google風2段構成 -->
-                        <aside class="search-container" aria-label="検索条件">
+                        <aside class="search-container" aria-label="{{ _('search_region') }}">
                             <!-- 検索バー（常に表示・Above the Fold） -->
                             <div class="search-primary">
                                 <div class="search-primary-field">
-                                    <input type="text" id="search-input" class="search-primary-input" placeholder="キーワードで検索" aria-label="検索キーワード" autocomplete="off">
+                                    <input type="text" id="search-input" class="search-primary-input" placeholder="{{ _('placeholder_keyword') }}" aria-label="{{ _('search_kw_aria') }}" autocomplete="off">
                                     <kbd class="search-primary-kbd" id="search-shortcut-kbd" aria-hidden="true">⌘K</kbd>
                                 </div>
-                                <button type="button" id="search-button" onclick="search()" aria-label="検索を実行" class="search-primary-btn">検索</button>
+                                <button type="button" id="search-button" onclick="search()" aria-label="{{ _('search_btn_aria') }}" class="search-primary-btn">{{ _('search_btn') }}</button>
                             </div>
                             <!-- 詳細条件（折りたたみ） -->
                             <details class="search-details" id="search-details">
                                 <summary class="search-details-toggle">
-                                    <span class="search-details-label">詳細条件で絞り込む</span>
+                                    <span class="search-details-label">{{ _('search_details') }}</span>
                                     <span class="search-details-icon" aria-hidden="true">▼</span>
                                 </summary>
                                 <div class="search-details-content">
-                                    <h2>選択</h2>
-                                    <label for="type-input">目的を選択</label>
-                                    <select id="type-input" aria-label="目的を選択">
-                                        <option value="">目的を選択</option>
+                                    <h2>{{ _('search_section_choice') }}</h2>
+                                    <label for="type-input">{{ _('label_purpose') }}</label>
+                                    <select id="type-input" aria-label="{{ _('label_purpose') }}">
+                                        <option value="">{{ _('opt_purpose') }}</option>
                                     </select>
-                                    <label for="players-input">人数を選択</label>
-                                    <select id="players-input" aria-label="人数を選択">
-                                        <option value="">人数を選択</option>
+                                    <label for="players-input">{{ _('label_players') }}</label>
+                                    <select id="players-input" aria-label="{{ _('label_players') }}">
+                                        <option value="">{{ _('opt_players') }}</option>
                                     </select>
-                                    <label for="level-input">レベルを選択</label>
-                                    <select id="level-input" aria-label="レベルを選択">
-                                        <option value="">レベルを選択</option>
+                                    <label for="level-input">{{ _('label_level') }}</label>
+                                    <select id="level-input" aria-label="{{ _('label_level') }}">
+                                        <option value="">{{ _('opt_level') }}</option>
                                     </select>
-                                    <label for="channel-input">チャネルを選択</label>
-                                    <select id="channel-input" aria-label="チャネルを選択">
-                                        <option value="">チャネルを選択</option>
+                                    <label for="channel-input">{{ _('label_channel') }}</label>
+                                    <select id="channel-input" aria-label="{{ _('label_channel') }}">
+                                        <option value="">{{ _('opt_channel') }}</option>
                                     </select>
-                                    <h2>並び替え / 表示数</h2>
-                                    <label for="sort-input">並び替え</label>
-                                    <select id="sort-input" aria-label="並び替え方法">
-                                        <option value="upload_date">アップロード日</option>
-                                        <option value="view_count">再生回数</option>
-                                        <option value="like_count">いいね数</option>
+                                    <h2>{{ _('search_section_sort') }}</h2>
+                                    <label for="sort-input">{{ _('label_sort') }}</label>
+                                    <select id="sort-input" aria-label="{{ _('label_sort') }}">
+                                        <option value="upload_date">{{ _('sort_upload') }}</option>
+                                        <option value="view_count">{{ _('sort_views') }}</option>
+                                        <option value="like_count">{{ _('sort_likes') }}</option>
                                     </select>
-                                    <label for="limit-input">表示数</label>
-                                    <select id="limit-input" aria-label="表示数">
-                                        <option value="">制限なし</option>
+                                    <label for="limit-input">{{ _('label_limit') }}</label>
+                                    <select id="limit-input" aria-label="{{ _('label_limit') }}">
+                                        <option value="">{{ _('limit_none') }}</option>
                                         {% for i in range(1, 11) %}
                                             <option value="{{ i }}">{{ i }}</option>
                                         {% endfor %}
@@ -159,12 +159,12 @@
                             </details>
                         </aside>
                         <!-- メインコンテンツ -->
-                        <section class="main-content" aria-label="検索結果">
+                        <section class="main-content" aria-label="{{ _('results_region') }}">
                             <div id="search-prompt" class="search-prompt">
-                                キーワードを入力して検索ボタンを押すか、Enterキーで少年サッカーの練習ドリルを検索できます。</div>
-                            <div id="loading-indicator" class="loading-indicator hidden" aria-live="polite" aria-label="検索中">
+                                {{ _('search_prompt_initial') }}</div>
+                            <div id="loading-indicator" class="loading-indicator hidden" aria-live="polite" aria-label="{{ _('loading_aria') }}">
                                 <div class="spinner"></div>
-                                <p>検索中...</p>
+                                <p>{{ _('loading_text') }}</p>
                             </div>
                             <div id="error-message" class="error-message hidden" role="alert" aria-live="assertive">
                                 <!-- エラーメッセージがここに表示される -->
@@ -173,12 +173,12 @@
                                 <!-- カードがここに表示される -->
                             </div>
                         </section>
-                        <nav class="pagination" aria-label="ページナビゲーション">
-                            <div id="video-count" aria-live="polite">表示中: 0 / 0 件</div>
+                        <nav class="pagination" aria-label="{{ _('pagination_aria') }}">
+                            <div id="video-count" aria-live="polite"></div>
                             <div class="pagination-controls">
-                                <button onclick="goToPage(currentPage - 1)" id="prev-page" disabled aria-label="前のページ">前へ</button>
-                                <span id="page-info">ページ <span id="current-page">1</span></span>
-                                <button onclick="goToPage(currentPage + 1)" id="next-page" aria-label="次のページ">次へ</button>
+                                <button onclick="goToPage(currentPage - 1)" id="prev-page" disabled aria-label="{{ _('page_prev') }}">{{ _('page_prev') }}</button>
+                                <span id="page-info">{{ _('page_info') }} <span id="current-page">1</span></span>
+                                <button onclick="goToPage(currentPage + 1)" id="next-page" aria-label="{{ _('page_next') }}">{{ _('page_next') }}</button>
                             </div>
                         </nav>
                     </div>
@@ -188,12 +188,12 @@
     </main>
 
     <footer>
-        <p>&copy; 2026 少年サッカードリル. All rights reserved.</p>
-        <p><a href="/board">ボード</a> | <a href="/favorites">お気に入り</a> | <a href="/practice-notes">メモ帳</a> | <a href="/about">このサイトについて</a> | <a href="/privacy">プライバシーポリシー</a></p>
+        <p>{{ _('footer_rights', year=2026) }}</p>
+        <p><a href="/board">{{ _('nav_board') }}</a> | <a href="/favorites">{{ _('nav_favorites') }}</a> | <a href="/practice-notes">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
-    <script src="{{ url_for('static', filename='scripts.js') }}?v=6"></script>
-    <script src="{{ url_for('static', filename='user-sync.js') }}?v=8"></script>
-    <script src="{{ url_for('static', filename='site-header.js') }}?v=52"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}?v=7"></script>
+    <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
 </body>
 </html>

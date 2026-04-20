@@ -6,6 +6,14 @@
 (function () {
   'use strict';
 
+  function tr(k) {
+    return typeof uiS === 'function' ? uiS(k) : k;
+  }
+  function formationLabel(ja) {
+    const m = (typeof window !== 'undefined' && window.__FORMATION_LABELS__) ? window.__FORMATION_LABELS__ : {};
+    return (m && m[ja]) ? m[ja] : ja;
+  }
+
   const STORAGE_KEY = 'soccer_tactical_board';
   const SAVED_BOARDS_KEY = 'soccer_saved_boards';
   const PITCH_COLOR = '#2d5016';
@@ -108,15 +116,16 @@
   function formatSavedBoardTimestamp(isoString) {
     try {
       const dt = new Date(isoString);
-      if (Number.isNaN(dt.getTime())) return '日時不明';
-      return dt.toLocaleString('ja-JP', {
+      if (Number.isNaN(dt.getTime())) return tr('js_tb_unknown_time');
+      const loc = (typeof window !== 'undefined' && window.__UI_LOCALE__ === 'en') ? 'en-US' : 'ja-JP';
+      return dt.toLocaleString(loc, {
         month: 'numeric',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
       });
     } catch (_) {
-      return '日時不明';
+      return tr('js_tb_unknown_time');
     }
   }
 
@@ -168,7 +177,7 @@
       }
       return true;
     } catch (e) {
-      alert('定番ボードの保存に失敗しました: ' + e.message);
+      alert(tr('js_tb_saved_board_save_fail') + e.message);
       return false;
     }
   }
@@ -185,7 +194,7 @@
     const listEl = document.getElementById('saved-board-list');
     if (!listEl) return;
     if (!savedBoards.length) {
-      listEl.innerHTML = '<p class="saved-board-empty">まだ定番ボードはありません</p>';
+      listEl.innerHTML = '<p class="saved-board-empty">' + tr('js_tb_saved_board_empty') + '</p>';
       return;
     }
     listEl.innerHTML = savedBoards.map(item => {
@@ -193,12 +202,12 @@
       const id = escapeHtml(item.id);
       return (
         '<div class="saved-board-row" role="listitem" data-saved-board-id="' + id + '">' +
-        '<button type="button" class="saved-board-pick' + selected + '" data-saved-board-id="' + id + '" title="上書き対象として選択">' +
+        '<button type="button" class="saved-board-pick' + selected + '" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_pick_saved_title')) + '">' +
         '<span class="saved-board-name">' + escapeHtml(item.name) + '</span>' +
         '<span class="saved-board-date">' + escapeHtml(formatSavedBoardTimestamp(item.updatedAt)) + '</span>' +
         '</button>' +
-        '<button type="button" class="saved-board-load" data-saved-board-id="' + id + '" title="この定番ボードを読込">読込</button>' +
-        '<button type="button" class="saved-board-delete" data-saved-board-id="' + id + '" title="この定番ボードを削除" aria-label="削除">×</button>' +
+        '<button type="button" class="saved-board-load" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_load_saved')) + '">' + escapeHtml(tr('js_tb_load_saved')) + '</button>' +
+        '<button type="button" class="saved-board-delete" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_delete_saved_title')) + '" aria-label="' + escapeHtml(tr('js_tb_delete_aria')) + '">×</button>' +
         '</div>'
       );
     }).join('');
@@ -209,7 +218,7 @@
     if (!input) return;
     const name = String(input.value || '').trim().slice(0, 32);
     if (!name) {
-      alert('定番ボード名を入力してください');
+      alert(tr('js_tb_name_required'));
       return;
     }
     const entry = {
@@ -219,7 +228,7 @@
       data: cloneBoardData(getData()),
     };
     if (!entry.data) {
-      alert('定番ボードの保存に失敗しました');
+      alert(tr('js_tb_save_fail'));
       return;
     }
     savedBoards = [entry, ...savedBoards].slice(0, 60);
@@ -227,25 +236,25 @@
     input.value = '';
     if (!writeSavedBoardsToStorage(true)) return;
     renderSavedBoardsPanel();
-    alert('定番ボードに保存しました');
+    alert(tr('js_tb_saved_ok'));
   }
 
   function overwriteSelectedSavedBoard() {
     if (!selectedSavedBoardId) {
-      alert('上書きする定番ボードを一覧から選択してください');
+      alert(tr('js_tb_select_overwrite'));
       return;
     }
     const target = savedBoards.find(item => item.id === selectedSavedBoardId);
     if (!target) {
-      alert('選択中の定番ボードが見つかりません');
+      alert(tr('js_tb_selected_missing'));
       selectedSavedBoardId = null;
       renderSavedBoardsPanel();
       return;
     }
-    if (!confirm('「' + target.name + '」を現在の配置で上書きしますか？')) return;
+    if (!confirm(tr('js_tb_overwrite_confirm').replace('{name}', target.name))) return;
     const nextData = cloneBoardData(getData());
     if (!nextData) {
-      alert('定番ボードの上書きに失敗しました');
+      alert(tr('js_tb_overwrite_fail'));
       return;
     }
     target.data = nextData;
@@ -255,35 +264,35 @@
     savedBoards.unshift(target);
     if (!writeSavedBoardsToStorage(true)) return;
     renderSavedBoardsPanel();
-    alert('定番ボードを上書きしました');
+    alert(tr('js_tb_overwrite_ok'));
   }
 
   function loadSavedBoardById(id) {
     const target = savedBoards.find(item => item.id === id);
     if (!target) {
-      alert('定番ボードが見つかりません');
+      alert(tr('js_tb_not_found'));
       return;
     }
     if (!target?.data?.scenes?.length) {
-      alert('この定番ボードの内容が壊れているため読込できません');
+      alert(tr('js_tb_corrupt'));
       return;
     }
     const loaded = cloneBoardData(target.data);
     if (!loaded) {
-      alert('この定番ボードは読込できません');
+      alert(tr('js_tb_load_fail'));
       return;
     }
     setData(loaded);
     selectedSavedBoardId = target.id;
     renderSavedBoardsPanel();
     persistCurrentBoardSilently(true);
-    alert('定番ボードを読込ました');
+    alert(tr('js_tb_loaded'));
   }
 
   function deleteSavedBoardById(id) {
     const target = savedBoards.find(item => item.id === id);
     if (!target) return;
-    if (!confirm('「' + target.name + '」を削除しますか？')) return;
+    if (!confirm(tr('js_tb_delete_saved_confirm').replace('{name}', target.name))) return;
     savedBoards = savedBoards.filter(item => item.id !== id);
     if (selectedSavedBoardId === id) selectedSavedBoardId = null;
     if (!writeSavedBoardsToStorage(true)) return;
@@ -313,7 +322,7 @@
     const bench = roster.filter(r => !used.has(r.id));
 
     if (bench.length === 0) {
-      listEl.innerHTML = '<p class="roster-bench-empty">出場メンバーはいません（未登録か、全員ピッチ上です）</p>';
+      listEl.innerHTML = '<p class="roster-bench-empty">' + tr('js_tb_roster_empty') + '</p>';
     } else {
       listEl.innerHTML = bench.map(r => {
         const sel = r.id === selectedRosterId ? ' selected' : '';
@@ -321,9 +330,9 @@
         const ename = escapeHtml(r.name);
         return (
           '<div class="roster-bench-row" role="listitem" data-roster-id="' + eid + '">' +
-          '<button type="button" class="roster-bench-pick' + sel + '" data-roster-id="' + eid + '" title="選択して👤で配置">' +
+          '<button type="button" class="roster-bench-pick' + sel + '" data-roster-id="' + eid + '" title="' + escapeHtml(tr('js_tb_roster_pick_title')) + '">' +
           '<span class="roster-bench-name">' + ename + '</span></button>' +
-          '<button type="button" class="roster-bench-delete" data-roster-id="' + eid + '" title="リストから削除" aria-label="削除">×</button>' +
+          '<button type="button" class="roster-bench-delete" data-roster-id="' + eid + '" title="' + escapeHtml(tr('js_tb_roster_delete_title')) + '" aria-label="' + escapeHtml(tr('js_tb_delete_aria')) + '">×</button>' +
           '</div>'
         );
       }).join('');
@@ -333,10 +342,10 @@
       if (selectedRosterId) {
         const entry = roster.find(x => x.id === selectedRosterId);
         hintEl.textContent = entry
-          ? '「' + entry.name + '」を配置: 👤でピッチをタップ（Escで解除）'
-          : '一覧から選び、👤でピッチをタップして配置';
+          ? tr('js_tb_roster_place').replace('{name}', entry.name)
+          : tr('js_tb_roster_hint_default');
       } else {
-        hintEl.textContent = '一覧から選び、👤でピッチをタップして配置';
+        hintEl.textContent = tr('js_tb_roster_hint_default');
       }
     }
   }
@@ -450,7 +459,7 @@
 
     versus.sort((a, b) => a.left - b.left || a.right - b.right);
     people.sort((a, b) => a.count - b.count);
-    others.sort((a, b) => a.localeCompare(b, 'ja'));
+    others.sort((a, b) => a.localeCompare(b, (typeof window !== 'undefined' && window.__UI_LOCALE__ === 'en') ? 'en' : 'ja'));
 
     return [...versus.map(item => item.value), ...people.map(item => item.value), ...others];
   }
@@ -512,12 +521,12 @@
     select.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.textContent = 'フォーメーションを選択';
+    placeholder.textContent = tr('js_tb_fmt_placeholder');
     select.appendChild(placeholder);
 
     TACTICAL_FORMATION_GROUPS.forEach(group => {
       const optgroup = document.createElement('optgroup');
-      optgroup.label = group.label;
+      optgroup.label = group.label === '11人制' ? tr('js_tb_optgroup_11') : (group.label === '8人制（少年）' ? tr('js_tb_optgroup_8') : group.label);
       group.options.forEach(value => {
         const option = document.createElement('option');
         option.value = value;
@@ -536,13 +545,13 @@
     select.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.textContent = '練習フォーメーションを選択';
+    placeholder.textContent = tr('js_tb_practice_fmt_placeholder');
     select.appendChild(placeholder);
 
     practiceFormationOptions.forEach(value => {
       const option = document.createElement('option');
       option.value = value;
-      option.textContent = value;
+      option.textContent = formationLabel(value);
       if (value === selectedValue) option.selected = true;
       select.appendChild(option);
     });
@@ -556,12 +565,12 @@
     if (boardTypeSelect) boardTypeSelect.value = boardType;
 
     if (boardType === 'practice') {
-      if (formationLabel) formationLabel.textContent = '練習フォーメーション';
-      if (formationHint) formationHint.textContent = 'ホーム検索の人数候補から選択';
+      if (formationLabel) formationLabel.textContent = tr('js_tb_label_practice_formation');
+      if (formationHint) formationHint.textContent = tr('js_tb_hint_practice_formation');
       renderPracticeFormationOptions(practiceFormation);
     } else {
-      if (formationLabel) formationLabel.textContent = 'フォーメーション';
-      if (formationHint) formationHint.textContent = '戦術ボード用のフォーメーションを選択';
+      if (formationLabel) formationLabel.textContent = tr('js_tb_label_tactical_formation');
+      if (formationHint) formationHint.textContent = tr('js_tb_hint_tactical_formation');
       renderTacticalFormationOptions(tacticalFormation);
     }
   }
@@ -663,7 +672,7 @@
     renderRosterPanel();
     renderSavedBoardsPanel();
     const hint = document.getElementById('tool-hint');
-    if (hint) hint.textContent = 'ドラッグで移動';
+    if (hint) hint.textContent = tr('js_tb_drag_move');
     const canvasSection = document.getElementById('canvas-section');
     if (canvasSection) canvasSection.classList.remove('place-mode');
 
@@ -1452,7 +1461,14 @@
       else if (tool === 'ball') addBallAt(pos.x, pos.y);
     });
 
-    const toolHints = { select: '四角で範囲選択、選択範囲をドラッグで一括移動', player: 'クリックで選手を追加', ball: 'クリックでボールを置く', arrow: 'ドラッグで矢印を描く', line: 'ドラッグでラインを描く', delete: 'クリックで削除' };
+    const toolHints = {
+      select: tr('js_tb_tool_select'),
+      player: tr('js_tb_tool_player'),
+      ball: tr('js_tb_tool_ball'),
+      arrow: tr('js_tb_tool_arrow'),
+      line: tr('js_tb_tool_line'),
+      delete: tr('js_tb_tool_delete'),
+    };
     const canvasSection = document.getElementById('canvas-section');
     document.querySelectorAll('.tool-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1470,7 +1486,7 @@
           const isDraw = tool === 'arrow' || tool === 'line';
           canvasSection.classList.toggle('place-mode', isPlace);
           canvasSection.classList.toggle('draw-mode', isDraw);
-          canvasSection.dataset.hint = (tool === 'player' ? 'クリックで選手を追加' : tool === 'ball' ? 'クリックでボールを置く' : (tool === 'arrow' ? 'ドラッグで矢印' : tool === 'line' ? 'ドラッグでライン' : ''));
+          canvasSection.dataset.hint = (tool === 'player' ? tr('js_tb_canvas_player') : tool === 'ball' ? tr('js_tb_canvas_ball') : (tool === 'arrow' ? tr('js_tb_canvas_arrow') : tool === 'line' ? tr('js_tb_canvas_line') : ''));
         }
         renderCurrentScene();
       });
@@ -1516,7 +1532,7 @@
     document.getElementById('btn-clear')?.addEventListener('click', () => {
       const s = scenes[currentSceneIndex];
       if (!s) return;
-      if (!confirm('現在の配置を全てクリアしますか？')) return;
+      if (!confirm(tr('js_tb_clear_confirm'))) return;
       pushUndo();
       s.players = [];
       s.opponents = [];
@@ -1596,7 +1612,7 @@
         const rid = del.dataset.rosterId;
         if (!rid) return;
         if (isRosterIdUsedInAnyScene(rid)) {
-          alert('このメンバーはピッチ上にいます。先にコマを削除するか、別の場面でピッチから外れていることを確認してからリストから削除してください。');
+          alert(tr('js_tb_roster_on_pitch'));
           return;
         }
         roster = roster.filter(r => r.id !== rid);
@@ -1652,10 +1668,10 @@
     if (!list) return;
     list.innerHTML = scenes.map((s, i) => `
       <div class="animation-item ${i === currentSceneIndex ? 'active' : ''}" data-index="${i}" draggable="true">
-        <span class="animation-item-drag" title="ドラッグで順序変更">⋮⋮</span>
+        <span class="animation-item-drag" title="${tr('js_tb_anim_drag')}">⋮⋮</span>
         <span class="animation-item-num">${i + 1}</span>
-        <span class="animation-item-label">${s.name || 'フレーム ' + (i + 1)}</span>
-        <button type="button" class="animation-item-delete" data-index="${i}" title="削除">×</button>
+        <span class="animation-item-label">${s.name || (tr('js_tb_anim_frame') + (i + 1))}</span>
+        <button type="button" class="animation-item-delete" data-index="${i}" title="${tr('js_tb_anim_delete_title')}">×</button>
       </div>
     `).join('');
     list.querySelectorAll('.animation-item').forEach(el => {
@@ -1728,13 +1744,13 @@
     const playBtn = document.getElementById('btn-play');
     if (!playBtn) return;
     if (isPlaying) {
-      playBtn.textContent = '一時停止';
+      playBtn.textContent = tr('js_tb_pause');
       playBtn.classList.add('playing');
-      playBtn.title = '一時停止 (Space)';
+      playBtn.title = tr('js_tb_pause_title');
     } else {
-      playBtn.textContent = '再生';
+      playBtn.textContent = tr('js_tb_play');
       playBtn.classList.remove('playing');
-      playBtn.title = '再生 (Space)';
+      playBtn.title = tr('js_tb_play_title');
     }
   }
 
@@ -1779,9 +1795,9 @@
     renderSequenceList();
   }
 
-  function saveToStorage() { try { if (!persistCurrentBoardSilently(true)) return; alert('保存しました'); } catch (e) { alert('保存失敗: ' + e.message); } }
-  function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert('保存データがありません'); return; } setData(JSON.parse(r)); lastAppliedBoardStorageRaw = r; alert('読込ました'); } catch (e) { alert('読込失敗: ' + e.message); } }
-  function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert('読込ました'); } catch (err) { alert('読込失敗'); } }; r.readAsText(f); e.target.value = ''; }
+  function saveToStorage() { try { if (!persistCurrentBoardSilently(true)) return; alert(tr('js_tb_saved')); } catch (e) { alert(tr('js_tb_save_failed') + e.message); } }
+  function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert(tr('js_tb_no_saved')); return; } setData(JSON.parse(r)); lastAppliedBoardStorageRaw = r; alert(tr('js_tb_loaded_short')); } catch (e) { alert(tr('js_tb_load_failed') + e.message); } }
+  function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert(tr('js_tb_loaded_short')); } catch (err) { alert(tr('js_tb_load_failed_short')); } }; r.readAsText(f); e.target.value = ''; }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
   function exportPNG() { const a = document.createElement('a'); a.href = stage.toDataURL({ pixelRatio: 2 }); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.png'; a.click(); }
 
@@ -1791,10 +1807,10 @@
       const boardData = getData();
       const payload = { imageDataUrl, boardData, savedAt: new Date().toISOString() };
       localStorage.setItem('soccer_pending_board_for_plan', JSON.stringify(payload)); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
-      alert('メニュー帳に追加する準備ができました。\n練習メモ帳ページで「ボード図を取り込む」をクリックしてください。');
+      alert(tr('js_tb_notes_prepare'));
       window.location.href = '/practice-notes';
     } catch (e) {
-      alert('エラー: ' + (e.message || '処理に失敗しました'));
+      alert(tr('js_tb_error_prefix') + (e.message || tr('js_tb_process_failed')));
     }
   }
 

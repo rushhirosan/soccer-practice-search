@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, g, session
+from flask import Flask, render_template, request, jsonify, g, session, redirect
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from datetime import datetime, timedelta
 from utilities.db_access import get_db_connection, pool, get_channel_name_from_id, ensure_app_user_tables
@@ -1333,6 +1333,31 @@ def robots():
     robots_txt = f"""User-agent: *
 Allow: /
 
+# JSON・運用用URLは検索向けページではないためクロール優先度を下げる（Disallow は「インデックス禁止」ではない）
+Disallow: /api/
+Disallow: /auth/
+Disallow: /search
+Disallow: /get_unique_values
+Disallow: /get_levels
+Disallow: /get_channels
+Disallow: /get-csrf-token
+Disallow: /submit-feedback
+Disallow: /health
+Disallow: /db-stats
+Disallow: /db-info
+Disallow: /clear-database
+Disallow: /drop-soccer-tables
+Disallow: /init-database
+Disallow: /create-indexes
+Disallow: /test-simple
+Disallow: /test-db-connection
+Disallow: /fetch-youtube-data
+Disallow: /debug
+Disallow: /debug-youtube
+Disallow: /table-structure/
+Disallow: /update-channel-names
+Disallow: /google-search-console.html
+
 Sitemap: {base}/sitemap.xml
 """
     
@@ -1352,8 +1377,13 @@ def privacy():
     return render_template('privacy.html')
 
 
-@app.route('/board')
 @app.route('/tactical-board')
+def tactical_board_legacy_redirect():
+    """旧URLは正規URL /board へ恒久的に寄せる（重複クロール・未インデックスの要因を減らす）"""
+    return redirect(f"{get_site_base_url()}/board", code=301)
+
+
+@app.route('/board')
 def tactical_board():
     """ボードページ"""
     return render_template('tactical_board.html')

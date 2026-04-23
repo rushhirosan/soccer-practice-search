@@ -369,6 +369,69 @@ main {
   color: var(--text-muted);
 }
 
+/* ホーム上部: SEO 用の短文（.content-wrapper は横 flex + min-height 用のため使わない） */
+.home-seo-intro {
+  display: block;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto 0.75rem;
+  padding: 0.85rem 1.15rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-seo-intro h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.home-seo-intro p {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.home-seo-intro p:last-child {
+  margin-bottom: 0;
+}
+
+.home-seo-intro a {
+  color: var(--primary-color);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-seo-intro a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .home-seo-intro {
+    margin: 0 0 0.65rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-md);
+  }
+
+  .home-seo-intro h1 {
+    font-size: 1.1rem;
+  }
+
+  .home-seo-intro p {
+    font-size: 0.8125rem;
+  }
+
+  .home-seo-intro a {
+    white-space: normal;
+  }
+}
+
 /* タブパネル */
 .tab-panel {
     display: none;

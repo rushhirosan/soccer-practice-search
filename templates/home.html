@@ -84,7 +84,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=54">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=55">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -99,7 +99,7 @@
     {% set active_nav = 'home' %}
     {% include 'partials/site_header.html' %}
     <main>
-        <section class="content-wrapper" aria-label="SEO intro">
+        <section class="home-seo-intro" aria-label="SEO intro">
             <h1>{{ _('brand_title') }}</h1>
             {% if ui_locale == 'ja' %}
             <p>少年サッカードリルは、小学生〜中学生向けのサッカー練習動画を目的・人数・レベルで探せる無料サイトです。以下の人気テーマからもすぐに検索できます。</p>

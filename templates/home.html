@@ -17,6 +17,7 @@
     
     <!-- Canonical URL（末尾スラッシュはサイトマップのトップURLと一致） -->
     <link rel="canonical" href="{{ site_base_url }}/">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ site_base_url }}/sitemap.xml">
     
     <!-- Favicon（classic soccer ball style） -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -98,6 +99,42 @@
     {% set active_nav = 'home' %}
     {% include 'partials/site_header.html' %}
     <main>
+        <section class="content-wrapper" aria-label="SEO intro">
+            <h1>{{ _('brand_title') }}</h1>
+            {% if ui_locale == 'ja' %}
+            <p>少年サッカードリルは、小学生〜中学生向けのサッカー練習動画を目的・人数・レベルで探せる無料サイトです。以下の人気テーマからもすぐに検索できます。</p>
+            <p>
+                人気検索:
+                <a href="/?q=ドリブル">ドリブル</a> /
+                <a href="/?q=パス">パス</a> /
+                <a href="/?q=シュート">シュート</a> /
+                <a href="/?q=対人">対人</a>
+            </p>
+            <p>
+                関連ページ:
+                <a href="/about">このサイトについて</a> /
+                <a href="/privacy">プライバシーポリシー</a> /
+                <a href="/board">戦術ボード</a> /
+                <a href="/practice-notes">練習メモ</a>
+            </p>
+            {% else %}
+            <p>Soccer Practice Search is a free web app to find youth soccer drill videos by purpose, player count, and skill level. You can also start from popular drill themes below.</p>
+            <p>
+                Popular searches:
+                <a href="/?q=dribbling">dribbling</a> /
+                <a href="/?q=passing">passing</a> /
+                <a href="/?q=shooting">shooting</a> /
+                <a href="/?q=1v1">1v1</a>
+            </p>
+            <p>
+                Related pages:
+                <a href="/about">About</a> /
+                <a href="/privacy">Privacy Policy</a> /
+                <a href="/board">Tactical Board</a> /
+                <a href="/practice-notes">Practice Notes</a>
+            </p>
+            {% endif %}
+        </section>
         <div class="tab-container">
             <div class="home-screen-hint" role="region" aria-label="{{ _('home_screen_region') }}">
                 <p class="home-screen-hint__text">{{ _('home_hint_1') }}</p>

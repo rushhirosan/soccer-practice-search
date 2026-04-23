@@ -84,7 +84,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=55">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=56">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -103,35 +103,33 @@
             <h1>{{ _('brand_title') }}</h1>
             {% if ui_locale == 'ja' %}
             <p>少年サッカードリルは、小学生〜中学生向けのサッカー練習動画を目的・人数・レベルで探せる無料サイトです。以下の人気テーマからもすぐに検索できます。</p>
-            <p>
-                人気検索:
+            <p class="home-seo-intro__quick" role="navigation" aria-label="人気検索と関連ページ">
+                <span class="home-seo-intro__inline"><strong>人気検索:</strong>
                 <a href="/?q=ドリブル">ドリブル</a> /
                 <a href="/?q=パス">パス</a> /
                 <a href="/?q=シュート">シュート</a> /
-                <a href="/?q=対人">対人</a>
-            </p>
-            <p>
-                関連ページ:
+                <a href="/?q=対人">対人</a></span>
+                <span class="home-seo-intro__quick-sep" aria-hidden="true">|</span>
+                <span class="home-seo-intro__inline"><strong>関連ページ:</strong>
                 <a href="/about">このサイトについて</a> /
                 <a href="/privacy">プライバシーポリシー</a> /
                 <a href="/board">戦術ボード</a> /
-                <a href="/practice-notes">練習メモ</a>
+                <a href="/practice-notes">練習メモ</a></span>
             </p>
             {% else %}
             <p>Soccer Practice Search is a free web app to find youth soccer drill videos by purpose, player count, and skill level. You can also start from popular drill themes below.</p>
-            <p>
-                Popular searches:
+            <p class="home-seo-intro__quick" role="navigation" aria-label="Popular searches and related pages">
+                <span class="home-seo-intro__inline"><strong>Popular searches:</strong>
                 <a href="/?q=dribbling">dribbling</a> /
                 <a href="/?q=passing">passing</a> /
                 <a href="/?q=shooting">shooting</a> /
-                <a href="/?q=1v1">1v1</a>
-            </p>
-            <p>
-                Related pages:
+                <a href="/?q=1v1">1v1</a></span>
+                <span class="home-seo-intro__quick-sep" aria-hidden="true">|</span>
+                <span class="home-seo-intro__inline"><strong>Related pages:</strong>
                 <a href="/about">About</a> /
                 <a href="/privacy">Privacy Policy</a> /
                 <a href="/board">Tactical Board</a> /
-                <a href="/practice-notes">Practice Notes</a>
+                <a href="/practice-notes">Practice Notes</a></span>
             </p>
             {% endif %}
         </section>

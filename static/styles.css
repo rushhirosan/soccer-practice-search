@@ -29,7 +29,7 @@
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-spring: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   /* モバイル: sticky 検索バーをサイトヘッダー直下に固定（ヘッダー z-index より上に視認できるよう top をずらす） */
-  --site-header-sticky-offset: 3.5rem;
+  --site-header-sticky-offset: 3.15rem;
 }
 
 /* リセットとベーススタイル */
@@ -118,10 +118,10 @@ main {
   z-index: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0.65rem 1.25rem;
+  padding: 0.5rem 1.1rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 /* ログイン中表示・ハンバーガー・ナビをまとめて右側に寄せる（チップだけ中央に浮かない） */
@@ -163,14 +163,14 @@ main {
 .site-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   text-decoration: none;
   color: inherit;
   font-weight: 600;
   letter-spacing: -0.02em;
   border-radius: var(--radius-lg);
-  padding: 0.35rem 0.5rem 0.35rem 0.25rem;
-  margin: -0.35rem 0;
+  padding: 0.28rem 0.45rem 0.28rem 0.2rem;
+  margin: -0.28rem 0;
   transition: var(--transition);
   flex-shrink: 0;
 }
@@ -181,7 +181,7 @@ main {
 }
 
 .site-header__brand-mark {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   line-height: 1;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
@@ -194,8 +194,9 @@ main {
 }
 
 .site-header__title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .site-header__beta {
@@ -306,8 +307,8 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 0.85rem;
-  font-size: 0.875rem;
+  padding: 0.38rem 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
   text-decoration: none;
@@ -401,11 +402,37 @@ main {
   margin-bottom: 0;
 }
 
+.home-seo-intro__quick {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.home-seo-intro__inline {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.home-seo-intro__quick-sep {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-weight: 400;
+  user-select: none;
+  padding: 0 0.1rem;
+}
+
 .home-seo-intro a {
   color: var(--primary-color);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .home-seo-intro a:hover {
@@ -427,8 +454,8 @@ main {
     font-size: 0.8125rem;
   }
 
-  .home-seo-intro a {
-    white-space: normal;
+  .home-seo-intro__quick {
+    font-size: 0.8125rem;
   }
 }
 

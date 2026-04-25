@@ -51,4 +51,7 @@ misc/
 tests/
 *.db
 .env
-utilities/.env 
+utilities/.env
+# ローカル用が COPY されると Fly 上で DATABASE_URL が上書きされる事故を防ぐ
+utilities/.env.local
+utilities/.env.local.bak

@@ -18,24 +18,37 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def _is_fly_machine() -> bool:
+    """Fly 上では .env.local を読まない。SSH セッションでも通常はいずれかが入る。"""
+    return any(
+        os.getenv(name)
+        for name in (
+            "FLY_APP_NAME",
+            "FLY_REGION",
+            "FLY_MACHINE_ID",
+            "FLY_ALLOC_ID",
+        )
+    )
+
+
 if __name__ == '__main__':
     with app.app_context():
         try:
             #########################################################
             ## データベース初期化
             #########################################################
-            # 環境自動判別システム
-            # ローカル環境を最優先でチェック
-            if os.path.exists("./utilities/.env.local"):
-                # ローカル開発環境（最優先）
+            # 環境自動判別（Fly では fly secrets が既に os.environ に入っている。
+            # イメージに誤って utilities/.env.local が含まれると override で本番 URL が潰れるため、
+            # FLY_APP_NAME を最優先し、本番では .env.local を読まない。）
+            if _is_fly_machine():
+                if os.path.exists("./utilities/.env"):
+                    load_dotenv("./utilities/.env", override=False)
+                logger.info("Fly 本番: プラットフォームの環境変数を使用（.env.local は無視）")
+            elif os.path.exists("./utilities/.env.local"):
                 load_dotenv("./utilities/.env.local", override=True)
                 logger.info("ローカル開発環境の設定を読み込みました")
-            elif os.getenv('FLY_APP_NAME'):
-                # 本番環境（FLY_APP_NAMEが設定されている場合）
-                load_dotenv("./utilities/.env", override=True)
-                logger.info("本番環境の設定を読み込みました")
             else:
-                # フォールバック
                 load_dotenv("./utilities/.env", override=True)
                 logger.info("デフォルト環境の設定を読み込みました")
             

@@ -22,9 +22,17 @@ import os
 def load_environment():
     """環境変数を読み込む関数"""
     # 環境自動判別システム
-    # 本番環境では環境変数が既に設定されているので、.envファイルの読み込みを優先
-    if os.getenv('FLY_APP_NAME') or os.getenv('DATABASE_URL', '').startswith('postgresql://soccer_user'):
-        # 本番環境
+    if (
+        os.getenv("FLY_APP_NAME")
+        or os.getenv("FLY_REGION")
+        or os.getenv("FLY_MACHINE_ID")
+        or os.getenv("FLY_ALLOC_ID")
+    ):
+        # Fly は secrets が先に os.environ に入る。ディスクの .env で上書きしない
+        if os.path.exists("./utilities/.env"):
+            load_dotenv("./utilities/.env", override=False)
+        return
+    if os.getenv('DATABASE_URL', '').startswith('postgresql://soccer_user'):
         load_dotenv("./utilities/.env", override=True)
     elif os.path.exists("./utilities/.env.local"):
         # ローカル開発環境

@@ -1453,13 +1453,19 @@ def tactical_board():
 @app.route('/favorites')
 def favorites_page():
     """お気に入りに保存した動画一覧（クライアント側ストレージ用のページ）"""
-    return render_template('favorites.html')
+    response = make_response(render_template('favorites.html'))
+    # 個人用・ローカル保存前提ページは検索結果に出さない
+    response.headers['X-Robots-Tag'] = 'noindex, follow'
+    return response
 
 
 @app.route('/practice-notes')
 def practice_notes():
     """練習メモ・メニュー帳ページ"""
-    return render_template('practice_notes.html')
+    response = make_response(render_template('practice_notes.html'))
+    # 個人用・ローカル保存前提ページは検索結果に出さない
+    response.headers['X-Robots-Tag'] = 'noindex, follow'
+    return response
 
 @app.route('/google-search-console.html')
 def google_search_console():
@@ -1478,8 +1484,6 @@ def sitemap():
     paths = [
         ("/", "weekly", "1.0"),
         ("/board", "weekly", "0.8"),
-        ("/favorites", "weekly", "0.75"),
-        ("/practice-notes", "weekly", "0.7"),
         ("/about", "monthly", "0.7"),
         ("/privacy", "monthly", "0.5"),
     ]

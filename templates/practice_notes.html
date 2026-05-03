@@ -238,6 +238,35 @@
             font-size: 0.95rem;
         }
 
+        .records-search-row {
+            margin-bottom: 1rem;
+            min-width: 0;
+        }
+        .records-search-row label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            min-width: 0;
+        }
+        .records-search-row input[type="search"] {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            padding: 0.6rem 0.75rem;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-primary);
+        }
+        .records-search-row input[type="search"]:focus {
+            outline: 2px solid rgba(13, 148, 136, 0.45);
+            outline-offset: 1px;
+        }
+
         .match-games-block {
             grid-column: 1 / -1;
         }
@@ -461,8 +490,23 @@
 
         <section class="notes-section" id="saved-records-section">
             <h2>{{ _('saved_records_h2') }}</h2>
+            <div class="records-search-row no-print">
+                <label for="saved-records-search">{{ _('notes_records_search_label') }}</label>
+                <input
+                    type="search"
+                    id="saved-records-search"
+                    name="saved-records-search"
+                    maxlength="200"
+                    inputmode="search"
+                    enterkeyhint="search"
+                    placeholder="{{ _('notes_records_search_placeholder') }}"
+                    aria-label="{{ _('notes_records_search_aria') }}"
+                    autocomplete="off"
+                />
+            </div>
             <div id="empty-records" class="empty-state">
-                <p>{{ _('empty_records') }}</p>
+                <p id="empty-records-default">{{ _('empty_records') }}</p>
+                <p id="empty-records-filter" hidden></p>
             </div>
             <div id="saved-records-container"></div>
         </section>
@@ -475,6 +519,6 @@
 
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=8"></script>
+    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=9"></script>
 </body>
 </html>

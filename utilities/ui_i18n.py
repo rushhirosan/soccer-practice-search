@@ -162,6 +162,7 @@ JS_KEYS: frozenset[str] = frozenset(
         "js_pn_print_title",
         "js_pn_print_h1",
         "js_pn_print_menu_list",
+        "js_pn_search_no_results",
         # tactical-board.js
         "js_tb_unknown_time",
         "js_tb_saved_board_save_fail",
@@ -504,6 +505,15 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "saved_records_h2": {"ja": "保存した記録", "en": "Saved records"},
     "empty_records": {"ja": "保存した記録はありません。", "en": "No saved records yet."},
+    "notes_records_search_label": {"ja": "記録を検索", "en": "Search records"},
+    "notes_records_search_placeholder": {
+        "ja": "相手・スコア・メモ・日付など",
+        "en": "Opponent, score, notes, date…",
+    },
+    "notes_records_search_aria": {
+        "ja": "保存した試合結果と日々の気づきをキーワードで絞り込む",
+        "en": "Filter saved match results and daily notes by keyword",
+    },
     # Tactical board template
     "board_title": {"ja": "ボード - 少年サッカードリル", "en": "Board — Youth Soccer Drills"},
     "board_meta_desc": {
@@ -720,6 +730,10 @@ STRINGS: dict[str, dict[str, str]] = {
     "js_pn_print_title": {"ja": "練習メニュー帳 - {d}", "en": "Practice menu — {d}"},
     "js_pn_print_h1": {"ja": "練習メニュー帳", "en": "Practice menu"},
     "js_pn_print_menu_list": {"ja": "メニュー一覧", "en": "Drill list"},
+    "js_pn_search_no_results": {
+        "ja": "条件に一致する記録はありません。別のキーワードを試してください。",
+        "en": "No records match. Try different words.",
+    },
     "js_tb_unknown_time": {"ja": "日時不明", "en": "Unknown time"},
     "js_tb_saved_board_save_fail": {"ja": "定番ボードの保存に失敗しました: ", "en": "Could not save layout: "},
     "js_tb_saved_board_empty": {"ja": "まだ定番ボードはありません", "en": "No saved layouts yet"},

@@ -106,6 +106,42 @@
         .join('\n');
     }
 
+    function normalizeForSearch(s) {
+      if (s == null || typeof s !== 'string') return '';
+      try {
+        return s.normalize('NFKC').trim().toLowerCase();
+      } catch {
+        return String(s).trim().toLowerCase();
+      }
+    }
+
+    function getSavedRecordsSearchNeedle() {
+      const el = document.getElementById('saved-records-search');
+      const raw = el && el.value ? String(el.value) : '';
+      return normalizeForSearch(raw.substring(0, 200));
+    }
+
+    function haystackForRecordEntry(entry) {
+      const parts = [];
+      if (entry.date) {
+        parts.push(entry.date);
+        parts.push(formatISOToJa(entry.date));
+      }
+      if (entry.type === 'match') {
+        if (entry.opponent != null) parts.push(String(entry.opponent));
+        parts.push(matchRecordTitleText(entry));
+        parts.push(matchRecordSummaryText(entry));
+      } else if (entry.content != null) {
+        parts.push(String(entry.content));
+      }
+      return normalizeForSearch(parts.join('\n'));
+    }
+
+    function entryMatchesSavedSearch(entry, needle) {
+      if (!needle) return true;
+      return haystackForRecordEntry(entry).includes(needle);
+    }
+
     let editingMatchId = null;
     let editingDailyId = null;
 
@@ -259,6 +295,8 @@
     function renderSavedRecords() {
       const container = document.getElementById('saved-records-container');
       const empty = document.getElementById('empty-records');
+      const emptyDefault = document.getElementById('empty-records-default');
+      const emptyFilter = document.getElementById('empty-records-filter');
       if (!container || !empty) return;
 
       const matches = readList(SAVED_MATCH_RESULTS_KEY);
@@ -274,15 +312,39 @@
         return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
       });
 
+      const needle = getSavedRecordsSearchNeedle();
+      const filtered = needle ? all.filter((e) => entryMatchesSavedSearch(e, needle)) : all;
+
       container.innerHTML = '';
 
       if (all.length === 0) {
         empty.style.display = 'block';
+        if (emptyDefault) emptyDefault.hidden = false;
+        if (emptyFilter) {
+          emptyFilter.hidden = true;
+          emptyFilter.textContent = '';
+        }
         return;
       }
-      empty.style.display = 'none';
 
-      const grouped = groupByDate(all);
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        if (emptyDefault) emptyDefault.hidden = true;
+        if (emptyFilter) {
+          emptyFilter.hidden = false;
+          emptyFilter.textContent = tr('js_pn_search_no_results');
+        }
+        return;
+      }
+
+      empty.style.display = 'none';
+      if (emptyDefault) emptyDefault.hidden = false;
+      if (emptyFilter) {
+        emptyFilter.hidden = true;
+        emptyFilter.textContent = '';
+      }
+
+      const grouped = groupByDate(filtered);
       grouped.forEach((group) => {
         const groupEl = document.createElement('div');
         groupEl.className = 'record-date-group';
@@ -535,6 +597,13 @@
       }
 
       syncEditUi();
+
+      const recSearch = document.getElementById('saved-records-search');
+      if (recSearch) {
+        recSearch.addEventListener('input', function () {
+          renderSavedRecords();
+        });
+      }
     }
 
     function setup() {

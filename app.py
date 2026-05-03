@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, g, session, redirect
+from flask import Flask, render_template, request, jsonify, g, session, redirect, make_response
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from datetime import datetime, timedelta
 from utilities.db_access import get_db_connection, pool, get_channel_name_from_id, ensure_app_user_tables
@@ -1388,8 +1388,6 @@ def api_user_data_put():
 @app.route('/robots.txt')
 def robots():
     """robots.txtを生成"""
-    from flask import make_response
-    
     base = get_site_base_url()
     robots_txt = f"""User-agent: *
 Allow: /
@@ -1475,8 +1473,6 @@ def google_search_console():
 @app.route('/sitemap.xml')
 def sitemap():
     """サイトマップを生成"""
-    from flask import make_response
-    
     # 現在の日時を取得
     current_time = datetime.now().strftime('%Y-%m-%d')
     

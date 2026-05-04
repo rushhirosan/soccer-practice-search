@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="{{ site_base_url }}/favorites">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=56">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
     <style>
         .favorites-page { max-width: 1400px; margin: 0 auto; padding: 1rem 1rem 3rem; }
         .favorites-page h1 { margin-bottom: 0.35rem; font-size: 1.35rem; }
@@ -35,7 +35,7 @@
 
     <footer>
         <p>{{ _('footer_rights', year=2026) }}</p>
-        <p><a href="/">{{ _('nav_home') }}</a> | <a href="/board">{{ _('nav_board') }}</a> | <a href="/practice-notes">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
+        <p><a href="/">{{ _('nav_home') }}</a> | <a href="/board">{{ _('nav_board') }}</a> | <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}?v=7"></script>

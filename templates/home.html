@@ -84,7 +84,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=56">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -114,7 +114,7 @@
                 <a href="/about">このサイトについて</a> /
                 <a href="/privacy">プライバシーポリシー</a> /
                 <a href="/board">戦術ボード</a> /
-                <a href="/practice-notes">練習メモ</a></span>
+                <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a></span>
             </p>
             {% else %}
             <p>Soccer Practice Search is a free web app to find youth soccer drill videos by purpose, player count, and skill level. You can also start from popular drill themes below.</p>
@@ -129,7 +129,7 @@
                 <a href="/about">About</a> /
                 <a href="/privacy">Privacy Policy</a> /
                 <a href="/board">Tactical Board</a> /
-                <a href="/practice-notes">Practice Notes</a></span>
+                <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a></span>
             </p>
             {% endif %}
         </section>
@@ -224,7 +224,7 @@
 
     <footer>
         <p>{{ _('footer_rights', year=2026) }}</p>
-        <p><a href="/board">{{ _('nav_board') }}</a> | <a href="/favorites">{{ _('nav_favorites') }}</a> | <a href="/practice-notes">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
+        <p><a href="/board">{{ _('nav_board') }}</a> | <a href="/favorites">{{ _('nav_favorites') }}</a> | <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
     <script src="{{ url_for('static', filename='scripts.js') }}?v=7"></script>

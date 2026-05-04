@@ -257,7 +257,16 @@ STRINGS: dict[str, dict[str, str]] = {
     "nav_home": {"ja": "ホーム", "en": "Home"},
     "nav_board": {"ja": "ボード", "en": "Board"},
     "nav_favorites": {"ja": "お気に入り", "en": "Favorites"},
-    "nav_notes": {"ja": "メモ帳", "en": "Notes"},
+    "nav_notes": {"ja": "練習記録・メモ", "en": "Records · notes"},
+    "nav_notes_short": {"ja": "記録", "en": "Log"},
+    "nav_notes_link_title": {
+        "ja": "練習試合の結果と日々の気づきを保存するページ（練習メモ・記録帳）へ",
+        "en": "Practice notes — save match results and daily reflections",
+    },
+    "nav_notes_link_aria": {
+        "ja": "練習メモ・記録帳。試合結果と日々の気づきを開く",
+        "en": "Practice notes and records: open match results and daily reflections",
+    },
     "nav_account": {"ja": "アカウント", "en": "Account"},
     "nav_about": {"ja": "このサイトについて", "en": "About"},
     "nav_favorites_badge_aria": {"ja": "お気に入りの動画数", "en": "Number of favorite videos"},

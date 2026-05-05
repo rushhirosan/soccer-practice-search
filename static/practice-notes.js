@@ -477,7 +477,8 @@
             matchGamesList.querySelectorAll('.match-game-row').forEach((row) => {
               const score = (row.querySelector('.match-game-score')?.value || '').trim();
               const events = (row.querySelector('.match-game-events')?.value || '').trim();
-              if (score && events) games.push({ score, events });
+              // 失点のみ試合(例: 0-2)も記録できるよう、スコアがあれば保存対象にする
+              if (score) games.push({ score, events });
             });
           }
 

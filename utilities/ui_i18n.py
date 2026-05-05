@@ -712,8 +712,8 @@ STRINGS: dict[str, dict[str, str]] = {
     "js_pn_delete_record_confirm": {"ja": "この記録を削除しますか？", "en": "Delete this record?"},
     "js_pn_alert_match_required": {"ja": "日付と対戦相手を入力してください。", "en": "Enter date and opponent."},
     "js_pn_alert_match_game_required": {
-        "ja": "少なくとも1試合ぶん、スコアと得点者・出来事の両方を入力してください。",
-        "en": "For at least one game, enter both score and notes/events.",
+        "ja": "少なくとも1試合ぶん、スコアを入力してください。",
+        "en": "Enter a score for at least one game.",
     },
     "js_pn_alert_edit_missing": {"ja": "編集対象の記録が見つかりませんでした。", "en": "Could not find that record to edit."},
     "js_pn_alert_daily_required": {"ja": "日付とメモ本文を入力してください。", "en": "Enter date and note text."},

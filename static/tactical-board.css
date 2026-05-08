@@ -181,14 +181,21 @@
   align-items: stretch;
 }
 
+/* .action-btn は width:100% のため、横並びだと入力が潰れる（roster-add-row と同様に上書き） */
+.saved-board-group .saved-board-add-row .action-btn {
+  flex-shrink: 0;
+  width: auto;
+  min-width: 3.25rem;
+}
+
 .saved-board-group .saved-board-add-row input {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
   padding: 0.45rem 0.5rem;
   font-size: 0.8rem;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 4px);
-  text-overflow: ellipsis;
+  color: var(--text-color, #1e293b);
 }
 
 .saved-board-group .saved-board-actions {
@@ -764,6 +771,17 @@
   }
 
   .match-send-group .action-btn--match-send {
+    min-height: 44px;
+  }
+
+  /* 定番ボード名は横並びだと「保存」の width:100% 由来で潰れやすいので縦積み */
+  .saved-board-group .saved-board-add-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .saved-board-group .saved-board-add-row .action-btn {
+    width: 100%;
     min-height: 44px;
   }
 

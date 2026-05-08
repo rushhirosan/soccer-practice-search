@@ -169,6 +169,8 @@ JS_KEYS: frozenset[str] = frozenset(
         "js_pn_source_board",
         "js_pn_no_match_board_data",
         "js_pn_match_board_imported",
+        "js_pn_match_already_imported",
+        "js_pn_formation_import_fallback",
         # tactical-board.js
         "js_tb_unknown_time",
         "js_tb_saved_board_save_fail",
@@ -229,6 +231,7 @@ JS_KEYS: frozenset[str] = frozenset(
         "js_tb_load_failed",
         "js_tb_notes_prepare",
         "js_tb_match_prepare",
+        "js_tb_match_storage_fail",
         "js_tb_error_prefix",
         "js_tb_process_failed",
         "js_tb_optgroup_11",
@@ -767,6 +770,14 @@ STRINGS: dict[str, dict[str, str]] = {
         "ja": "フォーメーションと先発を取り込みました。保存すると試合記録に反映されます。",
         "en": "Formation and starters imported. Save to attach them to this match record.",
     },
+    "js_pn_match_already_imported": {
+        "ja": "すでにボードから取り込み済みです。「取り込み済みフォーメーション」を確認するか、一度クリアしてからボードから送り直してください。",
+        "en": "Already imported from the board. Check “Imported formation”, or clear and send again from the board.",
+    },
+    "js_pn_formation_import_fallback": {
+        "ja": "ボードから配置情報を取り込み済みです（詳細テキストなし）。保存すると試合記録に残ります。",
+        "en": "Lineup imported from the board (no text detail). Save to attach to this match record.",
+    },
     "js_tb_unknown_time": {"ja": "日時不明", "en": "Unknown time"},
     "js_tb_saved_board_save_fail": {"ja": "定番ボードの保存に失敗しました: ", "en": "Could not save layout: "},
     "js_tb_saved_board_empty": {"ja": "まだ定番ボードはありません", "en": "No saved layouts yet"},
@@ -834,6 +845,10 @@ STRINGS: dict[str, dict[str, str]] = {
     "js_tb_match_prepare": {
         "ja": "試合記録へ送る準備ができました。\n練習メモ帳ページで試合結果タブを開いて確認してください。",
         "en": "Ready to send to match records.\nOpen Practice notes and check the Match tab.",
+    },
+    "js_tb_match_storage_fail": {
+        "ja": "ブラウザへの一時保存に失敗しました（容量制限の可能性）。ボードの選手を減らすか、別ブラウザでお試しください。",
+        "en": "Could not stash data in the browser (storage may be full). Try fewer markers or another browser.",
     },
     "js_tb_error_prefix": {"ja": "エラー: ", "en": "Error: "},
     "js_tb_process_failed": {"ja": "処理に失敗しました", "en": "Something went wrong"},

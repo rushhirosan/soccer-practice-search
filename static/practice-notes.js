@@ -85,7 +85,8 @@
 
     function getPendingMatchBoard() {
       try {
-        const s = localStorage.getItem(PENDING_MATCH_BOARD_KEY);
+        let s = sessionStorage.getItem(PENDING_MATCH_BOARD_KEY);
+        if (!s) s = localStorage.getItem(PENDING_MATCH_BOARD_KEY);
         return s ? JSON.parse(s) : null;
       } catch {
         return null;
@@ -94,8 +95,21 @@
 
     function clearPendingMatchBoard() {
       try {
+        sessionStorage.removeItem(PENDING_MATCH_BOARD_KEY);
         localStorage.removeItem(PENDING_MATCH_BOARD_KEY);
       } catch (_) {}
+    }
+
+    /** ボードから遷移した直後の取り込み（pageshow でも再試行） */
+    function consumePendingMatchBoardIfAny() {
+      const pendingAtLoad = getPendingMatchBoard();
+      if (!pendingAtLoad || !pendingAtLoad.snapshot) return false;
+      setMatchFormationSnapshot({
+        ...pendingAtLoad.snapshot,
+        capturedAt: pendingAtLoad.savedAt || new Date().toISOString(),
+      });
+      clearPendingMatchBoard();
+      return true;
     }
 
     function normalizeFormationSnapshot(snapshot) {
@@ -124,7 +138,9 @@
       if (s.formation) lines.push(`${label}: ${s.formation}`);
       if (s.starters.length > 0) lines.push(`${tr('js_pn_starters')}: ${s.starters.join(' / ')}`);
       if (s.boardName) lines.push(`${tr('js_pn_source_board')}: ${s.boardName}`);
-      return lines.join('\n');
+      const joined = lines.join('\n');
+      if (joined) return joined;
+      return tr('js_pn_formation_import_fallback');
     }
 
     function setMatchFormationSnapshot(snapshot) {
@@ -144,17 +160,21 @@
 
     function importMatchFormationFromBoard() {
       const pending = getPendingMatchBoard();
-      if (!pending || !pending.snapshot) {
-        alert(tr('js_pn_no_match_board_data'));
+      if (pending && pending.snapshot) {
+        const snapshot = {
+          ...pending.snapshot,
+          capturedAt: pending.savedAt || new Date().toISOString(),
+        };
+        setMatchFormationSnapshot(snapshot);
+        clearPendingMatchBoard();
+        alert(tr('js_pn_match_board_imported'));
         return;
       }
-      const snapshot = {
-        ...pending.snapshot,
-        capturedAt: pending.savedAt || new Date().toISOString(),
-      };
-      setMatchFormationSnapshot(snapshot);
-      clearPendingMatchBoard();
-      alert(tr('js_pn_match_board_imported'));
+      if (currentMatchFormationSnapshot) {
+        alert(tr('js_pn_match_already_imported'));
+        return;
+      }
+      alert(tr('js_pn_no_match_board_data'));
     }
 
     function matchRecordTitleText(entry) {
@@ -694,14 +714,7 @@
         });
       }
 
-      const pendingAtLoad = getPendingMatchBoard();
-      if (pendingAtLoad && pendingAtLoad.snapshot) {
-        setMatchFormationSnapshot({
-          ...pendingAtLoad.snapshot,
-          capturedAt: pendingAtLoad.savedAt || new Date().toISOString(),
-        });
-        clearPendingMatchBoard();
-      } else {
+      if (!consumePendingMatchBoardIfAny()) {
         setMatchFormationSnapshot(null);
       }
     }
@@ -712,6 +725,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', setup);
+    window.addEventListener('pageshow', function () {
+      consumePendingMatchBoardIfAny();
+    });
     window.addEventListener('soccerUserDataSynced', function () {
       renderSavedRecords();
     });

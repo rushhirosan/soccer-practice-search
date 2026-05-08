@@ -1835,15 +1835,24 @@
   function addToMatchRecord() {
     try {
       const boardData = getData();
+      /** PNG と全 boardData は容量が大きくモバイルの localStorage で失敗しやすい。試合記録には snapshot のみで足りる */
       const payload = {
         snapshot: buildMatchSnapshotFromBoardData(boardData),
-        boardData,
-        imageDataUrl: stage.toDataURL({ pixelRatio: 2 }),
         savedAt: new Date().toISOString(),
       };
-      localStorage.setItem(PENDING_MATCH_BOARD_KEY, JSON.stringify(payload));
+      const raw = JSON.stringify(payload);
+      try {
+        sessionStorage.setItem(PENDING_MATCH_BOARD_KEY, raw);
+      } catch (e) {
+        console.warn('sessionStorage pending match', e);
+      }
+      try {
+        localStorage.setItem(PENDING_MATCH_BOARD_KEY, raw);
+      } catch (e) {
+        alert(tr('js_tb_match_storage_fail'));
+        return;
+      }
       if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
-      alert(tr('js_tb_match_prepare'));
       window.location.href = '/practice-notes';
     } catch (e) {
       alert(tr('js_tb_error_prefix') + (e.message || tr('js_tb_process_failed')));

@@ -576,6 +576,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "tb_add_notes_title": {"ja": "練習メモ帳にこの図を追加", "en": "Add this diagram to practice notes"},
     "tb_add_match": {"ja": "🧲 試合記録へ先発を送る", "en": "🧲 Send lineup to match record"},
     "tb_add_match_title": {"ja": "現在のフォーメーション/先発を試合記録に送る", "en": "Send current formation and starters to match record"},
+    "tb_match_record_heading": {"ja": "試合記録", "en": "Match record"},
     "tb_saved_boards": {"ja": "定番ボード", "en": "Saved layouts"},
     "tb_saved_board_ph": {"ja": "例: 3対2の崩し", "en": "e.g. 3v2 breakdown"},
     "tb_saved_board_name_aria": {"ja": "定番ボード名", "en": "Saved layout name"},

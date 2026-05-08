@@ -1562,6 +1562,7 @@
         else if (a === 'add-to-notes') addToPracticeNotes();
       });
     });
+    document.getElementById('btn-send-to-match')?.addEventListener('click', addToMatchRecord);
     document.addEventListener('click', (e) => {
       if (!document.querySelector('.save-dropdown')?.contains(e.target)) document.getElementById('save-dropdown-menu')?.setAttribute('aria-hidden', 'true');
     });

@@ -393,6 +393,16 @@
   background: var(--background-color, #f8fafc);
 }
 
+/* 試合記録へ送る（常時表示・ドロップダウン内と二重でも可） */
+.match-send-group .action-btn--match-send {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  white-space: normal;
+  text-align: center;
+  justify-content: center;
+  padding: 0.55rem 0.5rem;
+}
+
 
 .action-btn {
   width: 100%;
@@ -751,6 +761,10 @@
     min-height: 44px;
     font-size: 0.9rem;
     padding: 0.6rem 0.75rem;
+  }
+
+  .match-send-group .action-btn--match-send {
+    min-height: 44px;
   }
 
   .anim-btn {

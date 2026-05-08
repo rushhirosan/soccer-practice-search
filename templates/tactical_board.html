@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=12">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=13">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -101,6 +101,11 @@
                 </div>
             </div>
 
+            <div class="tool-group match-send-group">
+                <h3>{{ _('tb_match_record_heading') }}</h3>
+                <button type="button" id="btn-send-to-match" class="action-btn action-btn--match-send" title="{{ _('tb_add_match_title') }}">{{ _('tb_add_match') }}</button>
+            </div>
+
             <div class="tool-group saved-board-group">
                 <h3>{{ _('tb_saved_boards') }}</h3>
                 <div class="saved-board-add-row">
@@ -160,6 +165,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=18"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=19"></script>
 </body>
 </html>

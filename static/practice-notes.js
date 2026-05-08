@@ -14,6 +14,7 @@
   if (document.getElementById('saved-records-container')) {
     const SAVED_MATCH_RESULTS_KEY = 'soccer_saved_match_results';
     const SAVED_DAILY_NOTES_KEY = 'soccer_saved_daily_notes';
+    const PENDING_MATCH_BOARD_KEY = 'soccer_pending_board_for_match';
 
     function pad2(n) {
       return String(n).padStart(2, '0');
@@ -82,6 +83,80 @@
       return [];
     }
 
+    function getPendingMatchBoard() {
+      try {
+        const s = localStorage.getItem(PENDING_MATCH_BOARD_KEY);
+        return s ? JSON.parse(s) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function clearPendingMatchBoard() {
+      try {
+        localStorage.removeItem(PENDING_MATCH_BOARD_KEY);
+      } catch (_) {}
+    }
+
+    function normalizeFormationSnapshot(snapshot) {
+      if (!snapshot || typeof snapshot !== 'object') return null;
+      const starters = Array.isArray(snapshot.starters)
+        ? snapshot.starters.map((name) => String(name || '').trim()).filter(Boolean)
+        : [];
+      const formation = String(snapshot.formation || '').trim();
+      const boardName = String(snapshot.boardName || '').trim();
+      return {
+        boardType: snapshot.boardType === 'practice' ? 'practice' : 'tactical',
+        boardId: snapshot.boardId != null ? String(snapshot.boardId) : null,
+        boardName,
+        sceneIndex: typeof snapshot.sceneIndex === 'number' ? snapshot.sceneIndex : 0,
+        formation,
+        starters,
+        capturedAt: String(snapshot.capturedAt || '').trim(),
+      };
+    }
+
+    function formationSummaryText(snapshot) {
+      const s = normalizeFormationSnapshot(snapshot);
+      if (!s) return '';
+      const lines = [];
+      const label = s.boardType === 'practice' ? tr('js_pn_practice_shape') : tr('js_pn_formation');
+      if (s.formation) lines.push(`${label}: ${s.formation}`);
+      if (s.starters.length > 0) lines.push(`${tr('js_pn_starters')}: ${s.starters.join(' / ')}`);
+      if (s.boardName) lines.push(`${tr('js_pn_source_board')}: ${s.boardName}`);
+      return lines.join('\n');
+    }
+
+    function setMatchFormationSnapshot(snapshot) {
+      currentMatchFormationSnapshot = normalizeFormationSnapshot(snapshot);
+      const box = document.getElementById('match-formation-preview');
+      const text = document.getElementById('match-formation-preview-text');
+      if (!box || !text) return;
+      const summary = formationSummaryText(currentMatchFormationSnapshot);
+      if (!summary) {
+        box.hidden = true;
+        text.textContent = '';
+        return;
+      }
+      text.textContent = summary;
+      box.hidden = false;
+    }
+
+    function importMatchFormationFromBoard() {
+      const pending = getPendingMatchBoard();
+      if (!pending || !pending.snapshot) {
+        alert(tr('js_pn_no_match_board_data'));
+        return;
+      }
+      const snapshot = {
+        ...pending.snapshot,
+        capturedAt: pending.savedAt || new Date().toISOString(),
+      };
+      setMatchFormationSnapshot(snapshot);
+      clearPendingMatchBoard();
+      alert(tr('js_pn_match_board_imported'));
+    }
+
     function matchRecordTitleText(entry) {
       const opponent = entry.opponent ? `vs ${entry.opponent}` : tr('js_pn_vs_unset');
       const games = normalizeMatchGames(entry);
@@ -131,6 +206,7 @@
         if (entry.opponent != null) parts.push(String(entry.opponent));
         parts.push(matchRecordTitleText(entry));
         parts.push(matchRecordSummaryText(entry));
+        parts.push(formationSummaryText(entry.formationSnapshot));
       } else if (entry.content != null) {
         parts.push(String(entry.content));
       }
@@ -144,6 +220,7 @@
 
     let editingMatchId = null;
     let editingDailyId = null;
+    let currentMatchFormationSnapshot = null;
 
     function getMatchGamesListEl() {
       return document.getElementById('match-games-list');
@@ -223,6 +300,7 @@
         });
       }
       refreshMatchGameRowLabels();
+      setMatchFormationSnapshot(entry.formationSnapshot || null);
     }
 
     function activateNotesTab(panelId) {
@@ -404,7 +482,9 @@
           const summary = document.createElement('div');
           summary.className = 'record-summary';
           if (entry.type === 'match') {
-            summary.textContent = matchRecordSummaryText(entry);
+            const matchSummary = matchRecordSummaryText(entry);
+            const formationSummary = formationSummaryText(entry.formationSnapshot);
+            summary.textContent = [matchSummary, formationSummary].filter(Boolean).join('\n');
           } else {
             summary.textContent = entry.content || '';
           }
@@ -445,6 +525,7 @@
       const matchOpponent = document.getElementById('match-opponent');
       const matchGamesList = getMatchGamesListEl();
       const btnAddMatchGame = document.getElementById('btn-add-match-game');
+      const btnImportMatchBoard = document.getElementById('btn-import-match-board');
 
       const dailyDate = document.getElementById('daily-date');
       const dailyContent = document.getElementById('daily-content');
@@ -463,6 +544,9 @@
           matchGamesList.appendChild(createMatchGameRow());
           refreshMatchGameRowLabels();
         });
+      }
+      if (btnImportMatchBoard) {
+        btnImportMatchBoard.addEventListener('click', importMatchFormationFromBoard);
       }
 
       const btnSaveMatch = document.getElementById('btn-save-match');
@@ -507,6 +591,7 @@
               date,
               opponent,
               games: gamesPayload,
+              formationSnapshot: currentMatchFormationSnapshot ? { ...currentMatchFormationSnapshot } : null,
               createdAt: prev.createdAt || new Date().toISOString()
             };
             writeList(SAVED_MATCH_RESULTS_KEY, list);
@@ -516,6 +601,7 @@
               date,
               opponent,
               games: gamesPayload,
+              formationSnapshot: currentMatchFormationSnapshot ? { ...currentMatchFormationSnapshot } : null,
               createdAt: new Date().toISOString()
             };
             list.unshift(entry);
@@ -526,6 +612,7 @@
           if (matchOpponent) matchOpponent.value = '';
           if (matchDate) matchDate.value = toTodayISO();
           resetMatchGameRows();
+          setMatchFormationSnapshot(null);
           renderSavedRecords();
         });
       }
@@ -536,6 +623,7 @@
           if (matchOpponent) matchOpponent.value = '';
           if (matchDate) matchDate.value = toTodayISO();
           resetMatchGameRows();
+          setMatchFormationSnapshot(null);
         });
       }
 
@@ -604,6 +692,17 @@
         recSearch.addEventListener('input', function () {
           renderSavedRecords();
         });
+      }
+
+      const pendingAtLoad = getPendingMatchBoard();
+      if (pendingAtLoad && pendingAtLoad.snapshot) {
+        setMatchFormationSnapshot({
+          ...pendingAtLoad.snapshot,
+          capturedAt: pendingAtLoad.savedAt || new Date().toISOString(),
+        });
+        clearPendingMatchBoard();
+      } else {
+        setMatchFormationSnapshot(null);
       }
     }
 

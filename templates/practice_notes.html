@@ -317,6 +317,25 @@
             width: 100%;
             max-width: 16rem;
         }
+        .match-formation-preview {
+            margin-top: 0.75rem;
+            padding: 0.8rem 0.9rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(13, 148, 136, 0.28);
+            background: rgba(13, 148, 136, 0.08);
+        }
+        .match-formation-preview__title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+        .match-formation-preview__text {
+            color: var(--text-secondary);
+            line-height: 1.55;
+            white-space: pre-wrap;
+            font-size: 0.92rem;
+        }
 
         /* モバイル最適化（タップ領域・余白・崩れ回避） */
         @media (max-width: 768px) {
@@ -457,8 +476,13 @@
                     </div>
 
                     <div class="action-buttons no-print">
+                        <button type="button" id="btn-import-match-board" class="btn-secondary">{{ _('btn_import_match_board') }}</button>
                         <button type="button" id="btn-save-match" class="btn-primary">{{ _('btn_save') }}</button>
                         <button type="button" id="btn-clear-match" class="btn-secondary">{{ _('btn_clear') }}</button>
+                    </div>
+                    <div id="match-formation-preview" class="match-formation-preview" hidden>
+                        <div class="match-formation-preview__title">{{ _('match_formation_preview_title') }}</div>
+                        <div id="match-formation-preview-text" class="match-formation-preview__text"></div>
                     </div>
                 </div>
 

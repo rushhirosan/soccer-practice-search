@@ -28,13 +28,13 @@
           <a href="/" class="site-header__link{% if nav == 'home' %} is-active{% endif %}"{% if nav == 'home' %} aria-current="page"{% endif %}>{{ _('nav_home') }}</a>
         </li>
         <li>
-          <a href="/board" class="site-header__link{% if nav == 'board' %} is-active{% endif %}"{% if nav == 'board' %} aria-current="page"{% endif %}>{{ _('nav_board') }}</a>
-        </li>
-        <li>
           <a href="/favorites" class="site-header__link nav-with-badge{% if nav == 'favorites' %} is-active{% endif %}"{% if nav == 'favorites' %} aria-current="page"{% endif %}>{{ _('nav_favorites') }}<span id="favorites-badge" class="nav-badge" aria-label="{{ _('nav_favorites_badge_aria') }}" style="display:none;"></span></a>
         </li>
         <li>
           <a href="/practice-notes" id="practice-notes-link" class="site-header__link site-header__link--notes-nav nav-with-badge{% if nav == 'notes' %} is-active{% endif %}"{% if nav == 'notes' %} aria-current="page"{% endif %} title="{{ _('nav_notes_link_title') }}" aria-label="{{ _('nav_notes_link_aria') }}"><span class="nav-notes-link__long" aria-hidden="true">{{ _('nav_notes') }}</span><span class="nav-notes-link__short" aria-hidden="true">{{ _('nav_notes_short') }}</span><span id="practice-notes-badge" class="nav-badge" aria-label="{{ _('nav_notes_badge_aria') }}" style="display:none;"></span></a>
+        </li>
+        <li>
+          <a href="/board" class="site-header__link{% if nav == 'board' %} is-active{% endif %}"{% if nav == 'board' %} aria-current="page"{% endif %}>{{ _('nav_board') }}</a>
         </li>
         <li>
           <a href="/account" class="site-header__link{% if nav == 'account' %} is-active{% endif %}"{% if nav == 'account' %} aria-current="page"{% endif %}>{{ _('nav_account') }}</a>

@@ -246,6 +246,17 @@
       return document.getElementById('match-games-list');
     }
 
+    function defaultMatchEventsTemplate() {
+      return tr('js_pn_match_events_template');
+    }
+
+    function initialMatchEventsText(initial) {
+      if (initial && initial.events != null && String(initial.events).trim()) {
+        return String(initial.events);
+      }
+      return defaultMatchEventsTemplate();
+    }
+
     function createMatchGameRow(initial) {
       const matchGamesList = getMatchGamesListEl();
       const row = document.createElement('div');
@@ -271,9 +282,11 @@
           </div>`;
       const scoreInput = row.querySelector('.match-game-score');
       const eventsTa = row.querySelector('.match-game-events');
-      if (initial && scoreInput && eventsTa) {
-        scoreInput.value = initial.score != null ? String(initial.score) : '';
-        eventsTa.value = initial.events != null ? String(initial.events) : '';
+      if (scoreInput) {
+        scoreInput.value = initial && initial.score != null ? String(initial.score) : '';
+      }
+      if (eventsTa) {
+        eventsTa.value = initialMatchEventsText(initial);
       }
       const removeBtn = row.querySelector('.match-game-row__remove');
       removeBtn.addEventListener('click', () => {

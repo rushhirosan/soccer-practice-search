@@ -476,7 +476,7 @@
                     </div>
 
                     <div class="action-buttons no-print">
-                        <button type="button" id="btn-import-match-board" class="btn-secondary">{{ _('btn_import_match_board') }}</button>
+                        <button type="button" id="btn-import-match-board" class="btn-secondary" hidden aria-hidden="true">{{ _('btn_import_match_board') }}</button>
                         <button type="button" id="btn-save-match" class="btn-primary">{{ _('btn_save') }}</button>
                         <button type="button" id="btn-clear-match" class="btn-secondary">{{ _('btn_clear') }}</button>
                     </div>
@@ -543,6 +543,6 @@
 
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=10"></script>
+    <script src="{{ url_for('static', filename='practice-notes.js') }}?v=11"></script>
 </body>
 </html>

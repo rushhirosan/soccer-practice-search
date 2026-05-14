@@ -130,7 +130,6 @@ JS_KEYS: frozenset[str] = frozenset(
         "js_pn_score_ph",
         "js_pn_events",
         "js_pn_events_ph",
-        "js_pn_match_events_template",
         "js_pn_remove_game",
         "js_pn_remove_game_aria",
         "js_pn_save",
@@ -708,10 +707,6 @@ STRINGS: dict[str, dict[str, str]] = {
     "js_pn_score_ph": {"ja": "例: 1-0、2-1（勝ち）", "en": "e.g. 1-0, 2-1 (win)"},
     "js_pn_events": {"ja": "得点者・失点 / 出来事", "en": "Scorers / goals against / notes"},
     "js_pn_events_ph": {"ja": "例：得点者 YY、失点の経緯…", "en": "e.g. scorer names, how goals were conceded…"},
-    "js_pn_match_events_template": {
-        "ja": "フォーメーション：\n先発：\n得点者：\n",
-        "en": "Formation:\nStarters:\nScorers:\n",
-    },
     "js_pn_remove_game": {"ja": "この試合を削除", "en": "Remove this game"},
     "js_pn_remove_game_aria": {"ja": "この試合行を削除", "en": "Remove this game row"},
     "js_pn_save": {"ja": "保存", "en": "Save"},

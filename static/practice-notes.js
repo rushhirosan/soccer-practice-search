@@ -246,15 +246,11 @@
       return document.getElementById('match-games-list');
     }
 
-    function defaultMatchEventsTemplate() {
-      return tr('js_pn_match_events_template');
-    }
-
     function initialMatchEventsText(initial) {
       if (initial && initial.events != null && String(initial.events).trim()) {
         return String(initial.events);
       }
-      return defaultMatchEventsTemplate();
+      return '';
     }
 
     function createMatchGameRow(initial) {

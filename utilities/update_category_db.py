@@ -48,17 +48,36 @@ def to_half_width(text: str) -> str:
     return text.strip()  # 余分な空白削除
 
 
+def is_meaningful_players_label(value: str) -> bool:
+    """人数フィルタ用ラベルが有効か（000人・0対0 などは除外）。"""
+    if not value or not isinstance(value, str):
+        return False
+    text = value.strip()
+    if match := re.fullmatch(r"(\d+)人", text):
+        return int(match.group(1)) > 0
+    if match := re.fullmatch(r"(\d+)対(\d+)", text):
+        return int(match.group(1)) > 0 and int(match.group(2)) > 0
+    return True
+
+
 def assign_number(title: str) -> str:
     """タイトルに基づいて必要人数を割り当てる"""
     title = to_half_width(title)  # 全角→半角変換
     logger.info("Starting number assignment for title: %s", title)
 
     if match := re.search(r"(\d+)人", title):
-        logger.info("Number of people found: %s人", match.group(1))
-        return f"{match.group(1)}人"
+        count = int(match.group(1))
+        if count <= 0:
+            logger.info("Ignored zero player count in title")
+            return "人数指定なし"
+        logger.info("Number of people found: %s人", count)
+        return f"{count}人"
 
     if match := re.search(r"(\d+)対(\d+)", title):
         num1, num2 = int(match.group(1)), int(match.group(2))  # 数値化
+        if num1 <= 0 or num2 <= 0:
+            logger.info("Ignored zero side in versus count")
+            return "人数指定なし"
         bigger, smaller = max(num1, num2), min(num1, num2)  # 大小比較
         logger.info("Number of people found: %s対%s (normalized to %s対%s)",
                     num1, num2, bigger, smaller)

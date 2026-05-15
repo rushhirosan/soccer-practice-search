@@ -127,6 +127,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateFavoritesBadge();
 });
 
+/** 人数フィルタ用ラベルが有効か（000人・0対0 などは除外） */
+function isMeaningfulPlayersLabel(value) {
+    const text = String(value || '').trim();
+    let match = text.match(/^(\d+)人$/);
+    if (match) return parseInt(match[1], 10) > 0;
+    match = text.match(/^(\d+)対(\d+)$/);
+    if (match) {
+        return parseInt(match[1], 10) > 0 && parseInt(match[2], 10) > 0;
+    }
+    return true;
+}
+
 // ユニークな選択肢を取得・設定する関数
 function populateSelect(selectId, columnName) {
     console.log(`Fetching data for ${columnName}...`);
@@ -171,7 +183,10 @@ function populateSelect(selectId, columnName) {
             }
 
             // 重複を除去したユニークな値のみを処理
-            const uniqueData = [...new Set(data)];
+            let uniqueData = [...new Set(data)];
+            if (columnName === 'players') {
+                uniqueData = uniqueData.filter(isMeaningfulPlayersLabel);
+            }
             console.log(`Unique data for ${columnName}:`, uniqueData);
 
             const n_vs_n = [];

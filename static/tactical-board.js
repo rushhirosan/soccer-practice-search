@@ -469,11 +469,16 @@
     const normalized = String(value || '').trim();
     let match = normalized.match(/^(\d+)対(\d+)$/);
     if (match) {
-      return { home: parseInt(match[1], 10), away: parseInt(match[2], 10) };
+      const home = parseInt(match[1], 10);
+      const away = parseInt(match[2], 10);
+      if (home <= 0 || away <= 0) return null;
+      return { home, away };
     }
     match = normalized.match(/^(\d+)人$/);
     if (match) {
-      return { home: parseInt(match[1], 10), away: 0 };
+      const home = parseInt(match[1], 10);
+      if (home <= 0) return null;
+      return { home, away: 0 };
     }
     return null;
   }

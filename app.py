@@ -12,6 +12,7 @@ from typing import Optional, Any
 from dotenv import load_dotenv
 from utilities import app_user_store
 from utilities import ui_i18n
+from utilities.update_category_db import is_meaningful_players_label
 import threading
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -460,6 +461,8 @@ def get_unique_values(column_name):
         cursor.execute(query)
         values = [row[0] for row in cursor.fetchall()]
         cursor.close()
+        if column_name == "players":
+            values = [v for v in values if is_meaningful_players_label(v)]
         logger.info(f"Retrieved {len(values)} unique values for column {column_name}")
         return values
     except Exception as e:

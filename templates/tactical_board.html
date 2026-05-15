@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=14">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=15">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -95,15 +95,8 @@
                         <button type="button" data-action="export-json" title="{{ _('tb_export_json_title') }}">{{ _('tb_export_json') }}</button>
                         <button type="button" data-action="import" title="{{ _('tb_import_json_title') }}">{{ _('tb_import_json') }}</button>
                         <button type="button" data-action="export-png" title="{{ _('tb_export_png_title') }}">{{ _('tb_export_png') }}</button>
-                        <button type="button" data-action="add-to-match" title="{{ _('tb_add_match_title') }}" hidden aria-hidden="true">{{ _('tb_add_match') }}</button>
-                        <button type="button" data-action="add-to-notes" title="{{ _('tb_add_notes_title') }}" hidden aria-hidden="true">{{ _('tb_add_notes') }}</button>
                     </div>
                 </div>
-            </div>
-
-            <div class="tool-group match-send-group" hidden aria-hidden="true">
-                <h3>{{ _('tb_match_record_heading') }}</h3>
-                <button type="button" id="btn-send-to-match" class="action-btn action-btn--match-send" title="{{ _('tb_add_match_title') }}">{{ _('tb_add_match') }}</button>
             </div>
 
             <div class="tool-group saved-board-group">
@@ -165,6 +158,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=20"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=21"></script>
 </body>
 </html>

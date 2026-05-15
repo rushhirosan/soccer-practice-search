@@ -16,7 +16,6 @@
 
   const STORAGE_KEY = 'soccer_tactical_board';
   const SAVED_BOARDS_KEY = 'soccer_saved_boards';
-  const PENDING_MATCH_BOARD_KEY = 'soccer_pending_board_for_match';
   const PITCH_COLOR = '#2d5016';
   const LINE_COLOR = '#ffffff';
   const PLAYER_COLORS = { home: '#3b82f6', away: '#ef4444' };
@@ -1563,11 +1562,8 @@
         else if (a === 'export-json') exportJSON();
         else if (a === 'import') document.getElementById('file-input').click();
         else if (a === 'export-png') exportPNG();
-        else if (a === 'add-to-match') addToMatchRecord();
-        else if (a === 'add-to-notes') addToPracticeNotes();
       });
     });
-    document.getElementById('btn-send-to-match')?.addEventListener('click', addToMatchRecord);
     document.addEventListener('click', (e) => {
       if (!document.querySelector('.save-dropdown')?.contains(e.target)) document.getElementById('save-dropdown-menu')?.setAttribute('aria-hidden', 'true');
     });
@@ -1808,74 +1804,6 @@
   function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert(tr('js_tb_loaded_short')); } catch (err) { alert(tr('js_tb_load_failed_short')); } }; r.readAsText(f); e.target.value = ''; }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
   function exportPNG() { const a = document.createElement('a'); a.href = stage.toDataURL({ pixelRatio: 2 }); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.png'; a.click(); }
-
-  function buildMatchSnapshotFromBoardData(boardData) {
-    const sceneIndex = (boardData && typeof boardData.currentSceneIndex === 'number') ? boardData.currentSceneIndex : 0;
-    const scenesList = Array.isArray(boardData?.scenes) ? boardData.scenes : [];
-    const scene = scenesList[sceneIndex] || scenesList[0] || null;
-    const players = Array.isArray(scene?.players) ? scene.players : [];
-    const starters = players
-      .slice()
-      .sort((a, b) => (Number(b?.y || 0) - Number(a?.y || 0)) || (Number(a?.x || 0) - Number(b?.x || 0)))
-      .map((p, idx) => {
-        const label = (p?.label != null) ? String(p.label).trim() : '';
-        if (label) return label;
-        if (p?.number != null) return String(p.number);
-        return String(idx + 1);
-      });
-    const formation = (boardData?.boardType === 'practice')
-      ? String(boardData?.practiceFormation || '').trim()
-      : String(boardData?.tacticalFormation || '').trim();
-    const selected = savedBoards.find(item => item.id === selectedSavedBoardId) || null;
-    return {
-      boardType: boardData?.boardType === 'practice' ? 'practice' : 'tactical',
-      boardId: selected?.id || null,
-      boardName: selected?.name || '',
-      sceneIndex,
-      formation,
-      starters,
-    };
-  }
-
-  function addToMatchRecord() {
-    try {
-      const boardData = getData();
-      /** PNG と全 boardData は容量が大きくモバイルの localStorage で失敗しやすい。試合記録には snapshot のみで足りる */
-      const payload = {
-        snapshot: buildMatchSnapshotFromBoardData(boardData),
-        savedAt: new Date().toISOString(),
-      };
-      const raw = JSON.stringify(payload);
-      try {
-        sessionStorage.setItem(PENDING_MATCH_BOARD_KEY, raw);
-      } catch (e) {
-        console.warn('sessionStorage pending match', e);
-      }
-      try {
-        localStorage.setItem(PENDING_MATCH_BOARD_KEY, raw);
-      } catch (e) {
-        alert(tr('js_tb_match_storage_fail'));
-        return;
-      }
-      if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
-      window.location.href = '/practice-notes';
-    } catch (e) {
-      alert(tr('js_tb_error_prefix') + (e.message || tr('js_tb_process_failed')));
-    }
-  }
-
-  function addToPracticeNotes() {
-    try {
-      const imageDataUrl = stage.toDataURL({ pixelRatio: 2 });
-      const boardData = getData();
-      const payload = { imageDataUrl, boardData, savedAt: new Date().toISOString() };
-      localStorage.setItem('soccer_pending_board_for_plan', JSON.stringify(payload)); if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
-      alert(tr('js_tb_notes_prepare'));
-      window.location.href = '/practice-notes';
-    } catch (e) {
-      alert(tr('js_tb_error_prefix') + (e.message || tr('js_tb_process_failed')));
-    }
-  }
 
   function playAnimation() {
     if (scenes.length === 0) return;

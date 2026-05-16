@@ -200,12 +200,16 @@
     listEl.innerHTML = savedBoards.map(item => {
       const selected = item.id === selectedSavedBoardId ? ' selected' : '';
       const id = escapeHtml(item.id);
+      const overwriteBtn = item.id === selectedSavedBoardId
+        ? '<button type="button" class="saved-board-overwrite" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_overwrite_short_title')) + '">' + escapeHtml(tr('js_tb_overwrite_short')) + '</button>'
+        : '';
       return (
         '<div class="saved-board-row" role="listitem" data-saved-board-id="' + id + '">' +
         '<button type="button" class="saved-board-pick' + selected + '" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_pick_saved_title')) + '">' +
         '<span class="saved-board-name">' + escapeHtml(item.name) + '</span>' +
         '<span class="saved-board-date">' + escapeHtml(formatSavedBoardTimestamp(item.updatedAt)) + '</span>' +
         '</button>' +
+        overwriteBtn +
         '<button type="button" class="saved-board-load" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_load_saved')) + '">' + escapeHtml(tr('js_tb_load_saved')) + '</button>' +
         '<button type="button" class="saved-board-delete" data-saved-board-id="' + id + '" title="' + escapeHtml(tr('js_tb_delete_saved_title')) + '" aria-label="' + escapeHtml(tr('js_tb_delete_aria')) + '">×</button>' +
         '</div>'
@@ -1548,29 +1552,12 @@
       renderSequenceList();
     });
 
-    document.getElementById('save-dropdown-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const menu = document.getElementById('save-dropdown-menu');
-      menu.setAttribute('aria-hidden', menu.getAttribute('aria-hidden') === 'false' ? 'true' : 'false');
-    });
-    document.getElementById('save-dropdown-menu')?.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.getElementById('save-dropdown-menu').setAttribute('aria-hidden', 'true');
-        const a = btn.dataset.action;
-        if (a === 'save') saveToStorage();
-        else if (a === 'load') loadFromStorage();
-        else if (a === 'export-json') exportJSON();
-        else if (a === 'import') document.getElementById('file-input').click();
-        else if (a === 'export-png') exportPNG();
-      });
-    });
-    document.addEventListener('click', (e) => {
-      if (!document.querySelector('.save-dropdown')?.contains(e.target)) document.getElementById('save-dropdown-menu')?.setAttribute('aria-hidden', 'true');
-    });
+    document.getElementById('btn-export-png')?.addEventListener('click', exportPNG);
+    document.getElementById('btn-export-json')?.addEventListener('click', exportJSON);
+    document.getElementById('btn-import-json')?.addEventListener('click', () => document.getElementById('file-input')?.click());
     document.getElementById('file-input')?.addEventListener('change', loadFromFile);
 
     document.getElementById('saved-board-save-btn')?.addEventListener('click', saveCurrentAsSavedBoard);
-    document.getElementById('saved-board-overwrite-btn')?.addEventListener('click', overwriteSelectedSavedBoard);
     document.getElementById('saved-board-name-input')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -1590,6 +1577,15 @@
         e.preventDefault();
         const id = load.dataset.savedBoardId;
         if (id) loadSavedBoardById(id);
+        return;
+      }
+      const overwrite = e.target.closest('.saved-board-overwrite');
+      if (overwrite) {
+        e.preventDefault();
+        const id = overwrite.dataset.savedBoardId;
+        if (!id) return;
+        selectedSavedBoardId = id;
+        overwriteSelectedSavedBoard();
         return;
       }
       const pick = e.target.closest('.saved-board-pick');
@@ -1799,9 +1795,22 @@
     renderSequenceList();
   }
 
-  function saveToStorage() { try { if (!persistCurrentBoardSilently(true)) return; alert(tr('js_tb_saved')); } catch (e) { alert(tr('js_tb_save_failed') + e.message); } }
-  function loadFromStorage() { try { const r = localStorage.getItem(STORAGE_KEY); if (!r) { alert(tr('js_tb_no_saved')); return; } setData(JSON.parse(r)); lastAppliedBoardStorageRaw = r; alert(tr('js_tb_loaded_short')); } catch (e) { alert(tr('js_tb_load_failed') + e.message); } }
-  function loadFromFile(e) { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { setData(JSON.parse(ev.target.result)); alert(tr('js_tb_loaded_short')); } catch (err) { alert(tr('js_tb_load_failed_short')); } }; r.readAsText(f); e.target.value = ''; }
+  function loadFromFile(e) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        setData(JSON.parse(ev.target.result));
+        persistCurrentBoardSilently(true);
+        alert(tr('js_tb_loaded_short'));
+      } catch (err) {
+        alert(tr('js_tb_load_failed_short'));
+      }
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  }
   function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
   function exportPNG() { const a = document.createElement('a'); a.href = stage.toDataURL({ pixelRatio: 2 }); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.png'; a.click(); }
 

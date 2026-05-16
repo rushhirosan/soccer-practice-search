@@ -198,10 +198,6 @@
   color: var(--text-color, #1e293b);
 }
 
-.saved-board-group .saved-board-actions {
-  margin-top: 0.35rem;
-}
-
 .saved-board-list {
   display: flex;
   flex-direction: column;
@@ -272,10 +268,12 @@
 }
 
 .saved-board-load,
+.saved-board-overwrite,
 .saved-board-delete {
   flex-shrink: 0;
-  width: 2.25rem;
-  padding: 0;
+  min-width: 2.25rem;
+  width: auto;
+  padding: 0 0.35rem;
   font-size: 0.74rem;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 4px);
@@ -286,6 +284,17 @@
 }
 
 .saved-board-load:hover {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: var(--primary-color, #16a34a);
+}
+
+.saved-board-overwrite {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--primary-color, #16a34a);
+}
+
+.saved-board-overwrite:hover {
   background: rgba(22, 163, 74, 0.12);
   border-color: var(--primary-color, #16a34a);
 }
@@ -346,58 +355,47 @@
   min-width: 0;
 }
 
-/* 保存・読込ドロップダウン */
-.save-dropdown-group {
-  position: relative;
-}
-
-.save-dropdown {
-  position: relative;
-}
-
-.save-dropdown .dropdown-trigger {
+/* 共有・詳細 */
+.share-group .action-btn {
   margin-bottom: 0;
 }
 
-.save-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  min-width: 100%;
-  width: max-content;
-  margin-top: 0.25rem;
-  background: white;
+.board-advanced-details {
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: var(--radius-sm, 4px);
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
-  z-index: 100;
-  overflow: hidden;
+  background: var(--background-color, #f8fafc);
 }
 
-.save-dropdown-menu[aria-hidden="true"] {
+.board-advanced-summary {
+  padding: 0.45rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  list-style: none;
+}
+
+.board-advanced-summary::-webkit-details-marker {
   display: none;
 }
 
-.save-dropdown-menu[aria-hidden="false"] {
-  display: block;
+.board-advanced-summary::before {
+  content: '▸ ';
 }
 
-.save-dropdown-menu button {
+.board-advanced-details[open] .board-advanced-summary::before {
+  content: '▾ ';
+}
+
+.board-advanced-panel {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  color: var(--text-color, #1e293b);
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 0.5rem 0.5rem;
 }
 
-.save-dropdown-menu button:hover {
-  background: var(--background-color, #f8fafc);
+.board-advanced-panel .action-btn {
+  margin-bottom: 0;
 }
 
 .action-btn {

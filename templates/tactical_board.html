@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=15">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=16">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -85,31 +85,29 @@
                 </div>
             </div>
 
-            <div class="tool-group save-dropdown-group">
-                <h3>{{ _('tb_save_load_heading') }}</h3>
-                <div class="save-dropdown">
-                    <button type="button" id="save-dropdown-btn" class="action-btn dropdown-trigger">{{ _('tb_save_menu') }}</button>
-                    <div class="save-dropdown-menu" id="save-dropdown-menu" aria-hidden="true">
-                        <button type="button" data-action="save" title="{{ _('tb_save_browser_title') }}">{{ _('tb_save_browser') }}</button>
-                        <button type="button" data-action="load" title="{{ _('tb_load_browser_title') }}">{{ _('tb_load_browser') }}</button>
-                        <button type="button" data-action="export-json" title="{{ _('tb_export_json_title') }}">{{ _('tb_export_json') }}</button>
-                        <button type="button" data-action="import" title="{{ _('tb_import_json_title') }}">{{ _('tb_import_json') }}</button>
-                        <button type="button" data-action="export-png" title="{{ _('tb_export_png_title') }}">{{ _('tb_export_png') }}</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="tool-group saved-board-group">
                 <h3>{{ _('tb_saved_boards') }}</h3>
                 <div class="saved-board-add-row">
                     <input type="text" id="saved-board-name-input" maxlength="32" placeholder="{{ _('tb_saved_board_ph') }}" aria-label="{{ _('tb_saved_board_name_aria') }}" autocomplete="off" enterkeyhint="done">
-                    <button type="button" id="saved-board-save-btn" class="action-btn small">{{ _('tb_saved_board_save') }}</button>
-                </div>
-                <div class="saved-board-actions">
-                    <button type="button" id="saved-board-overwrite-btn" class="action-btn small" title="{{ _('tb_overwrite_title') }}">{{ _('tb_overwrite_selected') }}</button>
+                    <button type="button" id="saved-board-save-btn" class="action-btn small">{{ _('tb_saved_board_register') }}</button>
                 </div>
                 <p class="tool-hint" id="saved-board-hint">{{ _('tb_saved_board_hint') }}</p>
                 <div id="saved-board-list" class="saved-board-list" role="list" aria-label="{{ _('tb_saved_list_aria') }}"></div>
+            </div>
+
+            <div class="tool-group share-group">
+                <h3>{{ _('tb_share_heading') }}</h3>
+                <button type="button" id="btn-export-png" class="action-btn" title="{{ _('tb_export_png_title') }}">{{ _('tb_export_png_button') }}</button>
+            </div>
+
+            <div class="tool-group advanced-group">
+                <details class="board-advanced-details">
+                    <summary class="board-advanced-summary">{{ _('tb_advanced_heading') }}</summary>
+                    <div class="board-advanced-panel">
+                        <button type="button" id="btn-export-json" class="action-btn small" title="{{ _('tb_backup_json_title') }}">{{ _('tb_backup_json') }}</button>
+                        <button type="button" id="btn-import-json" class="action-btn small" title="{{ _('tb_restore_json_title') }}">{{ _('tb_restore_json') }}</button>
+                    </div>
+                </details>
             </div>
         </aside>
 
@@ -158,6 +156,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=21"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=22"></script>
 </body>
 </html>

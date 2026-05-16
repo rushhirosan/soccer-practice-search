@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=16">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=18">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -95,20 +95,6 @@
                 <div id="saved-board-list" class="saved-board-list" role="list" aria-label="{{ _('tb_saved_list_aria') }}"></div>
             </div>
 
-            <div class="tool-group share-group">
-                <h3>{{ _('tb_share_heading') }}</h3>
-                <button type="button" id="btn-export-png" class="action-btn" title="{{ _('tb_export_png_title') }}">{{ _('tb_export_png_button') }}</button>
-            </div>
-
-            <div class="tool-group advanced-group">
-                <details class="board-advanced-details">
-                    <summary class="board-advanced-summary">{{ _('tb_advanced_heading') }}</summary>
-                    <div class="board-advanced-panel">
-                        <button type="button" id="btn-export-json" class="action-btn small" title="{{ _('tb_backup_json_title') }}">{{ _('tb_backup_json') }}</button>
-                        <button type="button" id="btn-import-json" class="action-btn small" title="{{ _('tb_restore_json_title') }}">{{ _('tb_restore_json') }}</button>
-                    </div>
-                </details>
-            </div>
         </aside>
 
         <section class="canvas-section" id="canvas-section">
@@ -151,11 +137,9 @@
         <p><a href="/">{{ _('nav_home') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
-    <input type="file" id="file-input" accept=".json" style="display: none">
-
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=22"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=24"></script>
 </body>
 </html>

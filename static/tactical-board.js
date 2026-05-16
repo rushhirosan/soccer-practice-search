@@ -1552,11 +1552,6 @@
       renderSequenceList();
     });
 
-    document.getElementById('btn-export-png')?.addEventListener('click', exportPNG);
-    document.getElementById('btn-export-json')?.addEventListener('click', exportJSON);
-    document.getElementById('btn-import-json')?.addEventListener('click', () => document.getElementById('file-input')?.click());
-    document.getElementById('file-input')?.addEventListener('change', loadFromFile);
-
     document.getElementById('saved-board-save-btn')?.addEventListener('click', saveCurrentAsSavedBoard);
     document.getElementById('saved-board-name-input')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -1794,25 +1789,6 @@
     renderCurrentScene();
     renderSequenceList();
   }
-
-  function loadFromFile(e) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-      try {
-        setData(JSON.parse(ev.target.result));
-        persistCurrentBoardSilently(true);
-        alert(tr('js_tb_loaded_short'));
-      } catch (err) {
-        alert(tr('js_tb_load_failed_short'));
-      }
-    };
-    r.readAsText(f);
-    e.target.value = '';
-  }
-  function exportJSON() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(getData(), null, 2)], { type: 'application/json' })); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); }
-  function exportPNG() { const a = document.createElement('a'); a.href = stage.toDataURL({ pixelRatio: 2 }); a.download = 'tactical-' + new Date().toISOString().slice(0, 10) + '.png'; a.click(); }
 
   function playAnimation() {
     if (scenes.length === 0) return;

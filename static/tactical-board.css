@@ -355,49 +355,6 @@
   min-width: 0;
 }
 
-/* 共有・詳細 */
-.share-group .action-btn {
-  margin-bottom: 0;
-}
-
-.board-advanced-details {
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-sm, 4px);
-  background: var(--background-color, #f8fafc);
-}
-
-.board-advanced-summary {
-  padding: 0.45rem 0.55rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary, #64748b);
-  cursor: pointer;
-  list-style: none;
-}
-
-.board-advanced-summary::-webkit-details-marker {
-  display: none;
-}
-
-.board-advanced-summary::before {
-  content: '▸ ';
-}
-
-.board-advanced-details[open] .board-advanced-summary::before {
-  content: '▾ ';
-}
-
-.board-advanced-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0 0.5rem 0.5rem;
-}
-
-.board-advanced-panel .action-btn {
-  margin-bottom: 0;
-}
-
 .action-btn {
   width: 100%;
   padding: 0.5rem;

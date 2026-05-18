@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=18">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=19">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -107,6 +107,7 @@
                 <span class="animation-section-title">{{ _('tb_scene_list') }}</span>
                 <button type="button" id="btn-add-effect" class="action-btn add-effect-btn" title="{{ _('tb_add_scene_title') }}">{{ _('tb_add_scene') }}</button>
             </div>
+            <p class="animation-list-hint">{{ _('tb_scene_list_hint') }}</p>
             <div class="animation-list-group">
                 <div id="animation-list" class="animation-list" role="list"></div>
             </div>
@@ -140,6 +141,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=24"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=25"></script>
 </body>
 </html>

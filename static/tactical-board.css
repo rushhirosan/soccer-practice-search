@@ -461,7 +461,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.animation-list-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.35;
+  margin: 0 0 0.45rem 0;
 }
 
 .animation-section-title {
@@ -543,17 +550,18 @@
   cursor: grabbing;
 }
 
-.animation-item-num {
-  min-width: 1em;
-  font-weight: 700;
-  color: var(--primary-color, #16a34a);
-}
-
-.animation-item-label {
+.animation-item-title {
   flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--text-color, #1e293b);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.animation-item.active .animation-item-title {
+  color: var(--primary-color, #16a34a);
 }
 
 .animation-item-delete {

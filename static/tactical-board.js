@@ -440,6 +440,10 @@
     return { id: 's-' + Date.now(), name: '', players: [], opponents: [], balls: [], arrows: [], lines: [] };
   }
 
+  function sceneListLabel(index) {
+    return tr('js_tb_scene_item_label').replace('{n}', String(index + 1));
+  }
+
   function mirrorFormation(positions) {
     return positions.map(([x, y]) => [x, 100 - y]);
   }
@@ -612,7 +616,6 @@
     selectedSavedBoardId = null;
 
     scenes = [createEmptyScene()];
-    scenes[0].name = '1';
     currentSceneIndex = 0;
     undoStack = [];
     redoStack = [];
@@ -1169,7 +1172,7 @@
     const current = scenes[currentSceneIndex];
     if (!current) return;
     const snap = getSceneSnapshot(current);
-    const newScene = { id: 's-' + Date.now(), name: String(scenes.length + 1), players: snap.players, opponents: snap.opponents, balls: snap.balls, arrows: snap.arrows, lines: snap.lines };
+    const newScene = { id: 's-' + Date.now(), name: '', players: snap.players, opponents: snap.opponents, balls: snap.balls, arrows: snap.arrows, lines: snap.lines };
     scenes.push(newScene);
     currentSceneIndex = scenes.length - 1;
     undoStack = [];
@@ -1661,14 +1664,17 @@
   function renderSequenceList() {
     const list = document.getElementById('animation-list');
     if (!list) return;
-    list.innerHTML = scenes.map((s, i) => `
-      <div class="animation-item ${i === currentSceneIndex ? 'active' : ''}" data-index="${i}" draggable="true">
-        <span class="animation-item-drag" title="${tr('js_tb_anim_drag')}">⋮⋮</span>
-        <span class="animation-item-num">${i + 1}</span>
-        <span class="animation-item-label">${s.name || (tr('js_tb_anim_frame') + (i + 1))}</span>
-        <button type="button" class="animation-item-delete" data-index="${i}" title="${tr('js_tb_anim_delete_title')}">×</button>
-      </div>
-    `).join('');
+    list.innerHTML = scenes.map((s, i) => {
+      const label = sceneListLabel(i);
+      const isActive = i === currentSceneIndex;
+      const ariaLabel = isActive ? `${label}（${tr('js_tb_scene_current')}）` : label;
+      return `
+      <div class="animation-item ${isActive ? 'active' : ''}" data-index="${i}" draggable="true" role="listitem" aria-current="${isActive ? 'true' : 'false'}" aria-label="${escapeHtml(ariaLabel)}">
+        <span class="animation-item-drag" title="${tr('js_tb_anim_drag')}" aria-hidden="true">⋮⋮</span>
+        <span class="animation-item-title">${escapeHtml(label)}</span>
+        <button type="button" class="animation-item-delete" data-index="${i}" title="${tr('js_tb_anim_delete_title')}" aria-label="${escapeHtml(tr('js_tb_anim_delete_title'))}">×</button>
+      </div>`;
+    }).join('');
     list.querySelectorAll('.animation-item').forEach(el => {
       el.addEventListener('click', (e) => {
         if (e.target.closest('.animation-item-delete')) return;

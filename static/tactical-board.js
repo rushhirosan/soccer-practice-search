@@ -19,6 +19,7 @@
   const PITCH_COLOR = '#2d5016';
   const LINE_COLOR = '#ffffff';
   const PLAYER_COLORS = { home: '#3b82f6', away: '#ef4444' };
+  const PLAYER_RADIUS = 16;
   const MAX_UNDO = 50;
   const DEFAULT_TACTICAL_FORMATION = '3-3-1';
   const DEFAULT_PRACTICE_FORMATIONS = ['1対1', '2対2', '3対3', '4対4', '5対5', '6対6', '7対7', '8人', '11人'];
@@ -45,7 +46,6 @@
   let previewLine = null;
   let scenes = [];
   let currentSceneIndex = 0;
-  let courtMode = '8';
   let boardType = 'practice';
   let tacticalFormation = DEFAULT_TACTICAL_FORMATION;
   let practiceFormation = '';
@@ -320,24 +320,37 @@
   function renderRosterPanel() {
     const listEl = document.getElementById('roster-bench-list');
     const hintEl = document.getElementById('roster-hint');
+    const countEl = document.getElementById('roster-bench-count');
     if (!listEl) return;
 
     const used = getUsedRosterIdsInCurrentScene();
     const bench = roster.filter(r => !used.has(r.id));
 
+    if (countEl) {
+      if (bench.length > 0) {
+        countEl.textContent = tr('js_tb_roster_bench_count').replace('{n}', String(bench.length));
+        countEl.hidden = false;
+      } else {
+        countEl.textContent = '';
+        countEl.hidden = true;
+      }
+    }
+
     if (bench.length === 0) {
       listEl.innerHTML = '<p class="roster-bench-empty">' + tr('js_tb_roster_empty') + '</p>';
     } else {
+      const pickTitle = escapeHtml(tr('js_tb_roster_pick_title'));
+      const delTitle = escapeHtml(tr('js_tb_roster_delete_title'));
+      const delAria = escapeHtml(tr('js_tb_delete_aria'));
       listEl.innerHTML = bench.map(r => {
         const sel = r.id === selectedRosterId ? ' selected' : '';
         const eid = escapeHtml(r.id);
         const ename = escapeHtml(r.name);
         return (
-          '<div class="roster-bench-row" role="listitem" data-roster-id="' + eid + '">' +
-          '<button type="button" class="roster-bench-pick' + sel + '" data-roster-id="' + eid + '" title="' + escapeHtml(tr('js_tb_roster_pick_title')) + '">' +
-          '<span class="roster-bench-name">' + ename + '</span></button>' +
-          '<button type="button" class="roster-bench-delete" data-roster-id="' + eid + '" title="' + escapeHtml(tr('js_tb_roster_delete_title')) + '" aria-label="' + escapeHtml(tr('js_tb_delete_aria')) + '">×</button>' +
-          '</div>'
+          '<button type="button" class="roster-chip' + sel + '" role="listitem" data-roster-id="' + eid + '" title="' + pickTitle + '">' +
+          '<span class="roster-chip-label">' + ename + '</span>' +
+          '<span class="roster-chip-remove" data-roster-id="' + eid + '" role="button" title="' + delTitle + '" aria-label="' + delAria + '">×</span>' +
+          '</button>'
         );
       }).join('');
     }
@@ -359,9 +372,13 @@
     if (!input) return;
     const name = String(input.value || '').trim().slice(0, 24);
     if (!name) return;
-    roster.push({ id: newRosterId(), name });
+    const entry = { id: newRosterId(), name };
+    roster.push(entry);
+    selectedRosterId = entry.id;
     input.value = '';
     renderRosterPanel();
+    document.querySelector('.tool-btn[data-tool="player"]')?.click();
+    input.focus();
   }
 
   function getPlayerCircleText(p, index, r) {
@@ -696,20 +713,7 @@
   function drawPitch() {
     pitchLayer.destroyChildren();
     const w = pitchWidth, h = pitchHeight, lw = 3;
-    const isEleven = courtMode === '11';
-    const dims = isEleven ? {
-      penaltyAreaWidth: w * 0.62,
-      penaltyAreaDepth: h * 0.18,
-      goalAreaWidth: w * 0.28,
-      goalAreaDepth: h * 0.075,
-      goalWidth: w * 0.112,
-      goalDepth: h * 0.02,
-      penaltySpotOffset: h * 0.12,
-      cornerRadius: Math.min(w, h) * 0.035,
-      centerCircleRadius: Math.min(w, h) * 0.12,
-      penaltyArcRadius: Math.min(w, h) * 0.095,
-      penaltyArcVerticalRadius: Math.min(w, h) * 0.135,
-    } : {
+    const dims = {
       penaltyAreaWidth: w * 0.54,
       penaltyAreaDepth: h * 0.16,
       goalAreaWidth: w * 0.22,
@@ -835,7 +839,7 @@
   }
 
   function createPlayerNode(p, index) {
-    const r = courtMode === '8' ? 16 : 20;
+    const r = PLAYER_RADIUS;
     const sel = isInSelection('players', index);
     const group = new Konva.Group({
       x: p.x, y: p.y,
@@ -936,7 +940,7 @@
   }
 
   function createOpponentNode(p, index) {
-    const r = courtMode === '8' ? 16 : 20;
+    const r = PLAYER_RADIUS;
     const sel = isInSelection('opponents', index);
     const group = new Konva.Group({
       x: p.x, y: p.y,
@@ -1213,7 +1217,7 @@
   function getSelectionBounds() {
     const scene = scenes[currentSceneIndex];
     if (!scene) return null;
-    const r = courtMode === '8' ? 16 : 20;
+    const r = PLAYER_RADIUS;
     const ballSize = 14;
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     selectedBoard.players.forEach(i => {
@@ -1533,12 +1537,6 @@
       }
     });
 
-    document.getElementById('court-mode')?.addEventListener('change', (e) => {
-      courtMode = e.target.value;
-      drawPitch();
-      renderCurrentScene();
-    });
-
     document.getElementById('btn-add-effect')?.addEventListener('click', recordSnapshot);
 
     document.getElementById('btn-clear')?.addEventListener('click', () => {
@@ -1604,9 +1602,10 @@
       }
     });
     document.getElementById('roster-bench-list')?.addEventListener('click', (e) => {
-      const del = e.target.closest('.roster-bench-delete');
+      const del = e.target.closest('.roster-chip-remove');
       if (del) {
         e.preventDefault();
+        e.stopPropagation();
         const rid = del.dataset.rosterId;
         if (!rid) return;
         if (isRosterIdUsedInAnyScene(rid)) {
@@ -1618,7 +1617,7 @@
         renderRosterPanel();
         return;
       }
-      const pick = e.target.closest('.roster-bench-pick');
+      const pick = e.target.closest('.roster-chip');
       if (pick) {
         const rid = pick.dataset.rosterId;
         if (!rid) return;
@@ -1757,7 +1756,6 @@
 
   function getData() {
     return {
-      courtMode,
       boardType,
       tacticalFormation,
       practiceFormation,
@@ -1768,7 +1766,6 @@
   }
 
   function setData(data) {
-    courtMode = data.courtMode || '8';
     boardType = data.boardType === 'practice' ? 'practice' : 'tactical';
     tacticalFormation = data.tacticalFormation || DEFAULT_TACTICAL_FORMATION;
     practiceFormation = data.practiceFormation || '';
@@ -1788,7 +1785,6 @@
         s.opponents = pos.map((p, j) => ({ x: (p[0] / 100) * pitchWidth, y: (p[1] / 100) * pitchHeight, number: j + 1, color: PLAYER_COLORS.away }));
       }
     });
-    document.getElementById('court-mode').value = courtMode;
     updateBoardModeControls();
     loadPracticeFormationOptions();
     drawPitch();

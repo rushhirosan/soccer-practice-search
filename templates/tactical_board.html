@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=19">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=20">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -38,8 +38,11 @@
                     <input type="text" id="roster-name-input" maxlength="24" placeholder="{{ _('tb_roster_ph') }}" title="{{ _('tb_roster_title') }}" autocomplete="off" aria-label="{{ _('tb_roster_aria') }}" enterkeyhint="done">
                     <button type="button" id="roster-add-btn" class="action-btn small roster-add-btn">{{ _('tb_add') }}</button>
                 </div>
-                <p class="tool-hint" id="roster-hint">{{ _('tb_roster_hint') }}</p>
-                <div class="roster-section-label" id="roster-section-label">{{ _('tb_roster_section') }}</div>
+                <p class="tool-hint roster-hint" id="roster-hint">{{ _('tb_roster_hint') }}</p>
+                <div class="roster-bench-head">
+                    <span class="roster-section-label">{{ _('tb_roster_section') }}</span>
+                    <span id="roster-bench-count" class="roster-bench-count" hidden aria-live="polite"></span>
+                </div>
                 <div id="roster-bench-list" class="roster-bench-list" role="list" aria-label="{{ _('tb_roster_section') }}"></div>
             </div>
 
@@ -71,18 +74,9 @@
                 <p class="tool-hint" id="formation-hint">{{ _('tb_formation_hint') }}</p>
             </div>
 
-            <div class="tool-group tool-group-row">
-                <div>
-                    <h3>{{ _('tb_court') }}</h3>
-                    <select id="court-mode" aria-label="{{ _('tb_court') }}">
-                        <option value="8">{{ _('tb_court_8') }}</option>
-                        <option value="11">{{ _('tb_court_11') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <h3>{{ _('tb_edit') }}</h3>
-                    <button type="button" id="btn-clear" class="action-btn small" title="{{ _('tb_clear_title') }}">{{ _('tb_clear_btn') }}</button>
-                </div>
+            <div class="tool-group">
+                <h3>{{ _('tb_edit') }}</h3>
+                <button type="button" id="btn-clear" class="action-btn small" title="{{ _('tb_clear_title') }}">{{ _('tb_clear_btn') }}</button>
             </div>
 
             <div class="tool-group saved-board-group">
@@ -141,6 +135,6 @@
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=25"></script>
+    <script src="{{ url_for('static', filename='tactical-board.js') }}?v=26"></script>
 </body>
 </html>

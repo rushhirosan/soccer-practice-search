@@ -76,10 +76,15 @@
     if (!canvasSection) return;
 
     const rect = canvasSection.getBoundingClientRect();
-    const width = rect.width;
-    if (!width || width <= 0) return;
+    if (!rect.width || !rect.height) return;
 
-    const scale = Math.min(1, width / pitchWidth);
+    const style = getComputedStyle(canvasSection);
+    const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    const padY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+    const availW = Math.max(1, rect.width - padX);
+    const availH = Math.max(1, rect.height - padY);
+
+    const scale = Math.min(1, availW / pitchWidth, availH / pitchHeight);
     const nextScale = Math.max(0.35, scale);
 
     if (Math.abs(nextScale - stageFitScale) < 0.001) return;
@@ -90,6 +95,13 @@
     stage.scale({ x: stageFitScale, y: stageFitScale });
 
     stage.draw();
+  }
+
+  function observeCanvasSectionResize() {
+    const canvasSection = document.getElementById('canvas-section');
+    if (!canvasSection || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => scheduleFitStageToCanvasSection());
+    ro.observe(canvasSection);
   }
 
   function scheduleFitStageToCanvasSection() {
@@ -705,9 +717,11 @@
     const canvasSection = document.getElementById('canvas-section');
     if (canvasSection) canvasSection.classList.remove('place-mode');
 
-    // 画面サイズ変更/回転に追従
+    // 画面サイズ変更/回転・キャンバス領域のリサイズに追従
     window.addEventListener('resize', scheduleFitStageToCanvasSection, { passive: true });
     window.addEventListener('orientationchange', scheduleFitStageToCanvasSection, { passive: true });
+    observeCanvasSectionResize();
+    scheduleFitStageToCanvasSection();
   }
 
   function drawPitch() {

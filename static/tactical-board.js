@@ -109,6 +109,13 @@
     stageFitRafId = requestAnimationFrame(fitStageToCanvasSection);
   }
 
+  /** ステージ縮小表示時もピッチ論理座標 (0..pitchWidth/Height) で返す */
+  function getLogicalPointerPosition() {
+    const pos = stage?.getPointerPosition();
+    if (!pos || !stageFitScale) return null;
+    return { x: pos.x / stageFitScale, y: pos.y / stageFitScale };
+  }
+
   function newRosterId() {
     return 'r-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
   }
@@ -327,6 +334,18 @@
   function isRosterIdUsedInAnyScene(rid) {
     if (!rid) return false;
     return scenes.some(s => (s.players || []).some(p => p.rosterId === rid));
+  }
+
+  /** ピッチから外したメンバーは出場メンバー一覧からも外す */
+  function removeRosterEntries(rids) {
+    const idSet = new Set((rids || []).filter(Boolean));
+    if (!idSet.size) return;
+    roster = roster.filter(r => !idSet.has(r.id));
+    if (selectedRosterId && idSet.has(selectedRosterId)) selectedRosterId = null;
+  }
+
+  function collectRosterIdsFromPlayers(players) {
+    return (players || []).map(p => p.rosterId).filter(Boolean);
   }
 
   function renderRosterPanel() {
@@ -945,7 +964,13 @@
 
   function removePlayer(index) {
     const s = scenes[currentSceneIndex];
-    if (s?.players[index]) { pushUndo(); s.players.splice(index, 1); renderCurrentScene(); renderSequenceList(); }
+    if (!s?.players[index]) return;
+    const rid = s.players[index].rosterId;
+    pushUndo();
+    s.players.splice(index, 1);
+    if (rid && !isRosterIdUsedInAnyScene(rid)) removeRosterEntries([rid]);
+    renderCurrentScene();
+    renderSequenceList();
   }
 
   function removeOpponent(index) {
@@ -1023,6 +1048,10 @@
     const scene = scenes[currentSceneIndex];
     if (!scene || !hasBoardSelection()) return;
 
+    const rosterIdsToDrop = collectRosterIdsFromPlayers(
+      (scene.players || []).filter((_, i) => selectedBoard.players.has(i))
+    );
+
     pushUndo();
 
     scene.players = (scene.players || []).filter((_, i) => !selectedBoard.players.has(i));
@@ -1036,6 +1065,8 @@
     selectedBoard.balls.clear();
     selectedBoard.arrows.clear();
     selectedBoard.lines.clear();
+
+    removeRosterEntries(rosterIdsToDrop.filter(rid => !isRosterIdUsedInAnyScene(rid)));
 
     renderCurrentScene();
     renderSequenceList();
@@ -1395,7 +1426,7 @@
       const isSelectionBox = parent === selectionLayer;
       if (isPlayer || isBall || isDraw || isSelectionBox) return;
 
-      const pos = stage.getPointerPosition();
+      const pos = getLogicalPointerPosition();
       if (!pos) return;
 
       const tool = getCurrentTool();
@@ -1408,7 +1439,7 @@
     });
 
     stage.on('mousemove touchmove', () => {
-      const pos = stage.getPointerPosition();
+      const pos = getLogicalPointerPosition();
       const tool = getCurrentTool();
       document.body.style.cursor = (drawStart || marqueeStart || tool === 'ball' || tool === 'player') ? 'crosshair' : 'default';
 
@@ -1439,7 +1470,7 @@
     });
 
     stage.on('mouseup touchend', () => {
-      const pos = stage.getPointerPosition();
+      const pos = getLogicalPointerPosition();
       const tool = getCurrentTool();
       if (marqueeStart && pos) {
         selectByMarquee(marqueeStart.x, marqueeStart.y, pos.x, pos.y);
@@ -1483,7 +1514,7 @@
       const isDraw = t.getClassName?.() === 'Arrow' || t.getClassName?.() === 'Line' || parent?.getAttr?.('arrowIndex') !== undefined || parent?.getAttr?.('lineIndex') !== undefined;
       if (isPlayer || isBall || isDraw) return;
 
-      const pos = stage.getPointerPosition();
+      const pos = getLogicalPointerPosition();
       if (!pos) return;
 
       const tool = getCurrentTool();
@@ -1557,12 +1588,14 @@
       const s = scenes[currentSceneIndex];
       if (!s) return;
       if (!confirm(tr('js_tb_clear_confirm'))) return;
+      const rosterIdsToDrop = collectRosterIdsFromPlayers(s.players);
       pushUndo();
       s.players = [];
       s.opponents = [];
       s.balls = [];
       s.arrows = [];
       s.lines = [];
+      removeRosterEntries(rosterIdsToDrop.filter(rid => !isRosterIdUsedInAnyScene(rid)));
       renderCurrentScene();
       renderSequenceList();
     });

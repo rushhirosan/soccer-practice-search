@@ -348,18 +348,48 @@
     return (players || []).map(p => p.rosterId).filter(Boolean);
   }
 
+  /** ピッチ上の label / rosterId から出場メンバー一覧を補完（保存データ不整合・Undo 後の欠落を修復） */
+  function syncRosterFromPitchPlayers() {
+    scenes.forEach(scene => {
+      (scene.players || []).forEach(p => {
+        const label = (p.label != null ? String(p.label) : '').trim().slice(0, 24);
+        const rid = p.rosterId != null ? String(p.rosterId).trim() : '';
+
+        if (rid) {
+          const existing = roster.find(r => r.id === rid);
+          if (existing) {
+            if (!existing.name && label) existing.name = label;
+          } else {
+            roster.push({ id: rid, name: label || rid });
+          }
+          return;
+        }
+
+        if (!label) return;
+
+        let entry = roster.find(r => r.name === label);
+        if (!entry) {
+          entry = { id: newRosterId(), name: label };
+          roster.push(entry);
+        }
+        p.rosterId = entry.id;
+      });
+    });
+  }
+
   function renderRosterPanel() {
     const listEl = document.getElementById('roster-bench-list');
     const hintEl = document.getElementById('roster-hint');
     const countEl = document.getElementById('roster-bench-count');
     if (!listEl) return;
 
-    const used = getUsedRosterIdsInCurrentScene();
-    const bench = roster.filter(r => !used.has(r.id));
+    syncRosterFromPitchPlayers();
+
+    const onPitch = getUsedRosterIdsInCurrentScene();
 
     if (countEl) {
-      if (bench.length > 0) {
-        countEl.textContent = tr('js_tb_roster_bench_count').replace('{n}', String(bench.length));
+      if (roster.length > 0) {
+        countEl.textContent = tr('js_tb_roster_bench_count').replace('{n}', String(roster.length));
         countEl.hidden = false;
       } else {
         countEl.textContent = '';
@@ -367,18 +397,22 @@
       }
     }
 
-    if (bench.length === 0) {
+    if (roster.length === 0) {
       listEl.innerHTML = '<p class="roster-bench-empty">' + tr('js_tb_roster_empty') + '</p>';
     } else {
       const pickTitle = escapeHtml(tr('js_tb_roster_pick_title'));
+      const pickOnPitchTitle = escapeHtml(tr('js_tb_roster_pick_on_pitch_title'));
       const delTitle = escapeHtml(tr('js_tb_roster_delete_title'));
       const delAria = escapeHtml(tr('js_tb_delete_aria'));
-      listEl.innerHTML = bench.map(r => {
+      listEl.innerHTML = roster.map(r => {
+        const onField = onPitch.has(r.id);
         const sel = r.id === selectedRosterId ? ' selected' : '';
+        const pitchCls = onField ? ' on-pitch' : '';
         const eid = escapeHtml(r.id);
         const ename = escapeHtml(r.name);
+        const chipTitle = onField ? pickOnPitchTitle : pickTitle;
         return (
-          '<button type="button" class="roster-chip' + sel + '" role="listitem" data-roster-id="' + eid + '" title="' + pickTitle + '">' +
+          '<button type="button" class="roster-chip' + sel + pitchCls + '" role="listitem" data-roster-id="' + eid + '" title="' + chipTitle + '">' +
           '<span class="roster-chip-label">' + ename + '</span>' +
           '<span class="roster-chip-remove" data-roster-id="' + eid + '" role="button" title="' + delTitle + '" aria-label="' + delAria + '">×</span>' +
           '</button>'
@@ -464,6 +498,7 @@
     pushRedo(scene);
     const snapshot = undoStack.pop();
     applySnapshot(scene, snapshot);
+    syncRosterFromPitchPlayers();
     renderCurrentScene();
     renderSequenceList();
   }
@@ -480,6 +515,7 @@
     undoStack.push(getSceneSnapshot(scene));
     const snapshot = redoStack.pop();
     applySnapshot(scene, snapshot);
+    syncRosterFromPitchPlayers();
     renderCurrentScene();
     renderSequenceList();
   }
@@ -1834,6 +1870,7 @@
     });
     updateBoardModeControls();
     loadPracticeFormationOptions();
+    syncRosterFromPitchPlayers();
     drawPitch();
     renderCurrentScene();
     renderSequenceList();

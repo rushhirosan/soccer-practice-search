@@ -192,6 +192,11 @@ body:has(.tactical-main) > .tactical-footer {
   font-weight: 600;
 }
 
+.roster-chip.on-pitch {
+  background: rgba(22, 163, 74, 0.06);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
 .roster-chip-label {
   overflow: hidden;
   text-overflow: ellipsis;

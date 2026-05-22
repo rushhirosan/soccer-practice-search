@@ -542,15 +542,24 @@ body:has(.tactical-main) > .tactical-footer {
 }
 
 .animation-list-group {
-  flex: 1;
-  min-height: 56px;
+  flex: 1 1 auto;
+  /* flex 子が内容高さで縮まないと下の再生ボタンに食い込む */
+  min-height: 0;
   margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .animation-list {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .animation-item {
@@ -629,10 +638,13 @@ body:has(.tactical-main) > .tactical-footer {
   background: rgba(220, 38, 38, 0.1);
 }
 
-/* 再生コントロール（PowerPoint風） */
+/* 再生コントロール（PowerPoint風）— 場面リストの下に固定、重なり防止 */
 .animation-playback-group {
+  flex-shrink: 0;
+  margin-top: auto;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface-color, #fff);
 }
 
 .animation-controls-row {

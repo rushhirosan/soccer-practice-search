@@ -532,6 +532,41 @@
     return positions.map(([x, y]) => [x, 100 - y]);
   }
 
+  /** キックオフ時: 最前線は相手GKを除く最後方DFラインの手前（オフサイドにならない位置） */
+  const KICKOFF_FORWARD_GAP = 6;
+
+  function copyPositions(positions) {
+    return positions.map(([x, y]) => [x, y]);
+  }
+
+  function getDefensiveLineY(positions, goalAtHighY) {
+    const ys = [...new Set(positions.map(([, y]) => y))].sort((a, b) => a - b);
+    if (ys.length < 2) return goalAtHighY ? ys[0] : ys[ys.length - 1];
+    return goalAtHighY ? ys[1] : ys[ys.length - 2];
+  }
+
+  function getForwardIndices(positions, goalAtHighY) {
+    const targetY = goalAtHighY
+      ? Math.max(...positions.map(([, y]) => y))
+      : Math.min(...positions.map(([, y]) => y));
+    return positions.reduce((indices, [, y], index) => {
+      if (y === targetY) indices.push(index);
+      return indices;
+    }, []);
+  }
+
+  function fixKickoffOffside(homePos, awayPos) {
+    if (!homePos?.length || !awayPos?.length) return;
+    const homeDefLine = getDefensiveLineY(homePos, false);
+    const awayDefLine = getDefensiveLineY(awayPos, true);
+    getForwardIndices(homePos, false).forEach((index) => {
+      if (homePos[index][1] < awayDefLine) homePos[index][1] = awayDefLine + KICKOFF_FORWARD_GAP;
+    });
+    getForwardIndices(awayPos, true).forEach((index) => {
+      if (awayPos[index][1] > homeDefLine) awayPos[index][1] = homeDefLine - KICKOFF_FORWARD_GAP;
+    });
+  }
+
   function sortPracticeFormationOptions(values) {
     const uniqueValues = [...new Set((values || []).map(v => String(v || '').trim()).filter(Boolean))];
     const versus = [];
@@ -753,8 +788,7 @@
           ensureDefaultBallInCurrentScene();
         });
       } else {
-        applyFormation(tacticalFormation);
-        applyOpponentFormation(tacticalFormation);
+        applyTacticalFormation(tacticalFormation);
         ensureDefaultBallInCurrentScene();
         void loadPracticeFormationOptions();
       }
@@ -1055,14 +1089,7 @@
   }
 
   function applyOpponentFormation(key) {
-    const pos = mirrorFormation(FORMATIONS[key] || []);
-    if (pos.length === 0) return;
-    const scene = scenes[currentSceneIndex];
-    if (!scene) return;
-    if (!scene.opponents) scene.opponents = [];
-    scene.opponents = pos.map((p, i) => ({ x: (p[0] / 100) * pitchWidth, y: (p[1] / 100) * pitchHeight, number: i + 1, color: PLAYER_COLORS.away }));
-    renderCurrentScene();
-    renderSequenceList();
+    applyTacticalFormation(key);
   }
 
   function removeBall(index) {
@@ -1194,12 +1221,20 @@
   }
 
   function applyFormation(key) {
-    const pos = FORMATIONS[key];
-    if (!pos) return;
+    applyTacticalFormation(key);
+  }
+
+  function applyTacticalFormation(key) {
+    const raw = FORMATIONS[key];
+    if (!raw?.length) return;
     const scene = scenes[currentSceneIndex];
     if (!scene) return;
     if (undoStack.length > 0 || scenes.some(s => (s.players?.length || 0) > 0 || (s.opponents?.length || 0) > 0)) pushUndo();
-    scene.players = pos.map((p, i) => ({ x: (p[0] / 100) * pitchWidth, y: (p[1] / 100) * pitchHeight, number: i + 1, color: PLAYER_COLORS.home }));
+    const homePos = copyPositions(raw);
+    const awayPos = mirrorFormation(raw);
+    fixKickoffOffside(homePos, awayPos);
+    scene.players = createTeamFromPositions(homePos, PLAYER_COLORS.home);
+    scene.opponents = createTeamFromPositions(awayPos, PLAYER_COLORS.away);
     renderCurrentScene();
     renderSequenceList();
   }
@@ -1215,6 +1250,7 @@
 
     const homePositions = createPracticePositions(parsed.home);
     const awayPositions = parsed.away > 0 ? mirrorFormation(createPracticePositions(parsed.away)) : [];
+    if (awayPositions.length) fixKickoffOffside(homePositions, awayPositions);
 
     scene.players = createTeamFromPositions(homePositions, PLAYER_COLORS.home);
     scene.opponents = createTeamFromPositions(awayPositions, PLAYER_COLORS.away);
@@ -1598,10 +1634,7 @@
         if (practiceFormation) applyPracticeFormation(practiceFormation);
       } else {
         updateBoardModeControls();
-        if (tacticalFormation) {
-          applyFormation(tacticalFormation);
-          applyOpponentFormation(tacticalFormation);
-        }
+        if (tacticalFormation) applyTacticalFormation(tacticalFormation);
       }
     });
 
@@ -1613,8 +1646,7 @@
         applyPracticeFormation(v);
       } else {
         tacticalFormation = v;
-        applyFormation(v);
-        applyOpponentFormation(v);
+        applyTacticalFormation(v);
       }
     });
 

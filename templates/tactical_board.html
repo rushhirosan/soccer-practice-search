@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
-    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=23">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tactical-board.css') }}?v=24">
 </head>
 <body>
     {% set active_nav = 'board' %}
@@ -72,11 +72,7 @@
                     </optgroup>
                 </select>
                 <p class="tool-hint" id="formation-hint">{{ _('tb_formation_hint') }}</p>
-            </div>
-
-            <div class="tool-group">
-                <h3>{{ _('tb_edit') }}</h3>
-                <button type="button" id="btn-clear" class="action-btn small" title="{{ _('tb_clear_title') }}">{{ _('tb_clear_btn') }}</button>
+                <button type="button" id="btn-clear" class="action-btn small board-clear-btn" title="{{ _('tb_clear_title') }}" aria-label="{{ _('tb_clear_title') }}">{{ _('tb_clear_btn') }}</button>
             </div>
 
             <div class="tool-group saved-board-group">

@@ -552,7 +552,6 @@ STRINGS: dict[str, dict[str, str]] = {
     "tb_board_type_aria": {"ja": "ボード種別", "en": "Board type"},
     "tb_formation_heading": {"ja": "フォーメーション", "en": "Formation"},
     "tb_formation_default": {"ja": "フォーメーションを選択", "en": "Select formation"},
-    "tb_edit": {"ja": "編集", "en": "Edit"},
     "tb_clear_btn": {"ja": "🗑 クリア", "en": "🗑 Clear"},
     "tb_clear_title": {"ja": "現在の状態をクリア", "en": "Clear current layout"},
     "tb_saved_boards": {"ja": "定番ボード", "en": "Saved layouts"},

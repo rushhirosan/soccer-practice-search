@@ -57,6 +57,10 @@ body:has(.tactical-main) > .tactical-footer {
   letter-spacing: 0.05em;
 }
 
+.board-clear-btn {
+  margin-top: 0.65rem;
+}
+
 .tool-buttons {
   display: flex;
   flex-direction: column;

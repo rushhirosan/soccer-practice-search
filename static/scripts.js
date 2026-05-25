@@ -581,12 +581,16 @@ function buildVideoCard(activity, options = {}) {
         e.stopPropagation();
         if (listContext === 'favorites') {
             removeFavorite(activity.id);
-            card.remove();
             updateFavoritesBadge();
-            const list = document.getElementById('favorites-list');
-            const empty = document.getElementById('favorites-empty');
-            if (list && empty && list.children.length === 0) {
-                empty.style.display = 'block';
+            if (typeof window.renderFavoritesList === 'function') {
+                window.renderFavoritesList();
+            } else {
+                card.remove();
+                const list = document.getElementById('favorites-list');
+                const empty = document.getElementById('favorites-empty');
+                if (list && empty && list.children.length === 0) {
+                    empty.style.display = 'block';
+                }
             }
         } else {
             if (isFavorite(activity.id)) {
@@ -988,10 +992,27 @@ function updateSelectedMenusBadge() {
 // お気に入り動画（localStorage）
 const FAVORITES_KEY = 'soccer_favorite_videos';
 
+function normalizeFavoriteItem(item, legacyIndex) {
+    const out = { ...item };
+    if (typeof out.saved_at !== 'number' || !Number.isFinite(out.saved_at)) {
+        out.saved_at = legacyIndex;
+    }
+    return out;
+}
+
 function getFavorites() {
     try {
         const stored = localStorage.getItem(FAVORITES_KEY);
-        return stored ? JSON.parse(stored) : [];
+        const raw = stored ? JSON.parse(stored) : [];
+        if (!Array.isArray(raw)) return [];
+        let migrated = false;
+        const items = raw.map((it, i) => {
+            const norm = normalizeFavoriteItem(it, i);
+            if (norm.saved_at !== it.saved_at) migrated = true;
+            return norm;
+        });
+        if (migrated) saveFavorites(items);
+        return items;
     } catch {
         return [];
     }
@@ -1017,7 +1038,7 @@ function addFavorite(activity) {
     try {
         sessionStorage.setItem(NAV_FAV_BADGE_PENDING_KEY, '1');
     } catch (e) { /* ignore */ }
-    items.push({ ...activity });
+    items.push({ ...activity, saved_at: Date.now() });
     saveFavorites(items);
     updateFavoritesBadge();
     if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();

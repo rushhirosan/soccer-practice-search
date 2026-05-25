@@ -90,6 +90,7 @@ JS_KEYS: frozenset[str] = frozenset(
         "js_feedback_fail",
         "js_sel_history_warn",
         "js_sel_fav_warn",
+        "js_fav_search_no_results",
         # site-header.js
         "js_pw_show",
         "js_pw_hide",
@@ -486,6 +487,18 @@ STRINGS: dict[str, dict[str, str]] = {
     "fav_empty_p1": {"ja": "まだお気に入りはありません。", "en": "No favorites yet."},
     "fav_empty_p2": {"ja": "ホームで練習動画を検索", "en": "Search drills on Home"},
     "fav_empty_p2_suffix": {"ja": "して、気に入った動画に ☆ を付けてみてください。", "en": " and star videos you like."},
+    "fav_search_label": {"ja": "お気に入りを検索", "en": "Search favorites"},
+    "fav_search_placeholder": {
+        "ja": "タイトル・チャネル名など",
+        "en": "Title, channel name…",
+    },
+    "fav_search_aria": {
+        "ja": "お気に入りの動画をタイトルとチャネル名で絞り込む",
+        "en": "Filter favorite videos by title and channel",
+    },
+    "fav_sort_label": {"ja": "並べ替え", "en": "Sort"},
+    "fav_sort_saved_desc": {"ja": "追加が新しい順", "en": "Recently added"},
+    "fav_sort_title_asc": {"ja": "タイトル順", "en": "Title (A–Z)"},
     # Practice notes
     "notes_title": {"ja": "練習メモ帳 - 少年サッカードリル", "en": "Practice notes — Youth Soccer Drills"},
     "notes_meta_desc": {
@@ -632,6 +645,10 @@ STRINGS: dict[str, dict[str, str]] = {
     "js_feedback_fail": {"ja": "送信に失敗しました。もう一度お試しください。", "en": "Could not send. Please try again."},
     "js_sel_history_warn": {"ja": "選んだメニューの保存に失敗:", "en": "Could not save selected menus:"},
     "js_sel_fav_warn": {"ja": "お気に入りの保存に失敗:", "en": "Could not save favorites:"},
+    "js_fav_search_no_results": {
+        "ja": "条件に一致する動画はありません。別のキーワードを試してください。",
+        "en": "No videos match. Try different words.",
+    },
     "js_pw_show": {"ja": "パスワードを表示", "en": "Show password"},
     "js_pw_hide": {"ja": "パスワードを隠す", "en": "Hide password"},
     "js_logged_in": {"ja": "ログイン中", "en": "Signed in"},

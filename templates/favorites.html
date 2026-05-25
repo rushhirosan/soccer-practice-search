@@ -15,6 +15,72 @@
         .favorites-page .subtitle { color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.9rem; line-height: 1.5; }
         .favorites-empty { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); background: var(--surface-color); border-radius: var(--radius-xl); border: 1px dashed var(--border-color); }
         .favorites-empty a { color: var(--primary-color); font-weight: 600; }
+        .favorites-filter-empty {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            color: var(--text-muted);
+            background: var(--surface-color);
+            border-radius: var(--radius-xl);
+            border: 1px dashed var(--border-color);
+            margin-bottom: 1rem;
+        }
+        .favorites-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 1.25rem;
+            align-items: flex-end;
+            margin-bottom: 1rem;
+            min-width: 0;
+        }
+        .favorites-toolbar__search {
+            flex: 1 1 12rem;
+            min-width: 0;
+        }
+        .favorites-toolbar__search label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            min-width: 0;
+        }
+        .favorites-toolbar__search input[type="search"] {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            padding: 0.6rem 0.75rem;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-primary);
+        }
+        .favorites-toolbar__search input[type="search"]:focus {
+            outline: 2px solid rgba(13, 148, 136, 0.45);
+            outline-offset: 1px;
+        }
+        .favorites-toolbar__sort {
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+        .favorites-toolbar__sort label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .favorites-toolbar__sort select {
+            min-width: 10.5rem;
+            max-width: 100%;
+            padding: 0.6rem 0.75rem;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -30,6 +96,32 @@
             <p><a href="/">{{ _('fav_empty_p2') }}</a>{{ _('fav_empty_p2_suffix') }}</p>
         </div>
 
+        <div id="favorites-toolbar" class="favorites-toolbar" hidden>
+            <div class="favorites-toolbar__search">
+                <label for="favorites-search">{{ _('fav_search_label') }}</label>
+                <input
+                    type="search"
+                    id="favorites-search"
+                    name="favorites-search"
+                    maxlength="200"
+                    inputmode="search"
+                    enterkeyhint="search"
+                    placeholder="{{ _('fav_search_placeholder') }}"
+                    aria-label="{{ _('fav_search_aria') }}"
+                    autocomplete="off"
+                />
+            </div>
+            <div class="favorites-toolbar__sort">
+                <label for="favorites-sort">{{ _('fav_sort_label') }}</label>
+                <select id="favorites-sort" name="favorites-sort">
+                    <option value="saved_desc">{{ _('fav_sort_saved_desc') }}</option>
+                    <option value="title_asc">{{ _('fav_sort_title_asc') }}</option>
+                </select>
+            </div>
+        </div>
+
+        <p id="favorites-filter-empty" class="favorites-filter-empty" hidden></p>
+
         <div id="favorites-list" class="card-container" aria-live="polite"></div>
     </main>
 
@@ -38,9 +130,9 @@
         <p><a href="/">{{ _('nav_home') }}</a> | <a href="/board">{{ _('nav_board') }}</a> | <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
     </footer>
 
-    <script src="{{ url_for('static', filename='scripts.js') }}?v=7"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}?v=8"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
-    <script src="{{ url_for('static', filename='favorites.js') }}?v=5"></script>
+    <script src="{{ url_for('static', filename='favorites.js') }}?v=6"></script>
 </body>
 </html>

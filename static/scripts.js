@@ -870,7 +870,9 @@ async function submitFeedback(formData) {
             csrfToken = null;
             getCsrfToken();
         } else {
-            if (response.status === 400) {
+            if (response.status === 429) {
+                alert(typeof uiS === 'function' ? uiS('js_acc_rate_limit') : '試行回数が多すぎます。しばらく待ってからお試しください。');
+            } else if (response.status === 400) {
                 // CSRFエラーの可能性がある場合はトークンを再取得
                 csrfToken = null;
                 alert(typeof uiS === 'function' ? uiS('js_feedback_fail') : '送信に失敗しました。もう一度お試しください。');

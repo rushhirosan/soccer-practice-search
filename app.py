@@ -601,6 +601,10 @@ def get_csrf_token():
 
 @app.route('/submit-feedback', methods=['POST'])
 def submit_feedback():
+    ip = client_ip()
+    if not app_user_store.rate_limit_allow(f"feedback:{ip}", 6, 900):
+        return jsonify({'error': '試行回数が多すぎます。しばらく待ってからお試しください。'}), 429
+
     data = request.json
 
     if not data:

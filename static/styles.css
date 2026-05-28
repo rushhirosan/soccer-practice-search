@@ -199,16 +199,16 @@ main {
   white-space: nowrap;
 }
 
-.site-header__beta {
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.85;
-  padding: 0.1rem 0.35rem;
+.site-header__freshness {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+  padding: 0.08rem 0.3rem;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.18);
-  margin-top: 0.15rem;
+  background: rgba(255, 255, 255, 0.16);
+  margin-top: 0.12rem;
+  white-space: nowrap;
 }
 
 /* ログイン中（/auth/status と連動、user-sync が更新） */
@@ -357,7 +357,7 @@ main {
 .tab-container {
   width: 100%;
   max-width: 1400px;
-  margin: 1.25rem auto;
+  margin: 0.5rem auto 1.25rem;
   background: var(--surface-color);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
@@ -365,26 +365,99 @@ main {
   border: 1px solid var(--border-subtle);
 }
 
-/* ホーム: カード上部の補足（この画面でできること） */
-.home-screen-hint {
-  padding: 0.65rem 1.15rem;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+/* ホーム: 主な機能（折りたたみ・検索を優先） */
+.home-features {
   border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-.home-screen-hint__text {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.home-screen-hint__text--secondary {
-  margin-top: 0.45rem;
+.home-features__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 1.15rem;
   font-size: 0.8125rem;
-  font-weight: 400;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.home-features__summary::-webkit-details-marker {
+  display: none;
+}
+
+.home-features__summary:hover {
+  color: var(--primary-hover);
+}
+
+.home-features__icon {
+  flex-shrink: 0;
+  font-size: 0.55rem;
+  transition: transform 0.2s ease;
+}
+
+.home-features[open] .home-features__icon {
+  transform: rotate(180deg);
+}
+
+.home-features__body {
+  padding: 0 1.15rem 0.65rem;
+}
+
+.home-features__lead {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  font-weight: 500;
   color: var(--text-muted);
+}
+
+.home-features__list {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .home-features__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.home-features__item {
+  margin: 0;
+  min-width: 0;
+}
+
+.home-features__term {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.home-features__term a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.home-features__term a:hover {
+  text-decoration: underline;
+}
+
+.home-features__desc {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 /* ホーム上部: SEO 用の短文（.content-wrapper は横 flex + min-height 用のため使わない） */
@@ -392,26 +465,26 @@ main {
   display: block;
   width: 100%;
   max-width: 1400px;
-  margin: 0 auto 0.75rem;
-  padding: 0.85rem 1.15rem;
+  margin: 0 auto 0.45rem;
+  padding: 0.5rem 0.85rem;
   background: var(--surface-color);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
 .home-seo-intro h1 {
-  margin: 0 0 0.5rem;
-  font-size: 1.25rem;
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--text-primary);
 }
 
 .home-seo-intro p {
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
+  margin: 0 0 0.3rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
   color: var(--text-secondary);
 }
 
@@ -458,17 +531,16 @@ main {
 
 @media (max-width: 768px) {
   .home-seo-intro {
-    margin: 0 0 0.65rem;
-    padding: 0.65rem 0.85rem;
-    border-radius: var(--radius-md);
+    margin: 0 0 0.35rem;
+    padding: 0.45rem 0.7rem;
   }
 
   .home-seo-intro h1 {
-    font-size: 1.1rem;
+    font-size: 0.9375rem;
   }
 
   .home-seo-intro p {
-    font-size: 0.8125rem;
+    font-size: 0.78rem;
   }
 
   .home-seo-intro__quick {
@@ -1437,12 +1509,25 @@ button:active {
     font-size: 0.9rem;
   }
   
-  .home-screen-hint {
-    padding: 0.55rem 0.85rem;
+  .home-features__summary {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
   }
 
-  .home-screen-hint__text {
+  .home-features__body {
+    padding: 0 0.85rem 0.55rem;
+  }
+
+  .home-features__lead {
+    font-size: 0.75rem;
+  }
+
+  .home-features__term {
     font-size: 0.8125rem;
+  }
+
+  .home-features__desc {
+    font-size: 0.78rem;
   }
 
   /* モバイル: 詳細条件内の入力の可読性/タップ領域を改善 */

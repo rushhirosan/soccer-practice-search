@@ -4,12 +4,14 @@ from dotenv import load_dotenv
 from flask import g
 from psycopg2.pool import SimpleConnectionPool
 from contextlib import contextmanager
+from datetime import datetime
 from typing import Optional, List, Dict, Any, Generator, Union
 
 import sqlite3
 import psycopg2
 import logging
 import os
+import time
 
 # データベースに接続し、コンテキストマネージャを使って自動で接続を閉じる
 #DATABASE_PATH = './soccer_content.db'
@@ -512,3 +514,64 @@ def create_app_user_tables() -> None:
 def ensure_app_user_tables() -> None:
     """マイグレーション相当: テーブルが無ければ作成（冪等）。"""
     create_app_user_tables()
+
+
+_CATALOG_LATEST_TTL_SEC = 300
+_catalog_latest_cache: dict[str, Any] = {"at": 0.0, "value": None}
+
+
+def _parse_upload_date_raw(value: str) -> Optional[datetime]:
+    """Parse contents.upload_date for catalog freshness (ISO or legacy Japanese)."""
+    raw = (value or "").strip()
+    if not raw:
+        return None
+    normalized = raw.rstrip("Z")
+    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y年%m月%d日%H時%M分"):
+        try:
+            return datetime.strptime(normalized, fmt)
+        except ValueError:
+            continue
+    try:
+        return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+    except ValueError:
+        logger.warning("Unsupported upload_date for catalog freshness: %s", value)
+        return None
+
+
+def get_latest_catalog_upload_date(*, force_refresh: bool = False) -> Optional[datetime]:
+    """Newest upload_date in contents (cached; used for header freshness badge)."""
+    now = time.time()
+    if (
+        not force_refresh
+        and (now - _catalog_latest_cache["at"]) < _CATALOG_LATEST_TTL_SEC
+    ):
+        return _catalog_latest_cache["value"]
+
+    result: Optional[datetime] = None
+    try:
+        with use_db_connection() as conn:
+            with conn.cursor() as c:
+                c.execute(
+                    """
+                    SELECT upload_date FROM contents
+                    WHERE upload_date IS NOT NULL AND upload_date <> ''
+                    ORDER BY upload_date DESC
+                    LIMIT 1
+                    """
+                )
+                row = c.fetchone()
+        if row and row[0]:
+            result = _parse_upload_date_raw(str(row[0]))
+    except Exception as e:
+        logger.warning("Could not fetch latest catalog upload_date: %s", e)
+        return _catalog_latest_cache["value"]
+
+    _catalog_latest_cache["at"] = now
+    _catalog_latest_cache["value"] = result
+    return result
+
+
+def reset_catalog_freshness_cache() -> None:
+    """Clear cached catalog date (tests)."""
+    _catalog_latest_cache["at"] = 0.0
+    _catalog_latest_cache["value"] = None

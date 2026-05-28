@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 SUPPORTED_LOCALES = frozenset({"ja", "en"})
@@ -48,6 +49,14 @@ def formation_display_map(locale: str) -> dict[str, str]:
     if locale != "en":
         return {}
     return dict(FORMATION_DISPLAY_EN)
+
+
+def format_catalog_freshness_date(dt: datetime, locale: str) -> str:
+    """Short date for header catalog freshness badge."""
+    loc = locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
+    if loc == "en":
+        return dt.strftime("%b %d, %Y")
+    return dt.strftime("%Y/%m/%d")
 
 
 # Keys referenced from JavaScript (must exist in STRINGS)
@@ -257,7 +266,14 @@ STRINGS: dict[str, dict[str, str]] = {
         "ja": "少年サッカードリル",
         "en": "Youth Soccer Drills",
     },
-    "beta_aria": {"ja": "ベータ版", "en": "Beta"},
+    "header_catalog_date_short": {
+        "ja": "{date}時点",
+        "en": "as of {date}",
+    },
+    "header_catalog_date_aria": {
+        "ja": "掲載動画データの最新日（{date}）",
+        "en": "Latest catalog video date ({date})",
+    },
     "nav_open": {"ja": "メニューを開く", "en": "Open menu"},
     "nav_main": {"ja": "メインナビゲーション", "en": "Main navigation"},
     "nav_home": {"ja": "ホーム", "en": "Home"},
@@ -301,14 +317,37 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "meta_author": {"ja": "少年サッカードリル", "en": "Youth Soccer Drills"},
     "meta_language": {"ja": "ja", "en": "en"},
-    "home_screen_region": {"ja": "この画面でできること", "en": "What you can do on this screen"},
-    "home_hint_1": {
-        "ja": "キーワードや目的・人数・レベルで練習動画を検索し、一覧から動画を開けます。☆ お気に入りに保存して整理できます。",
-        "en": "Search drill videos by keyword, goal, group size, and level, then open videos from the list. Use ☆ favorites to organize picks.",
+    "home_features_region": {
+        "ja": "サイトの主な機能",
+        "en": "Main features",
     },
-    "home_hint_2": {
-        "ja": "少年サッカーのコーチ・指導者向けに、複数チャンネルの練習ドリルを横断して探せる検索です。メニュー選びの下調べや練習前のイメージづくりに使えます。",
-        "en": "Made for youth coaches: search across multiple channels to preview drills and plan sessions.",
+    "home_features_lead": {
+        "ja": "次の機能はそれぞれ単独でも使えます。組み合わせや順番は自由です。",
+        "en": "Each feature works on its own—use and combine them however you like.",
+    },
+    "home_feat_search_name": {
+        "ja": "練習動画の検索（この画面）",
+        "en": "Drill search (this page)",
+    },
+    "home_feat_search_desc": {
+        "ja": "キーワードや目的・人数・レベルで探し、一覧から動画を確認できます。",
+        "en": "Find videos by keyword, goal, group size, and level, then browse results here.",
+    },
+    "home_feat_favorites_desc": {
+        "ja": "気に入った動画をこの端末に保存できます。検索とあわせて使うこともあります。",
+        "en": "Save videos on this device. Often used together with search.",
+    },
+    "home_feat_notes_desc": {
+        "ja": "試合結果や練習の気づきを記録・保存できます（検索やお気に入りとは独立）。",
+        "en": "Save match results and daily reflections—independent of search and favorites.",
+    },
+    "home_feat_board_desc": {
+        "ja": "コート上の配置や動きを図で描き、保存・印刷できます（単体でも利用可）。",
+        "en": "Draw formations and movement, then save or print—works on its own too.",
+    },
+    "home_feat_account_desc": {
+        "ja": "任意。別の端末でも記録などを同期したいときに利用します。",
+        "en": "Optional—sync notes and other data across devices when you need to.",
     },
     "search_region": {"ja": "検索条件", "en": "Search filters"},
     "search_kw_aria": {"ja": "検索キーワード", "en": "Search keyword"},

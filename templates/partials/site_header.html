@@ -7,7 +7,9 @@
       <span class="site-header__brand-mark" aria-hidden="true">⚽</span>
       <span class="site-header__brand-text">
         <span class="site-header__title">{{ _('brand_title') }}</span>
-        <span class="site-header__beta" aria-label="{{ _('beta_aria') }}">Beta</span>
+        {% if catalog_freshness_label %}
+        <span class="site-header__freshness" aria-label="{{ catalog_freshness_aria }}">{{ catalog_freshness_label }}</span>
+        {% endif %}
       </span>
     </a>
     <div class="site-header__end">

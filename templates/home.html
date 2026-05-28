@@ -84,7 +84,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=59">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -102,7 +102,7 @@
         <section class="home-seo-intro" aria-label="SEO intro">
             <h1>{{ _('brand_title') }}</h1>
             {% if ui_locale == 'ja' %}
-            <p>少年サッカードリルは、小学生〜中学生向けのサッカー練習動画を目的・人数・レベルで探せる無料サイトです。以下の人気テーマからもすぐに検索できます。</p>
+            <p>小学生〜中学生向けの練習動画を、目的・人数・レベルで探せる無料サイトです。</p>
             <p class="home-seo-intro__quick" role="navigation" aria-label="人気検索と関連ページ">
                 <span class="home-seo-intro__inline"><strong>人気検索:</strong>
                 <a href="/?q=ドリブル">ドリブル</a> /
@@ -117,7 +117,7 @@
                 <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a></span>
             </p>
             {% else %}
-            <p>Soccer Practice Search is a free web app to find youth soccer drill videos by purpose, player count, and skill level. You can also start from popular drill themes below.</p>
+            <p>Find youth soccer drill videos by purpose, player count, and skill level—free to use.</p>
             <p class="home-seo-intro__quick" role="navigation" aria-label="Popular searches and related pages">
                 <span class="home-seo-intro__inline"><strong>Popular searches:</strong>
                 <a href="/?q=dribbling">dribbling</a> /
@@ -134,10 +134,45 @@
             {% endif %}
         </section>
         <div class="tab-container">
-            <div class="home-screen-hint" role="region" aria-label="{{ _('home_screen_region') }}">
-                <p class="home-screen-hint__text">{{ _('home_hint_1') }}</p>
-                <p class="home-screen-hint__text home-screen-hint__text--secondary">{{ _('home_hint_2') }}</p>
-            </div>
+            <details class="home-features">
+                <summary class="home-features__summary">
+                    <span class="home-features__summary-label">{{ _('home_features_region') }}</span>
+                    <span class="home-features__icon" aria-hidden="true">▼</span>
+                </summary>
+                <div class="home-features__body">
+                    <p class="home-features__lead">{{ _('home_features_lead') }}</p>
+                    <dl class="home-features__list">
+                        <div class="home-features__item">
+                            <dt class="home-features__term">{{ _('home_feat_search_name') }}</dt>
+                            <dd class="home-features__desc">{{ _('home_feat_search_desc') }}</dd>
+                        </div>
+                        <div class="home-features__item">
+                            <dt class="home-features__term">
+                                <a href="{{ url_for('favorites_page') }}">{{ _('nav_favorites') }}</a>
+                            </dt>
+                            <dd class="home-features__desc">{{ _('home_feat_favorites_desc') }}</dd>
+                        </div>
+                        <div class="home-features__item">
+                            <dt class="home-features__term">
+                                <a href="{{ url_for('practice_notes') }}" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a>
+                            </dt>
+                            <dd class="home-features__desc">{{ _('home_feat_notes_desc') }}</dd>
+                        </div>
+                        <div class="home-features__item">
+                            <dt class="home-features__term">
+                                <a href="{{ url_for('tactical_board') }}">{{ _('nav_board') }}</a>
+                            </dt>
+                            <dd class="home-features__desc">{{ _('home_feat_board_desc') }}</dd>
+                        </div>
+                        <div class="home-features__item">
+                            <dt class="home-features__term">
+                                <a href="{{ url_for('account_page') }}">{{ _('nav_account') }}</a>
+                            </dt>
+                            <dd class="home-features__desc">{{ _('home_feat_account_desc') }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </details>
             <div class="tab-content">
                 <div id="tab1" class="tab-panel active" role="region" aria-label="{{ _('results_region') }}">
                 <!-- tab1コンテンツ -->

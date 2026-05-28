@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, g, session, redirect, make_response
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from datetime import datetime, timedelta
-from utilities.db_access import get_db_connection, pool, get_channel_name_from_id, ensure_app_user_tables
+from utilities.db_access import get_db_connection, pool, get_channel_name_from_id, ensure_app_user_tables, get_latest_catalog_upload_date
 from contextlib import closing
 import os
 import sqlite3
@@ -95,6 +95,14 @@ def inject_site_base_url():
     def _(key: str, **kwargs):
         return ui_i18n.t(loc, key, **kwargs)
 
+    catalog_freshness_label = None
+    catalog_freshness_aria = None
+    latest_catalog_dt = get_latest_catalog_upload_date()
+    if latest_catalog_dt:
+        date_part = ui_i18n.format_catalog_freshness_date(latest_catalog_dt, loc)
+        catalog_freshness_label = _("header_catalog_date_short", date=date_part)
+        catalog_freshness_aria = _("header_catalog_date_aria", date=date_part)
+
     return {
         "site_base_url": get_site_base_url(),
         "ui_locale": loc,
@@ -104,6 +112,8 @@ def inject_site_base_url():
         "ui_formation_labels": ui_i18n.formation_display_map(loc),
         "og_locale": "ja_JP" if loc == "ja" else "en_US",
         "json_ld_lang": loc,
+        "catalog_freshness_label": catalog_freshness_label,
+        "catalog_freshness_aria": catalog_freshness_aria,
     }
 
 # セッション（ニックネームログイン）

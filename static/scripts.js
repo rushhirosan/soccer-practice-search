@@ -163,8 +163,8 @@ function populateSelect(selectId, columnName) {
             const defaultOption = document.createElement("option");
             defaultOption.value = "";
             defaultOption.textContent = selectId === "type-input"
-                ? (typeof uiS === 'function' ? uiS('js_select_category') : 'カテゴリを選択')
-                : (typeof uiS === 'function' ? uiS('js_select_players') : 'プレイヤー数を選択');
+                ? (typeof uiS === 'function' ? uiS('js_select_category') : '目的を選択')
+                : (typeof uiS === 'function' ? uiS('js_select_players') : '人数を選択');
             select.appendChild(defaultOption);
 
             if (!Array.isArray(data) || data.length === 0) {
@@ -243,8 +243,8 @@ function populateSelect(selectId, columnName) {
                 const defaultOption = document.createElement("option");
                 defaultOption.value = "";
                 defaultOption.textContent = selectId === "type-input"
-                ? (typeof uiS === 'function' ? uiS('js_select_category') : 'カテゴリを選択')
-                : (typeof uiS === 'function' ? uiS('js_select_players') : 'プレイヤー数を選択');
+                ? (typeof uiS === 'function' ? uiS('js_select_category') : '目的を選択')
+                : (typeof uiS === 'function' ? uiS('js_select_players') : '人数を選択');
                 select.appendChild(defaultOption);
                 
                 if (selectId === "type-input") {
@@ -498,6 +498,22 @@ function displayCards(data, limit = 10) {
 }
 
 /**
+ * activity.id または embed URL から YouTube 本家リンクを組み立てる
+ * @param {object} activity
+ * @returns {string|null}
+ */
+function buildYoutubeWatchUrl(activity) {
+    if (!activity) return null;
+    const id = String(activity.id || '').trim();
+    if (id) {
+        return `https://www.youtube.com/watch?v=${encodeURIComponent(id.split('&')[0])}`;
+    }
+    const videoUrl = activity.video_url || '';
+    const match = videoUrl.match(/(?:embed\/|watch\?v=)([^&/?#]+)/);
+    return match ? `https://www.youtube.com/watch?v=${encodeURIComponent(match[1])}` : null;
+}
+
+/**
  * 検索結果カードまたはお気に入り一覧用のカードを組み立てる
  * @param {object} activity
  * @param {{ listContext?: 'search'|'favorites' }} options
@@ -544,7 +560,7 @@ function buildVideoCard(activity, options = {}) {
     durationDiv.textContent = (typeof uiS === 'function' ? uiS('js_duration_label') : '動画時間: ') + (activity.duration || '');
 
     const channelDiv = document.createElement('div');
-    channelDiv.textContent = (typeof uiS === 'function' ? uiS('js_channel_label') : 'チャネル名: ') + (activity.channel_category || '');
+    channelDiv.textContent = (typeof uiS === 'function' ? uiS('js_channel_label') : 'チャンネル名: ') + (activity.channel_category || '');
 
     infoDiv.appendChild(uploadDateDiv);
     infoDiv.appendChild(viewCountDiv);
@@ -604,6 +620,22 @@ function buildVideoCard(activity, options = {}) {
     });
 
     actionsRow.appendChild(favoriteBtn);
+
+    const youtubeWatchUrl = buildYoutubeWatchUrl(activity);
+    if (youtubeWatchUrl) {
+        const youtubeLink = document.createElement('a');
+        youtubeLink.className = 'card-youtube-link';
+        youtubeLink.href = youtubeWatchUrl;
+        youtubeLink.target = '_blank';
+        youtubeLink.rel = 'noopener noreferrer';
+        youtubeLink.textContent = typeof uiS === 'function' ? uiS('js_open_youtube') : 'YouTubeで開く';
+        const titleForAria = (activity.title || '').trim() || (typeof uiS === 'function' ? uiS('js_open_youtube') : 'YouTube');
+        const ariaTpl = typeof uiS === 'function'
+            ? uiS('js_open_youtube_aria')
+            : '「{title}」をYouTubeで開く（新しいタブ）';
+        youtubeLink.setAttribute('aria-label', ariaTpl.replace('{title}', titleForAria));
+        actionsRow.appendChild(youtubeLink);
+    }
 
     card.appendChild(titleDiv);
     card.appendChild(videoContainer);

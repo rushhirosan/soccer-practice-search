@@ -1806,6 +1806,28 @@ footer a:hover {
   border-color: #fcd34d;
 }
 
+.card-youtube-link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.card-youtube-link:hover {
+  border-color: var(--primary-color);
+  background: rgba(13, 148, 136, 0.06);
+  color: var(--primary-hover);
+  text-decoration: none;
+}
+
 .card-actions .card-add-memo-btn {
   flex: 1;
   min-width: 8rem;

@@ -1,0 +1,5 @@
+{# ナビはヘッダーに集約。フッターは About / Privacy のみ #}
+<footer{% if footer_class %} class="{{ footer_class }}"{% endif %}>
+    <p>{{ _('footer_rights', year=2026) }}</p>
+    <p><a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
+</footer>

@@ -7,7 +7,6 @@
     
     <!-- SEO Meta Tags -->
     <meta name="description" content="{{ _('home_meta_desc') }}">
-    <meta name="keywords" content="{{ _('home_meta_keywords') }}">
     <meta name="author" content="{{ _('meta_author') }}">
     <meta name="robots" content="index, follow">
     <meta name="language" content="{{ _('meta_language') }}">
@@ -173,10 +172,7 @@
                     </dl>
                 </div>
             </details>
-            <div class="tab-content">
-                <div id="tab1" class="tab-panel active" role="region" aria-label="{{ _('results_region') }}">
-                <!-- tab1コンテンツ -->
-                    <div class="content-wrapper">
+            <div class="content-wrapper" role="region" aria-label="{{ _('results_region') }}">
                         <!-- サイドペイン - Google風2段構成 -->
                         <aside class="search-container" aria-label="{{ _('search_region') }}">
                             <!-- 検索バー（常に表示・Above the Fold） -->
@@ -251,16 +247,11 @@
                                 <button onclick="goToPage(currentPage + 1)" id="next-page" aria-label="{{ _('page_next') }}">{{ _('page_next') }}</button>
                             </div>
                         </nav>
-                    </div>
-                </div>
             </div>
         </div>
     </main>
 
-    <footer>
-        <p>{{ _('footer_rights', year=2026) }}</p>
-        <p><a href="/board">{{ _('nav_board') }}</a> | <a href="/favorites">{{ _('nav_favorites') }}</a> | <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
-    </footer>
+    {% include 'partials/site_footer.html' %}
 
     <script src="{{ url_for('static', filename='scripts.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>

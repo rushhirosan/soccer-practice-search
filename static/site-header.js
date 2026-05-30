@@ -1,7 +1,5 @@
 (function () {
-  var STORAGE_KEY = 'soccer_selected_menus';
   var FAVORITES_KEY = 'soccer_favorite_videos';
-  var PENDING_MEMO = 'soccer_nav_memo_badge_pending';
   var PENDING_FAV = 'soccer_nav_fav_badge_pending';
 
   function isNavigationReload() {
@@ -21,29 +19,11 @@
     try {
       if (isNavigationReload()) {
         sessionStorage.removeItem(PENDING_FAV);
-        sessionStorage.removeItem(PENDING_MEMO);
         return;
       }
       var p = window.location.pathname || '';
       if (p === '/favorites' || /\/favorites\/?$/.test(p)) sessionStorage.removeItem(PENDING_FAV);
-      if (p === '/practice-notes' || /\/practice-notes\/?$/.test(p)) sessionStorage.removeItem(PENDING_MEMO);
     } catch (e) { /* ignore */ }
-  }
-
-  function syncMemoBadge() {
-    applyNavBadgeSessionContext();
-    var badge = document.getElementById('practice-notes-badge');
-    if (!badge) return;
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      var items = raw ? JSON.parse(raw) : [];
-      var count = Array.isArray(items) ? items.length : 0;
-      var show = count > 0 && sessionStorage.getItem(PENDING_MEMO) === '1';
-      badge.textContent = show ? String(count) : '';
-      badge.style.display = show ? 'inline-flex' : 'none';
-    } catch (e) {
-      /* ignore */
-    }
   }
 
   function syncFavoritesBadge() {
@@ -176,7 +156,6 @@
     window.addEventListener('pageshow', function (e) {
       if (e.persisted) {
         close();
-        syncMemoBadge();
         syncFavoritesBadge();
       }
     });
@@ -227,14 +206,12 @@
   window.soccerUpdateAuthHeader = updateAuthHeader;
 
   document.addEventListener('DOMContentLoaded', function () {
-    syncMemoBadge();
     syncFavoritesBadge();
     setupMobileNav();
     setupPasswordFields();
   });
 
   window.addEventListener('storage', function (e) {
-    if (e.key === STORAGE_KEY) syncMemoBadge();
     if (e.key === FAVORITES_KEY) syncFavoritesBadge();
   });
 })();

@@ -125,10 +125,7 @@
         <div id="favorites-list" class="card-container" aria-live="polite"></div>
     </main>
 
-    <footer>
-        <p>{{ _('footer_rights', year=2026) }}</p>
-        <p><a href="/">{{ _('nav_home') }}</a> | <a href="/board">{{ _('nav_board') }}</a> | <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a> | <a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
-    </footer>
+    {% include 'partials/site_footer.html' %}
 
     <script src="{{ url_for('static', filename='scripts.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>

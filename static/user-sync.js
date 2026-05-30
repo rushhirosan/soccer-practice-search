@@ -1,5 +1,5 @@
 /**
- * ログイン時: サーバーと localStorage を同期（お気に入り・メモ帳など）
+ * ログイン時: サーバーと localStorage を同期（お気に入り・記録など）
  *
  * アカウントにログインして同期したデータは「アカウントのデータ」として扱う:
  * - ログアウト時・セッション切れ時は localStorage の同期キーを消し、画面からは見えないようにする。
@@ -16,14 +16,11 @@
 
   var SYNC_KEYS = [
     'soccer_favorite_videos',
-    'soccer_selected_menus',
-    'soccer_saved_practice_plans',
     'soccer_saved_match_results',
     'soccer_saved_daily_notes',
     'soccer_saved_boards',
     'soccer_tactical_board',
     'soccer_search_history',
-    'soccer_pending_board_for_plan'
   ];
 
   var csrfToken = '';
@@ -190,21 +187,18 @@
       var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
       if (nav && nav.type === 'reload') {
         sessionStorage.removeItem('soccer_nav_fav_badge_pending');
-        sessionStorage.removeItem('soccer_nav_memo_badge_pending');
         return;
       }
     } catch (e) {}
     try {
       if (typeof performance !== 'undefined' && performance.navigation && performance.navigation.type === 1) {
         sessionStorage.removeItem('soccer_nav_fav_badge_pending');
-        sessionStorage.removeItem('soccer_nav_memo_badge_pending');
         return;
       }
     } catch (e2) {}
     try {
       var p = window.location.pathname || '';
       if (p === '/favorites' || /\/favorites\/?$/.test(p)) sessionStorage.removeItem('soccer_nav_fav_badge_pending');
-      if (p === '/practice-notes' || /\/practice-notes\/?$/.test(p)) sessionStorage.removeItem('soccer_nav_memo_badge_pending');
     } catch (e3) {}
   }
 
@@ -221,23 +215,10 @@
         fb.style.display = showF ? 'inline-flex' : 'none';
       }
     } catch (e) {}
-    try {
-      var mb = document.getElementById('practice-notes-badge');
-      if (mb) {
-        var mr = localStorage.getItem('soccer_selected_menus');
-        var mi = mr ? JSON.parse(mr) : [];
-        var mc = Array.isArray(mi) ? mi.length : 0;
-        var showM = mc > 0 && sessionStorage.getItem('soccer_nav_memo_badge_pending') === '1';
-        mb.textContent = showM ? String(mc) : '';
-        mb.style.display = showM ? 'inline-flex' : 'none';
-      }
-    } catch (e) {}
   }
 
   function refreshBadgesFromStorage() {
     if (typeof window.updateFavoritesBadge === 'function') window.updateFavoritesBadge();
-    else syncBadgesFallback();
-    if (typeof window.updateSelectedMenusBadge === 'function') window.updateSelectedMenusBadge();
     else syncBadgesFallback();
   }
 

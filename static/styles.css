@@ -548,21 +548,6 @@ main {
   }
 }
 
-/* タブパネル */
-.tab-panel {
-    display: none;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.tab-panel.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 /* 全体のレイアウト */
 .content-wrapper {
   display: flex;
@@ -594,10 +579,6 @@ main {
   align-self: stretch;
   max-height: 100vh;
   overflow-y: auto;
-}
-
-.search-container.hidden {
-  display: none;
 }
 
 /* 検索バー（常に表示・Above the Fold） */
@@ -948,10 +929,6 @@ button:active {
   z-index: 1;
 }
 
-.main-content.full-width {
-  margin-left: 0;
-}
-
 /* 検索プロンプト - 空状態デザイン */
 .search-prompt {
   text-align: center;
@@ -1259,17 +1236,6 @@ button:active {
   opacity: 0.4;
   cursor: not-allowed;
   background: var(--background-color);
-}
-
-/* 段落コンテナ */
-.paragraph-container {
-  display: none;
-  width: 100%;
-  padding: 1.5rem;
-  background: var(--surface-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  margin-bottom: 80px; /* フッターの高さ分のマージンを追加 */
 }
 
 /* TAB2 - 分割コンテナ */

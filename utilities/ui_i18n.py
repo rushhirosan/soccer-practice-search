@@ -282,10 +282,6 @@ STRINGS: dict[str, dict[str, str]] = {
     "nav_account": {"ja": "アカウント", "en": "Account"},
     "nav_about": {"ja": "このサイトについて", "en": "About"},
     "nav_favorites_badge_aria": {"ja": "お気に入りの動画数", "en": "Number of favorite videos"},
-    "nav_notes_badge_aria": {
-        "ja": "練習記録・メモの未確認件数",
-        "en": "Unseen items in records and notes",
-    },
     "lang_switch_ja": {"ja": "日本語", "en": "日本語"},
     "lang_switch_en": {"ja": "English", "en": "English"},
     "lang_switch_aria": {"ja": "表示言語", "en": "Language"},
@@ -303,10 +299,6 @@ STRINGS: dict[str, dict[str, str]] = {
     "home_meta_desc": {
         "ja": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。",
         "en": "Search youth soccer drill videos by goal, group size, level, and more. Built to help coaches browse YouTube practice ideas faster.",
-    },
-    "home_meta_keywords": {
-        "ja": "少年サッカー,サッカー,ドリル,練習,メニュー,コーチ,小学生,ジュニア,検索,動画,YouTube,指導,サッカー練習,サッカーコーチ",
-        "en": "youth soccer,soccer,drills,practice,coaching,junior,YouTube,video search",
     },
     "meta_author": {"ja": "少年サッカードリル", "en": "Youth Soccer Drills"},
     "meta_language": {"ja": "ja", "en": "en"},

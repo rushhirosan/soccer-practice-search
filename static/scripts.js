@@ -123,7 +123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 5000);
     }
 
-    updateSelectedMenusBadge();
     updateFavoritesBadge();
 });
 
@@ -891,11 +890,7 @@ async function submitFeedback(formData) {
     });
 }
 
-// 練習メモ帳: 選んだメニュー件数バッジ（localStorage 既存データ用）
-const SELECTED_MENUS_KEY = 'soccer_selected_menus';
-
-/** ヘッダー数字バッジは「追加直後の目印」だけ。該当ページ表示・リロードで消す（件数の常時表示ではない） */
-const NAV_MEMO_BADGE_PENDING_KEY = 'soccer_nav_memo_badge_pending';
+// ナビバッジ（お気に入り追加直後の目印）
 const NAV_FAV_BADGE_PENDING_KEY = 'soccer_nav_fav_badge_pending';
 
 function isNavigationReload() {
@@ -915,42 +910,13 @@ function applyNavBadgeSessionContext() {
     try {
         if (isNavigationReload()) {
             sessionStorage.removeItem(NAV_FAV_BADGE_PENDING_KEY);
-            sessionStorage.removeItem(NAV_MEMO_BADGE_PENDING_KEY);
             return;
         }
         const p = window.location.pathname || '';
         if (p === '/favorites' || /\/favorites\/?$/.test(p)) {
             sessionStorage.removeItem(NAV_FAV_BADGE_PENDING_KEY);
         }
-        if (p === '/practice-notes' || /\/practice-notes\/?$/.test(p)) {
-            sessionStorage.removeItem(NAV_MEMO_BADGE_PENDING_KEY);
-        }
     } catch (e) { /* ignore */ }
-}
-
-function getSelectedMenus() {
-    try {
-        const stored = localStorage.getItem(SELECTED_MENUS_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
-        return [];
-    }
-}
-
-function updateSelectedMenusBadge() {
-    applyNavBadgeSessionContext();
-    const count = getSelectedMenus().length;
-    const badge = document.getElementById('practice-notes-badge');
-    let show = false;
-    try {
-        show = count > 0 && sessionStorage.getItem(NAV_MEMO_BADGE_PENDING_KEY) === '1';
-    } catch (e) {
-        show = false;
-    }
-    if (badge) {
-        badge.textContent = show ? String(count) : '';
-        badge.style.display = show ? 'inline-flex' : 'none';
-    }
 }
 
 // お気に入り動画（localStorage）
@@ -1053,7 +1019,6 @@ function resyncSearchResultsFavoriteButtons() {
 
 window.addEventListener('soccerUserDataSynced', () => {
     updateFavoritesBadge();
-    updateSelectedMenusBadge();
     resyncSearchResultsFavoriteButtons();
 });
 

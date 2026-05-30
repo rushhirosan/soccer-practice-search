@@ -27,7 +27,7 @@
 | [ ] | 動画時間フィルタ | `duration` 列あり、`todo.md` §13 |
 | [x] | 「YouTube で開く」リンク | カード actions に常時表示 |
 | [ ] | モバイル性能 | 一覧 iframe 多用 → サムネ+タップ再生等 |
-| [ ] | `scripts.js` tab2 デッドコード | テンプレに UI なし |
+| [x] | `scripts.js` tab2 デッドコード | `initSearchTypeBehavior` に整理、tab-panel CSS 削除 |
 
 ---
 
@@ -35,9 +35,9 @@
 
 | 状態 | 項目 | メモ |
 |------|------|------|
-| [ ] | メニュー帳 vs 記録帳の一本化 | `addToSelectedMenus` 未使用、`practice-notes.js` レガシー |
-| [ ] | 死コード削除 or「メニューに追加」復活 | どちらか決めて実装 |
-| [ ] | i18n 古い文言整理 | 「メニューを選んで…」系 |
+| [x] | メニュー帳 vs 記録帳の一本化 | レガシー UI・バッジ・同期キー撤去 |
+| [x] | 死コード削除 or「メニューに追加」復活 | 死コード削除で確定 |
+| [x] | i18n 古い文言整理 | `nav_notes_badge_aria`・`home_meta_keywords` 等削除 |
 
 ---
 
@@ -86,11 +86,11 @@
 
 | 状態 | 項目 |
 |------|------|
-| [ ] | `scripts.js` tab2 / `paragraph-container` |
-| [ ] | `practice-notes.js` 743行以降レガシー |
-| [ ] | 未使用 `addToSelectedMenus` |
-| [ ] | 重複フッターリンク |
-| [ ] | `meta keywords` |
+| [x] | `scripts.js` tab2 / `paragraph-container` | CSS・home.html 簡素化 |
+| [x] | `practice-notes.js` 743行以降レガシー | 前回リリースで削除済 |
+| [x] | 未使用 `addToSelectedMenus` | バッジ一式ごと撤去 |
+| [x] | 重複フッターリンク | `partials/site_footer.html` に共通化 |
+| [x] | `meta keywords` | home/about/privacy から削除 |
 | [x] | Beta バッジ |
 
 ---
@@ -112,5 +112,6 @@
 
 | 日付 | 内容 |
 |------|------|
+| 2026-05-30 | 削除・整理候補（tab2 CSS、メニュー帳バッジ、フッター共通化、meta keywords） |
 | 2026-05-30 | ナビ・ラベル統一（i18n / ヘッダー / 練習記録ページ） |
 | 2026-05-29 | 本トラッカー作成。Beta → カタログ最新日バッジ |

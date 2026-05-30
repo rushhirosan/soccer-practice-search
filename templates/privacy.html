@@ -7,7 +7,6 @@
     
     <!-- SEO Meta Tags -->
     <meta name="description" content="{{ _('privacy_meta_desc') }}">
-    <meta name="keywords" content="{{ _('home_meta_keywords') }}">
     <meta name="author" content="{{ _('meta_author') }}">
     <meta name="robots" content="index, follow">
     
@@ -86,10 +85,7 @@
         </div>
     </main>
     
-    <footer>
-        <p>{{ _('footer_rights', year=2026) }}</p>
-        <p><a href="/about">{{ _('nav_about') }}</a> | <a href="/privacy">{{ _('footer_privacy') }}</a></p>
-    </footer>
+    {% include 'partials/site_footer.html' %}
 
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>

@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         displayCards([]); // 初期状態で「検索してください」を表示
         updatePaginationButtons(); // 初期化時にボタンを更新
-        initTabSwitching(); // タブ切り替え処理の初期化
+        initSearchTypeBehavior();
         setupSearchHandler(); // 検索の初期設定
         setupKeyboardShortcuts(); // キーボードショートカットの設定
         setupFocusManagement(); // フォーカス管理の設定
@@ -714,7 +714,6 @@ function fetchData(endpoint, queryParams, limit) {
 // ページング表示制御
 function togglePaginationVisibility(totalResults) {
     const pagination = document.querySelector('.pagination');
-    //pagination.style.display = totalResults < 11 ? 'none' : 'block';
     pagination.style.display = 'block';
 }
 
@@ -803,15 +802,8 @@ function updatePaginationButtons() {
     }
 }
 
-// タブ切り替え処理
-function initTabSwitching() {
-    const tabButtons = document.querySelectorAll(".tab-button");
-    const tabPanels = document.querySelectorAll(".tab-panel");
-    const searchContainer = document.querySelector(".search-container");
-    const mainContent = document.querySelector(".main-content");
-    const paragraphContainer = document.querySelector(".paragraph-container");
-    const pagination = document.querySelector(".pagination");
-
+// 目的「対人」選択時のみ人数入力を有効化
+function initSearchTypeBehavior() {
     const typeInput = document.getElementById("type-input");
     const playersInput = document.getElementById("players-input");
     if (!typeInput || !playersInput) return;
@@ -819,35 +811,6 @@ function initTabSwitching() {
     typeInput.addEventListener("change", () => {
         playersInput.disabled = typeInput.value !== "対人";
     });
-
-    tabButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            tabButtons.forEach(btn => btn.classList.remove("active"));
-            button.classList.add("active");
-
-            tabPanels.forEach(panel => panel.classList.remove("active"));
-
-            const targetTab = button.getAttribute("data-tab");
-            document.getElementById(targetTab).classList.add("active");
-
-            handleTabVisibility(targetTab, searchContainer, mainContent, paragraphContainer, pagination);
-        });
-    });
-}
-
-// タブに基づいて表示内容を切り替え
-function handleTabVisibility(targetTab, searchContainer, mainContent, paragraphContainer, pagination) {
-    if (targetTab === "tab2") {
-        searchContainer.classList.add("hidden");
-        mainContent.classList.add("full-width");
-        paragraphContainer.style.display = "block";
-        pagination.style.display = "none";
-    } else {
-        searchContainer.classList.remove("hidden");
-        mainContent.classList.remove("full-width");
-        paragraphContainer.style.display = "none";
-        pagination.style.display = "block";
-    }
 }
 
 // フォームの初期化処理
@@ -928,7 +891,7 @@ async function submitFeedback(formData) {
     });
 }
 
-// 練習メモ帳: 選んだメニュー（localStorage）
+// 練習メモ帳: 選んだメニュー件数バッジ（localStorage 既存データ用）
 const SELECTED_MENUS_KEY = 'soccer_selected_menus';
 
 /** ヘッダー数字バッジは「追加直後の目印」だけ。該当ページ表示・リロードで消す（件数の常時表示ではない） */
@@ -972,37 +935,6 @@ function getSelectedMenus() {
     } catch {
         return [];
     }
-}
-
-function saveSelectedMenus(items) {
-    try {
-        localStorage.setItem(SELECTED_MENUS_KEY, JSON.stringify(items));
-        return true;
-    } catch (e) {
-        console.warn((typeof uiS === 'function' ? uiS('js_sel_history_warn') : '選んだメニューの保存に失敗:'), e);
-        return false;
-    }
-}
-
-function addToSelectedMenus(activity) {
-    const items = getSelectedMenus();
-    const exists = items.some(it => it.id === activity.id);
-    if (exists) return false;
-    try {
-        sessionStorage.setItem(NAV_MEMO_BADGE_PENDING_KEY, '1');
-    } catch (e) { /* ignore */ }
-    items.push({ ...activity, memo: '' });
-    saveSelectedMenus(items);
-    updateSelectedMenusBadge();
-    if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
-    return true;
-}
-
-function removeFromSelectedMenus(activityId) {
-    const items = getSelectedMenus().filter(it => it.id !== activityId);
-    saveSelectedMenus(items);
-    updateSelectedMenusBadge();
-    if (typeof window.soccerScheduleUserDataPush === 'function') window.soccerScheduleUserDataPush();
 }
 
 function updateSelectedMenusBadge() {

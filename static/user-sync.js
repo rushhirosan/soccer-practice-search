@@ -343,7 +343,7 @@
       }
       return askSyncChoice().then(function (choice) {
         if (choice === 'local') {
-          return pushToServer(true).then(function () {
+          return pushToServer().then(function () {
             markAccountLocalMirror();
           });
         }
@@ -357,7 +357,7 @@
     });
   }
 
-  function pushToServer(force) {
+  function pushToServer() {
     if (!window.__soccerLoggedIn) return Promise.resolve();
     var payload = collectPayload();
     var headers = {

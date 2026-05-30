@@ -44,11 +44,6 @@
             overflow-x: clip;
         }
         .notes-section h2 { font-size: 1.1rem; margin-bottom: 1rem; }
-        .menu-item { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; background: var(--background-color); border-radius: var(--radius-md); margin-bottom: 0.75rem; border: 1px solid var(--border-subtle); }
-        .menu-item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
-        .menu-item-title { font-weight: 600; flex: 1; }
-        .menu-item-remove { padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--danger-color); background: transparent; border: 1px solid var(--danger-color); border-radius: var(--radius-sm); cursor: pointer; }
-        .menu-item-memo { width: 100%; min-height: 60px; padding: 0.5rem; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); resize: vertical; }
         .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); }
         .empty-state a { color: var(--primary-color); }
         .action-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
@@ -57,13 +52,6 @@
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-secondary { background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); }
         .btn-secondary:hover { background: var(--background-color); }
-        .plans-list { list-style: none; padding: 0; margin: 0; }
-        .plan-card { padding: 1rem; margin-bottom: 0.75rem; background: var(--background-color); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
-        .plan-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .plan-card-title { font-weight: 600; }
-        .plan-card-date { font-size: 0.85rem; color: var(--text-secondary); }
-        .plan-card-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-        .board-preview { max-width: 100%; max-height: 200px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-top: 0.5rem; }
 
         /* 記録（試合結果/気づき）UI */
         .notes-tabs {
@@ -476,7 +464,6 @@
                     </div>
 
                     <div class="action-buttons no-print">
-                        <button type="button" id="btn-import-match-board" class="btn-secondary" hidden aria-hidden="true">{{ _('btn_import_match_board') }}</button>
                         <button type="button" id="btn-save-match" class="btn-primary">{{ _('btn_save') }}</button>
                         <button type="button" id="btn-clear-match" class="btn-secondary">{{ _('btn_clear') }}</button>
                     </div>

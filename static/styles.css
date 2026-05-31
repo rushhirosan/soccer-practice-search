@@ -1720,7 +1720,7 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* ナビバッジ（メモ帳の選んだメニュー数） */
+/* ナビバッジ（お気に入り追加直後） */
 .nav-badge {
   position: absolute;
   top: -8px;
@@ -1738,7 +1738,7 @@ footer a:hover {
   justify-content: center;
 }
 
-/* カード: お気に入り + メモ帳 */
+/* カード: お気に入り + YouTube */
 .card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1792,41 +1792,6 @@ footer a:hover {
   background: rgba(13, 148, 136, 0.06);
   color: var(--primary-hover);
   text-decoration: none;
-}
-
-.card-actions .card-add-memo-btn {
-  flex: 1;
-  min-width: 8rem;
-  margin-top: 0;
-  width: auto;
-}
-
-/* カード「メモ帳に追加」ボタン */
-.card-add-memo-btn {
-  margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--primary-color);
-  background: var(--primary-light);
-  border: 1px solid rgba(13, 148, 136, 0.2);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: var(--transition);
-  width: 100%;
-}
-
-.card-add-memo-btn:hover:not(:disabled) {
-  background: rgba(13, 148, 136, 0.15);
-  border-color: var(--primary-color);
-}
-
-.card-add-memo-btn.added,
-.card-add-memo-btn:disabled {
-  color: var(--text-muted);
-  background: var(--border-subtle);
-  border-color: var(--border-color);
-  cursor: default;
 }
 
 /* パスワード: 表示切替（data-password-enhanced を site-header.js がラップ） */

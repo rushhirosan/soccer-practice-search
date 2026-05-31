@@ -518,7 +518,7 @@ def get_levels():
         return []
 
 
-# APIエンドポイント（JSONでチャネル一覧を返す）
+# APIエンドポイント（JSONでチャンネル一覧を返す）
 @app.route("/get_levels")
 def get_levels_api():
     return jsonify(get_levels())
@@ -547,7 +547,7 @@ def get_channels():
         return []
 
 
-# APIエンドポイント（JSONでチャネル一覧を返す）
+# APIエンドポイント（JSONでチャンネル一覧を返す）
 @app.route("/get_channels")
 def get_channels_api():
     return jsonify(get_channels())

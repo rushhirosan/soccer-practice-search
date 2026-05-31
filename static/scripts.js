@@ -162,7 +162,7 @@ function populateSelect(selectId, columnName) {
             const defaultOption = document.createElement("option");
             defaultOption.value = "";
             defaultOption.textContent = selectId === "type-input"
-                ? (typeof uiS === 'function' ? uiS('js_select_category') : '目的を選択')
+                ? (typeof uiS === 'function' ? uiS('js_select_purpose') : '目的を選択')
                 : (typeof uiS === 'function' ? uiS('js_select_players') : '人数を選択');
             select.appendChild(defaultOption);
 
@@ -213,7 +213,7 @@ function populateSelect(selectId, columnName) {
             n_vs_n.sort((a, b) => a.num1 - b.num1 || a.num2 - b.num2);
             n_people.sort((a, b) => a.num - b.num);
             
-            // カテゴリーの場合、「その他」を一番下に表示
+            // 目的フィルタの場合、「その他」を一番下に表示
             let sortedOthers;
             if (selectId === "type-input") {
                 const nonSonota = others.filter(value => value !== "その他").sort();
@@ -242,7 +242,7 @@ function populateSelect(selectId, columnName) {
                 const defaultOption = document.createElement("option");
                 defaultOption.value = "";
                 defaultOption.textContent = selectId === "type-input"
-                ? (typeof uiS === 'function' ? uiS('js_select_category') : '目的を選択')
+                ? (typeof uiS === 'function' ? uiS('js_select_purpose') : '目的を選択')
                 : (typeof uiS === 'function' ? uiS('js_select_players') : '人数を選択');
                 select.appendChild(defaultOption);
                 

@@ -332,8 +332,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Draw formations and movement, then save or print—works on its own too.",
     },
     "home_feat_account_desc": {
-        "ja": "任意。別の端末でも記録などを同期したいときに利用します。",
-        "en": "Optional—sync notes and other data across devices when you need to.",
+        "ja": "任意・メール不要。お気に入りや練習記録などを別端末と揃えたいときだけ（検索はログインなし）。",
+        "en": "Optional, no email—sync favorites and records across devices; search needs no login.",
     },
     "search_region": {"ja": "検索条件", "en": "Search filters"},
     "search_kw_aria": {"ja": "検索キーワード", "en": "Search keyword"},
@@ -368,7 +368,20 @@ STRINGS: dict[str, dict[str, str]] = {
     "page_prev": {"ja": "前へ", "en": "Previous"},
     "page_next": {"ja": "次へ", "en": "Next"},
     "page_info": {"ja": "ページ", "en": "Page"},
-    "placeholder_keyword": {"ja": "キーワードで検索", "en": "Search by keyword"},
+    "placeholder_keyword": {
+        "ja": "キーワード（タイトル・目的・チャンネル等）",
+        "en": "Keyword (title, goal, channel…)",
+    },
+    "label_duration_max": {"ja": "動画時間（上限）", "en": "Max video length"},
+    "opt_duration_any": {"ja": "指定なし", "en": "Any length"},
+    "opt_duration_10": {"ja": "10分以内", "en": "Up to 10 min"},
+    "opt_duration_15": {"ja": "15分以内", "en": "Up to 15 min"},
+    "opt_duration_20": {"ja": "20分以内", "en": "Up to 20 min"},
+    "opt_duration_30": {"ja": "30分以内", "en": "Up to 30 min"},
+    "opt_duration_45": {"ja": "45分以内", "en": "Up to 45 min"},
+    "opt_duration_60": {"ja": "60分以内", "en": "Up to 60 min"},
+    "js_play_video": {"ja": "動画を再生", "en": "Play video"},
+    "js_play_video_aria": {"ja": "サムネイルをタップして動画を再生", "en": "Tap thumbnail to play video"},
     # About
     "about_title": {"ja": "このサイトについて - 少年サッカードリル", "en": "About — Youth Soccer Drills"},
     "about_meta_desc": {
@@ -384,6 +397,20 @@ STRINGS: dict[str, dict[str, str]] = {
         "ja": "サイト作成者自身が小学生のサッカーコーチをしていますが、練習メニューに困った時や他のチーム・配信者の練習メニューを参考にしたいと思い検索用途で作りました。",
         "en": "The creator coaches an elementary-age team and built this to browse drill ideas faster when planning practices.",
     },
+    "about_account_heading": {"ja": "アカウント（任意）", "en": "Account (optional)"},
+    "about_account_p": {
+        "ja": "検索はログインなしで使えます。ニックネーム登録は、スマホとPCなどでデータを揃えたいとき向けです（メール不要）。",
+        "en": "Search works without signing in. A nickname account is only for syncing data across phone and PC—no email required.",
+    },
+    "about_account_sync": {
+        "ja": "同期の対象: お気に入り、練習記録・メモ、戦術ボード、検索履歴",
+        "en": "Syncs: favorites, records/notes, tactical board, search history",
+    },
+    "about_account_local": {
+        "ja": "未ログインのデータは端末内のみ。ログイン後は初回に「サーバー優先」か「この端末を取り込む」を選べます。",
+        "en": "Without login, data stays on this device. After sign-in, choose server-first or import this device once.",
+    },
+    "about_account_link": {"ja": "アカウントページへ", "en": "Go to account page"},
     "about_p3": {"ja": "参考にしているチャンネルは⇨の通りです。", "en": "Reference channels are listed on the right."},
     "about_p4": {"ja": "ご意見・ご要望・ご感想等々以下のフォームから送信ください。", "en": "Please send feedback, requests, or comments with the form below."},
     "feedback_form_aria": {"ja": "フィードバックフォーム", "en": "Feedback form"},
@@ -459,8 +486,20 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "account_h1": {"ja": "アカウント", "en": "Account"},
     "account_lead": {
-        "ja": "メールアドレスは不要です。ニックネームとパスワードでお気に入り・練習記録・メモなどを同期できます。パスワード変更や削除はこのページからいつでも行えます。",
-        "en": "No email required. Use a nickname and password to sync favorites, records, and notes. Change your password or delete your account here anytime.",
+        "ja": "練習動画の検索にログインは不要です。ここでは、端末をまたいでデータを揃えたいときだけニックネームで登録・ログインします。",
+        "en": "Drill search needs no account. Sign in here only when you want the same data on another device.",
+    },
+    "account_value_sync": {
+        "ja": "お気に入り・練習記録・メモ・戦術ボード・検索履歴を同期",
+        "en": "Sync favorites, records/notes, tactical board, and search history",
+    },
+    "account_value_no_email": {
+        "ja": "メール不要（ニックネームとパスワードのみ）",
+        "en": "No email—nickname and password only",
+    },
+    "account_value_optional": {
+        "ja": "未ログインでも検索・お気に入り（この端末）・記録は利用可",
+        "en": "Search and on-device favorites/records work without signing in",
     },
     "recovery_title": {"ja": "回復用キーを必ず保存してください", "en": "Save your recovery key"},
     "recovery_note": {

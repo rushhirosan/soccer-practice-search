@@ -25,7 +25,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=61">
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
@@ -48,6 +48,15 @@
                     <h2>{{ _('about_heading') }}</h2>
                     <p>{{ _('about_p1') }}</p>
                     <p>{{ _('about_p2') }}</p>
+                    <section class="about-account-note" aria-labelledby="about-account-heading">
+                        <h3 id="about-account-heading" class="about-account-note__title">{{ _('about_account_heading') }}</h3>
+                        <p>{{ _('about_account_p') }}</p>
+                        <ul class="about-account-note__list">
+                            <li>{{ _('about_account_sync') }}</li>
+                            <li>{{ _('about_account_local') }}</li>
+                        </ul>
+                        <p><a href="{{ url_for('account_page') }}">{{ _('about_account_link') }}</a></p>
+                    </section>
                     <p>{{ _('about_p3') }}</p>
                     <p>{{ _('about_p4') }}</p>
                     <div class="feedback-form">

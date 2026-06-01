@@ -501,6 +501,103 @@ function displayCards(data, limit = 10) {
  * @param {object} activity
  * @returns {string|null}
  */
+/** モバイル一覧では iframe を遅延（サムネ+タップ再生） */
+function shouldUseVideoFacade() {
+    return window.matchMedia('(max-width: 768px)').matches;
+}
+
+/**
+ * DB の duration 文字列を短く表示（例: 0:05:30 → 5:30）
+ * @param {string} raw
+ * @returns {string}
+ */
+function formatDurationDisplay(raw) {
+    const text = String(raw || '').trim();
+    if (!text || text === 'N/A') return text;
+    const parts = text.split(':');
+    if (parts.length === 3) {
+        const h = parseInt(parts[0], 10) || 0;
+        const m = parseInt(parts[1], 10) || 0;
+        const s = parseInt(parts[2], 10) || 0;
+        if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        return `${m}:${String(s).padStart(2, '0')}`;
+    }
+    return text;
+}
+
+/**
+ * @param {object} activity
+ * @param {HTMLElement} videoContainer
+ * @param {{ listContext?: string }} options
+ */
+function mountVideoPlayer(activity, videoContainer, options = {}) {
+    const listContext = options.listContext || 'search';
+    const videoUrl = activity.video_url || '';
+    const videoId = String(activity.id || '').trim().split('&')[0];
+    const embedUrl = (videoUrl.startsWith('https://www.youtube.com/embed/') ||
+        videoUrl.startsWith('https://youtube.com/embed/'))
+        ? videoUrl
+        : (videoId ? `https://www.youtube.com/embed/${encodeURIComponent(videoId)}` : '');
+
+    if (listContext === 'search' && shouldUseVideoFacade() && videoId && embedUrl) {
+        const facade = document.createElement('button');
+        facade.type = 'button';
+        facade.className = 'video-thumb-facade';
+        const playLabel = typeof uiS === 'function' ? uiS('js_play_video') : '動画を再生';
+        facade.setAttribute('aria-label', typeof uiS === 'function'
+            ? uiS('js_play_video_aria')
+            : 'サムネイルをタップして動画を再生');
+
+        const img = document.createElement('img');
+        img.className = 'video-thumb-facade__img';
+        img.src = `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+
+        const playIcon = document.createElement('span');
+        playIcon.className = 'video-thumb-facade__play';
+        playIcon.setAttribute('aria-hidden', 'true');
+        playIcon.textContent = '▶';
+
+        const label = document.createElement('span');
+        label.className = 'video-thumb-facade__label';
+        label.textContent = playLabel;
+
+        facade.appendChild(img);
+        facade.appendChild(playIcon);
+        facade.appendChild(label);
+
+        facade.addEventListener('click', () => {
+            facade.replaceWith(createYoutubeIframe(embedUrl));
+        });
+        videoContainer.appendChild(facade);
+        return;
+    }
+
+    videoContainer.appendChild(createYoutubeIframe(embedUrl));
+}
+
+/**
+ * @param {string} embedUrl
+ * @returns {HTMLIFrameElement}
+ */
+function createYoutubeIframe(embedUrl) {
+    const iframe = document.createElement('iframe');
+    iframe.src = embedUrl || '';
+    if (embedUrl) {
+        iframe.setAttribute('loading', 'lazy');
+    }
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute(
+        'allow',
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+    );
+    iframe.title = typeof uiS === 'function' ? uiS('js_play_video') : '動画を再生';
+    return iframe;
+}
+
 function buildYoutubeWatchUrl(activity) {
     if (!activity) return null;
     const id = String(activity.id || '').trim();
@@ -530,18 +627,7 @@ function buildVideoCard(activity, options = {}) {
 
     const videoContainer = document.createElement('div');
     videoContainer.className = 'video-container';
-    const iframe = document.createElement('iframe');
-    const videoUrl = activity.video_url || '';
-    if (videoUrl.startsWith('https://www.youtube.com/embed/') ||
-        videoUrl.startsWith('https://youtube.com/embed/')) {
-        iframe.src = videoUrl;
-        iframe.setAttribute('loading', 'lazy');
-    } else {
-        iframe.src = '';
-    }
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', '');
-    videoContainer.appendChild(iframe);
+    mountVideoPlayer(activity, videoContainer, { listContext });
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'info';
@@ -556,7 +642,12 @@ function buildVideoCard(activity, options = {}) {
     likeCountDiv.textContent = (typeof uiS === 'function' ? uiS('js_likes_label') : 'いいね: ') + formatNumber(activity.like_count || 0);
 
     const durationDiv = document.createElement('div');
-    durationDiv.textContent = (typeof uiS === 'function' ? uiS('js_duration_label') : '動画時間: ') + (activity.duration || '');
+    durationDiv.className = 'info-duration';
+    if (listContext === 'search') {
+        durationDiv.classList.add('info-duration--prominent');
+    }
+    durationDiv.textContent = (typeof uiS === 'function' ? uiS('js_duration_label') : '動画時間: ')
+        + formatDurationDisplay(activity.duration || '');
 
     const channelDiv = document.createElement('div');
     channelDiv.textContent = (typeof uiS === 'function' ? uiS('js_channel_label') : 'チャンネル名: ') + (activity.channel_category || '');
@@ -735,6 +826,7 @@ function search(resetPage = true) {
     const playersInput = document.getElementById('players-input');
     const levelInput = document.getElementById('level-input');
     const channelInput = document.getElementById('channel-input');
+    const durationMaxInput = document.getElementById('duration-max-input');
     const sortInput = document.getElementById('sort-input');
 
     // セキュリティ: 入力値の長さ制限（クライアント側検証）
@@ -757,9 +849,13 @@ function search(resetPage = true) {
         sort: sort,
         limit: getLimit(),
         offset: (currentPage - 1) * getLimit(),
-    }).toString();
+    });
+    if (durationMax) {
+        queryParams.set('duration_max', durationMax);
+    }
+    const queryString = queryParams.toString();
 
-    fetchData('/search', queryParams, getLimit())
+    fetchData('/search', queryString, getLimit())
         .then(() => addToSearchHistory(query))
         .finally(() => {
             // 検索完了後にボタンを再有効化

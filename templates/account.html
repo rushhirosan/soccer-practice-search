@@ -8,7 +8,7 @@
     <meta name="description" content="{{ _('account_meta_desc') }}">
     <meta name="robots" content="noindex, follow">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=61">
 </head>
 <body>
     {% set active_nav = 'account' %}
@@ -19,6 +19,11 @@
             <header class="account-page__header">
                 <h1 class="account-page__title">{{ _('account_h1') }}</h1>
                 <p class="account-page__lead">{{ _('account_lead') }}</p>
+                <ul class="account-value-list">
+                    <li>{{ _('account_value_sync') }}</li>
+                    <li>{{ _('account_value_no_email') }}</li>
+                    <li>{{ _('account_value_optional') }}</li>
+                </ul>
             </header>
 
             <!-- 登録直後のみ表示（ログイン後ビューに切り替わっても見える） -->

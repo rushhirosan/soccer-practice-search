@@ -83,7 +83,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=59">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=60">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -207,6 +207,16 @@
                                     <select id="channel-input" aria-label="{{ _('label_channel') }}">
                                         <option value="">{{ _('opt_channel') }}</option>
                                     </select>
+                                    <label for="duration-max-input">{{ _('label_duration_max') }}</label>
+                                    <select id="duration-max-input" aria-label="{{ _('label_duration_max') }}">
+                                        <option value="">{{ _('opt_duration_any') }}</option>
+                                        <option value="10">{{ _('opt_duration_10') }}</option>
+                                        <option value="15">{{ _('opt_duration_15') }}</option>
+                                        <option value="20">{{ _('opt_duration_20') }}</option>
+                                        <option value="30">{{ _('opt_duration_30') }}</option>
+                                        <option value="45">{{ _('opt_duration_45') }}</option>
+                                        <option value="60">{{ _('opt_duration_60') }}</option>
+                                    </select>
                                     <h2>{{ _('search_section_sort') }}</h2>
                                     <label for="sort-input">{{ _('label_sort') }}</label>
                                     <select id="sort-input" aria-label="{{ _('label_sort') }}">
@@ -253,7 +263,7 @@
 
     {% include 'partials/site_footer.html' %}
 
-    <script src="{{ url_for('static', filename='scripts.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}?v=10"></script>
     <script src="{{ url_for('static', filename='user-sync.js') }}?v=9"></script>
     <script src="{{ url_for('static', filename='site-header.js') }}?v=53"></script>
 </body>

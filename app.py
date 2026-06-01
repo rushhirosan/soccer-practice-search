@@ -199,6 +199,72 @@ def convert_activities(activities: list) -> list:
     return result
 
 
+ALLOWED_DURATION_MAX_MINUTES = (10, 15, 20, 30, 45, 60)
+
+
+def normalize_search_query(q: str) -> str:
+    """検索キーワードを正規化（全角半角など）"""
+    return unicodedata.normalize('NFKC', (q or '').strip())
+
+
+def parse_duration_max_filter(raw: str) -> Optional[int]:
+    """動画時間上限（分）をホワイトリスト検証して返す。無効なら None。"""
+    if not raw:
+        return None
+    try:
+        minutes = int(raw)
+    except (ValueError, TypeError):
+        return None
+    return minutes if minutes in ALLOWED_DURATION_MAX_MINUTES else None
+
+
+def duration_text_to_seconds(duration_text: str) -> Optional[int]:
+    """DB の duration 文字列（timedelta 表記）を秒に変換。解析不能なら None。"""
+    if not duration_text:
+        return None
+    text = duration_text.strip()
+    if 'day' in text.lower():
+        return None
+    parts = text.split(':')
+    if len(parts) != 3:
+        return None
+    try:
+        hours, minutes, seconds = (int(p.strip()) for p in parts)
+    except ValueError:
+        return None
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def keyword_search_sql() -> str:
+    """タイトル・目的・人数・レベル・チャンネル名をキーワード対象にする"""
+    return """(
+        c.title ILIKE %s
+        OR cat.category_title ILIKE %s
+        OR cat.players ILIKE %s
+        OR cat.level ILIKE %s
+        OR ch.cname ILIKE %s
+    )"""
+
+
+def append_keyword_params(params: list, q_like: str) -> list:
+    params.extend([q_like] * 5)
+    return params
+
+
+def duration_max_filter_sql(alias: str = "c") -> str:
+    """再生時間が上限（秒）以下の動画に限定（日数表記の長尺は除外）"""
+    return f"""(
+        {alias}.duration IS NOT NULL
+        AND {alias}.duration <> ''
+        AND {alias}.duration NOT ILIKE '%%day%%'
+        AND (
+            COALESCE(NULLIF(TRIM(split_part({alias}.duration, ':', 1)), '')::int, 0) * 3600
+            + COALESCE(NULLIF(TRIM(split_part({alias}.duration, ':', 2)), '')::int, 0) * 60
+            + COALESCE(NULLIF(TRIM(split_part({alias}.duration, ':', 3)), '')::int, 0)
+        ) <= %s
+    )"""
+
+
 def build_query_with_filters(base_query: str, filters: dict, params: list) -> tuple[str, list]:
     """フィルタに基づいてクエリを構築する補助関数"""
     if filters.get('type_filter'):
@@ -217,6 +283,16 @@ def build_query_with_filters(base_query: str, filters: dict, params: list) -> tu
         # チャンネルIDで検索
         base_query += " AND cat.channel_brand_category = %s"
         params.append(filters['channel_filter'])
+
+    duration_max = filters.get('duration_max_minutes')
+    if duration_max is not None:
+        base_query += " AND " + duration_max_filter_sql("c")
+        params.append(int(duration_max) * 60)
+
+    if filters.get('search_query'):
+        q_like = f"%{filters['search_query']}%"
+        base_query += " AND " + keyword_search_sql()
+        append_keyword_params(params, q_like)
 
     return base_query, params
 
@@ -313,114 +389,78 @@ def get_data_by_id(q: str, ids: list, sort: str, offset: int, limit: int = None)
     return execute_query(query, params)
 
 
-def multi_search_total(q: str, filters: dict) -> int:
+def fetch_search_ids(filters: dict) -> list:
+    """フィルタ・キーワード・再生時間上限に一致する動画 ID を取得"""
+    base_query = """
+        SELECT DISTINCT c.ID
+        FROM contents c
+        JOIN category cat ON c.ID = cat.ID
+        JOIN cid ch ON cat.channel_brand_category = ch.id
+        WHERE 1=1
+    """
+    params: list = []
+    base_query, params = build_query_with_filters(base_query, filters, params)
+    rows = execute_query(base_query, params)
+    return [row[0] for row in rows]
+
+
+def multi_search_total(filters: dict) -> int:
     """複数のフィルタ条件に基づいて総データ数を取得"""
-    # JOINを使用してより適切な検索を実現
-    base_query = """
-        SELECT DISTINCT c.ID 
-        FROM contents c
-        JOIN category cat ON c.ID = cat.ID
-        JOIN cid ch ON cat.channel_brand_category = ch.id
-        WHERE 1=1
-    """
-    params = []
-    base_query, params = build_query_with_filters(base_query, filters, params)
-
-    rows = execute_query(base_query, params)
-    ids = [row[0] for row in rows]
-    return get_total_data_by_id(q, ids)
+    return len(fetch_search_ids(filters))
 
 
-def multi_search(q: str, filters: dict, sort: str, offset: int, limit: int) -> list:
+def multi_search(filters: dict, sort: str, offset: int, limit: int) -> list:
     """複数のフィルタ条件に基づいてデータを取得"""
-    # JOINを使用してより適切な検索を実現
-    base_query = """
-        SELECT DISTINCT c.ID 
-        FROM contents c
-        JOIN category cat ON c.ID = cat.ID
-        JOIN cid ch ON cat.channel_brand_category = ch.id
-        WHERE 1=1
-    """
-    params = []
-    base_query, params = build_query_with_filters(base_query, filters, params)
-
-    rows = execute_query(base_query, params)
-    ids = [row[0] for row in rows]
-    return get_data_by_id(q, ids, sort, offset, limit)
+    ids = fetch_search_ids(filters)
+    return get_data_by_id(None, ids, sort, offset, limit)
 
 
 @app.route('/search')
 def search_activities():
-    
-    query = request.args.get('q', '')
+    raw_query = request.args.get('q', '')
     type_filter = request.args.get('type', '')
     players_filter = request.args.get('players', '')
     level_filter = request.args.get('level', '')
     channel_filter = request.args.get('channel', '')
     sort = request.args.get('sort', 'upload_date')
-    
+
     # セキュリティ: sortパラメータのホワイトリスト検証
     allowed_sort_columns = ['upload_date', 'view_count', 'like_count']
     if sort not in allowed_sort_columns:
         sort = 'upload_date'  # デフォルト値にフォールバック
-    
+
     # セキュリティ: limitとoffsetの値検証
     try:
         limit = int(request.args.get('limit', 10))
         limit = max(1, min(limit, 100))  # 1-100の範囲に制限
     except (ValueError, TypeError):
         limit = 10
-    
+
     try:
         offset = int(request.args.get('offset', 0))
         offset = max(0, offset)  # 0以上に制限
     except (ValueError, TypeError):
         offset = 0
 
+    search_query = normalize_search_query(raw_query) if raw_query else ''
     filters = {
         'type_filter': type_filter,
         'players_filter': players_filter,
         'level_filter': level_filter,
-        'channel_filter': channel_filter
+        'channel_filter': channel_filter,
+        'duration_max_minutes': parse_duration_max_filter(request.args.get('duration_max', '')),
     }
+    if search_query:
+        filters['search_query'] = search_query
 
-    conn = get_db()
-    with closing(conn.cursor()) as c:  # ✅ カーソルのみ `closing` を使用
-        try:
-            if query:
-                if not any([type_filter, players_filter, level_filter, channel_filter]):
-                    query = unicodedata.normalize('NFKC', query.strip())
-
-                    c.execute('''
-                        SELECT count(*) FROM contents
-                        WHERE title ILIKE %s
-                    ''', ('%' + query + '%',))  # ✅ `?` → `%s` に修正 (PostgreSQL 用)
-
-                    total = c.fetchone()[0]
-
-                    # セキュリティ: sortパラメータは既にホワイトリスト検証済み
-                    c.execute(f'''
-                        SELECT * FROM contents
-                        WHERE title ILIKE %s
-                        ORDER BY {sort} DESC
-                        LIMIT %s OFFSET %s
-                    ''', ('%' + query + '%', limit, offset))
-
-                    activities = c.fetchall()
-                else:
-                    total = multi_search_total(query, filters)
-                    activities = multi_search(query, filters, sort, offset, limit)
-            else:
-                total = multi_search_total(query, filters)
-                activities = multi_search(query, filters, sort, offset, limit)
-
-        except psycopg2.Error as e:
-            logger.error("Error while executing search query: %s", e)
-            return jsonify({"error": "Database error"}), 500  # HTTP 500 を返す
+    try:
+        total = multi_search_total(filters)
+        activities = multi_search(filters, sort, offset, limit)
+    except psycopg2.Error as e:
+        logger.error("Error while executing search query: %s", e)
+        return jsonify({"error": "Database error"}), 500
 
     current_display_count = len(activities) + offset
-
-    #conn.close()
 
     return jsonify({
         "activities": convert_activities(activities),

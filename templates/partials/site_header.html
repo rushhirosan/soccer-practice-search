@@ -17,9 +17,9 @@
       <a href="{{ url_for('set_language', code='ja') }}" class="{% if ui_locale == 'ja' %}is-active{% endif %}">{{ _('lang_switch_ja') }}</a>
       <a href="{{ url_for('set_language', code='en') }}" class="{% if ui_locale == 'en' %}is-active{% endif %}">{{ _('lang_switch_en') }}</a>
     </div>
-    <a href="/account" id="site-header-auth-chip" class="site-header__auth-chip hidden" aria-hidden="true">
-      <span class="site-header__auth-dot" aria-hidden="true"></span>
-      <span id="site-header-auth-label" class="site-header__auth-label">{{ _('js_logged_in') }}</span>
+    <a href="/account" id="site-header-auth-chip" class="site-header__auth-chip site-header__auth-chip--guest" aria-label="{{ _('nav_login_aria') }}">
+      <span id="site-header-auth-dot" class="site-header__auth-dot" aria-hidden="true" hidden></span>
+      <span id="site-header-auth-label" class="site-header__auth-label">{{ _('nav_login') }}</span>
     </a>
     <button type="button" class="site-header__menu-btn" id="site-header-menu-btn" aria-expanded="false" aria-controls="site-header-nav" aria-label="{{ _('nav_open') }}">
       <span class="site-header__menu-icon" aria-hidden="true"></span>
@@ -37,9 +37,6 @@
         </li>
         <li>
           <a href="/board" class="site-header__link{% if nav == 'board' %} is-active{% endif %}"{% if nav == 'board' %} aria-current="page"{% endif %} title="{{ _('nav_board_link_title') }}" aria-label="{{ _('nav_board_link_aria') }}">{{ _('nav_board') }}</a>
-        </li>
-        <li>
-          <a href="/account" class="site-header__link{% if nav == 'account' %} is-active{% endif %}"{% if nav == 'account' %} aria-current="page"{% endif %}>{{ _('nav_account') }}</a>
         </li>
         <li>
           <a href="/about" class="site-header__link{% if nav == 'about' %} is-active{% endif %}"{% if nav == 'about' %} aria-current="page"{% endif %}>{{ _('nav_about') }}</a>

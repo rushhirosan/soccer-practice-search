@@ -184,23 +184,42 @@
   function updateAuthHeader(j) {
     var chip = document.getElementById('site-header-auth-chip');
     var label = document.getElementById('site-header-auth-label');
+    var dot = document.getElementById('site-header-auth-dot');
     if (!chip || !label) return;
     if (j && j.logged_in && j.nickname) {
       var nick = j.nickname;
       label.textContent = typeof uiS === 'function'
         ? uiS('js_auth_chip').replace('{nick}', nick)
         : ('ログイン中 · ' + nick);
-      chip.classList.remove('hidden');
+      chip.classList.remove('site-header__auth-chip--guest');
+      chip.classList.add('site-header__auth-chip--signed-in');
       chip.setAttribute('aria-hidden', 'false');
       chip.setAttribute('aria-label', typeof uiS === 'function'
         ? uiS('js_logged_in_chip').replace('{nick}', nick)
         : ('ログイン中: ' + nick + '。アカウントページへ'));
+      if (dot) dot.hidden = false;
     } else {
-      chip.classList.add('hidden');
-      label.textContent = typeof uiS === 'function' ? uiS('js_logged_in') : 'ログイン中';
-      chip.setAttribute('aria-hidden', 'true');
-      chip.removeAttribute('aria-label');
+      label.textContent = typeof uiS === 'function' ? uiS('nav_login') : 'ログイン';
+      chip.classList.remove('site-header__auth-chip--signed-in');
+      chip.classList.add('site-header__auth-chip--guest');
+      chip.setAttribute('aria-hidden', 'false');
+      chip.setAttribute('aria-label', typeof uiS === 'function'
+        ? uiS('nav_login_aria')
+        : 'ログインまたは新規登録（任意・端末間同期）');
+      if (dot) dot.hidden = true;
     }
+  }
+
+  function refreshAuthHeaderFromServer() {
+    return fetch('/auth/status', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        updateAuthHeader(j);
+        return j;
+      })
+      .catch(function () {
+        updateAuthHeader(null);
+      });
   }
 
   window.soccerUpdateAuthHeader = updateAuthHeader;
@@ -209,6 +228,7 @@
     syncFavoritesBadge();
     setupMobileNav();
     setupPasswordFields();
+    refreshAuthHeaderFromServer();
   });
 
   window.addEventListener('storage', function (e) {

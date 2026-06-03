@@ -107,6 +107,8 @@ JS_KEYS: frozenset[str] = frozenset(
         "js_logged_in",
         "js_auth_chip",
         "js_logged_in_chip",
+        "nav_login",
+        "nav_login_aria",
         # account.js
         "js_acc_wrong_password",
         "js_acc_csrf_invalid",
@@ -281,6 +283,11 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Records and notes: open match results and daily reflections",
     },
     "nav_account": {"ja": "アカウント", "en": "Account"},
+    "nav_login": {"ja": "ログイン", "en": "Sign in"},
+    "nav_login_aria": {
+        "ja": "ログインまたは新規登録（任意・端末間同期）",
+        "en": "Sign in or register (optional sync across devices)",
+    },
     "nav_about": {"ja": "このサイトについて", "en": "About"},
     "nav_favorites_badge_aria": {"ja": "お気に入りの動画数", "en": "Number of favorite videos"},
     "lang_switch_ja": {"ja": "日本語", "en": "日本語"},
@@ -292,6 +299,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "© {year} Youth Soccer Drills. All rights reserved.",
     },
     "footer_privacy": {"ja": "プライバシーポリシー", "en": "Privacy policy"},
+    "footer_account": {"ja": "ログイン・同期", "en": "Sign in · sync"},
     # --- Home SEO ---
     "home_title": {
         "ja": "少年サッカードリル - 練習ドリル動画を簡単検索",

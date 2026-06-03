@@ -211,7 +211,7 @@ main {
   white-space: nowrap;
 }
 
-/* ログイン中（/auth/status と連動、user-sync が更新） */
+/* ログイン / 同期（/auth/status と連動。メインナビからアカウントは外しチップで誘導） */
 .site-header__auth-chip {
   display: inline-flex;
   align-items: center;
@@ -236,6 +236,16 @@ main {
 .site-header__auth-chip:hover {
   background: rgba(255, 255, 255, 0.28);
   color: #fff;
+}
+
+.site-header__auth-chip--guest {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+}
+
+.site-header__auth-chip--signed-in {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .site-header__auth-dot {

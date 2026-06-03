@@ -114,6 +114,9 @@
         if (j.csrf_token) setMetaCsrf(j.csrf_token);
         if (j.logged_in && j.nickname) showLoggedIn(j.nickname);
         else showLoggedOut();
+        if (typeof window.soccerUpdateAuthHeader === 'function') {
+          window.soccerUpdateAuthHeader(j);
+        }
         return j;
       });
   }

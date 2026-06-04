@@ -12,6 +12,8 @@
     
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ site_base_url }}/about">
+    {% set seo_canonical_path = '/about' %}
+    {% include 'partials/seo_head_extras.html' %}
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ _('about_title') }}">
@@ -25,7 +27,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=61">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=62">
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
@@ -48,6 +50,7 @@
                     <h2>{{ _('about_heading') }}</h2>
                     <p>{{ _('about_p1') }}</p>
                     <p>{{ _('about_p2') }}</p>
+                    <p class="about-youtube-notice">{{ _('about_youtube_notice') }}</p>
                     <section class="about-account-note" aria-labelledby="about-account-heading">
                         <h3 id="about-account-heading" class="about-account-note__title">{{ _('about_account_heading') }}</h3>
                         <p>{{ _('about_account_p') }}</p>

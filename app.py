@@ -40,6 +40,16 @@ def get_site_base_url() -> str:
         raw = "https://" + raw.lstrip("/")
     return raw.rstrip("/")
 
+
+def build_seo_page_url(path: str, locale: str) -> str:
+    """Absolute URL with ?lang= for hreflang (same path, explicit locale for crawlers)."""
+    base = get_site_base_url()
+    norm = path if path.startswith("/") else f"/{path}"
+    loc = f"{base}/" if norm == "/" else f"{base}{norm}"
+    if locale in ui_i18n.SUPPORTED_LOCALES:
+        return f"{loc}?lang={locale}"
+    return loc
+
 # セキュリティ: CSRF保護の設定
 # SECRET_KEYは環境変数から取得、なければランダムに生成（本番環境では必ず環境変数で設定すること）
 _secret_key_env = os.getenv("SECRET_KEY")
@@ -105,6 +115,7 @@ def inject_site_base_url():
 
     return {
         "site_base_url": get_site_base_url(),
+        "build_seo_page_url": build_seo_page_url,
         "ui_locale": loc,
         "html_lang": loc,
         "_": _,
@@ -1529,8 +1540,8 @@ def google_search_console():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    """サイトマップを生成"""
-    # 現在の日時を取得
+    """サイトマップを生成（index 対象の公開ページのみ）"""
+    # /favorites・/practice-notes・/account は noindex のため意図的に含めない
     current_time = datetime.now().strftime('%Y-%m-%d')
     
     base = get_site_base_url()

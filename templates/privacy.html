@@ -12,6 +12,8 @@
     
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ site_base_url }}/privacy">
+    {% set seo_canonical_path = '/privacy' %}
+    {% include 'partials/seo_head_extras.html' %}
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -26,7 +28,7 @@
     <meta property="og:url" content="{{ site_base_url }}/privacy">
     <meta property="og:locale" content="{{ og_locale }}">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=57">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=62">
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>

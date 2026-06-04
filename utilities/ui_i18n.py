@@ -300,6 +300,10 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "footer_privacy": {"ja": "プライバシーポリシー", "en": "Privacy policy"},
     "footer_account": {"ja": "ログイン・同期", "en": "Sign in · sync"},
+    "footer_youtube_notice": {
+        "ja": "動画は各YouTubeチャンネルの著作物です。当サイトは検索・整理を提供し、権利は各権利者に帰属します。",
+        "en": "Videos belong to their respective YouTube channels. This site provides search and organization; rights remain with each owner.",
+    },
     # --- Home SEO ---
     "home_title": {
         "ja": "少年サッカードリル - 練習ドリル動画を簡単検索",
@@ -404,6 +408,10 @@ STRINGS: dict[str, dict[str, str]] = {
     "about_p2": {
         "ja": "サイト作成者自身が小学生のサッカーコーチをしていますが、練習メニューに困った時や他のチーム・配信者の練習メニューを参考にしたいと思い検索用途で作りました。",
         "en": "The creator coaches an elementary-age team and built this to browse drill ideas faster when planning practices.",
+    },
+    "about_youtube_notice": {
+        "ja": "掲載動画の著作権は各YouTubeチャンネルおよび権利者に帰属します。当サイトはYouTubeの埋め込み表示に従い、検索・閲覧の利便性を提供するものです。",
+        "en": "Video copyrights belong to each YouTube channel and rights holder. This site follows YouTube embed policies and helps you search and browse drills.",
     },
     "about_account_heading": {"ja": "アカウント（任意）", "en": "Account (optional)"},
     "about_account_p": {

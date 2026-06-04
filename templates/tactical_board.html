@@ -7,6 +7,8 @@
     <meta name="description" content="{{ _('board_meta_desc') }}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ site_base_url }}/board">
+    {% set seo_canonical_path = '/board' %}
+    {% include 'partials/seo_head_extras.html' %}
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">

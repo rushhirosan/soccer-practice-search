@@ -377,7 +377,7 @@ function populateChannelSelect() {
                 select.appendChild(option);
             });
             
-            const ul = document.querySelector(".right-half ul");
+            const ul = document.querySelector(".about-channels ul");
             if (ul) {
                 // セキュリティ: innerHTML = "" は空文字列なので安全
                 ul.innerHTML = ""; // リストをクリア

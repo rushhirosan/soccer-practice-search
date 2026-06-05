@@ -427,8 +427,11 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Without login, data stays on this device. After sign-in, choose server-first or import this device once.",
     },
     "about_account_link": {"ja": "アカウントページへ", "en": "Go to account page"},
-    "about_p3": {"ja": "参考にしているチャンネルは⇨の通りです。", "en": "Reference channels are listed on the right."},
-    "about_p4": {"ja": "ご意見・ご要望・ご感想等々以下のフォームから送信ください。", "en": "Please send feedback, requests, or comments with the form below."},
+    "about_feedback_heading": {"ja": "お問い合わせ・フィードバック", "en": "Feedback"},
+    "about_p4": {
+        "ja": "ご意見・ご要望・ご感想は以下のフォームからお送りください。",
+        "en": "Send feedback, requests, or comments using the form below.",
+    },
     "feedback_form_aria": {"ja": "フィードバックフォーム", "en": "Feedback form"},
     "label_name_opt": {"ja": "名前（任意）:", "en": "Name (optional):"},
     "ph_name": {"ja": "お名前", "en": "Your name"},

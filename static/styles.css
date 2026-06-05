@@ -1425,6 +1425,73 @@ button:active {
   text-decoration: underline;
 }
 
+/* About ページ（紹介 → チャンネル → フィードバック） */
+.about-page {
+  margin: 1.5rem 0 6rem;
+}
+
+.about-page__top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.about-panel {
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.about-panel p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.about-panel h2 {
+  margin-top: 0;
+}
+
+.about-channels ul {
+  list-style: none;
+  padding: 0;
+}
+
+.about-channels li {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--background-color);
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.about-channels li:hover {
+  background: var(--surface-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.about-channels a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.about-channels a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.about-feedback .feedback-form {
+  margin-bottom: 0;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+
 /* ユーティリティクラス */
 
 /* レスポンシブデザイン */
@@ -1466,6 +1533,10 @@ button:active {
   }
   
   .split-container {
+    grid-template-columns: 1fr;
+  }
+
+  .about-page__top {
     grid-template-columns: 1fr;
   }
 }
@@ -1643,8 +1714,18 @@ button:active {
     margin: 1rem 0 4rem 0;
   }
 
+  .about-page {
+    margin: 1rem 0 4rem;
+  }
+
+  .about-page__top {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
   .left-half,
   .right-half,
+  .about-panel,
   .feedback-form {
     padding: 1rem;
   }

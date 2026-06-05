@@ -27,7 +27,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=62">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=63">
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
@@ -44,23 +44,41 @@
     
     <main>
         <div class="content-wrapper">
-            <div class="split-container">
-                <!-- 左半分: フォーム -->
-                <section class="left-half">
-                    <h2>{{ _('about_heading') }}</h2>
-                    <p>{{ _('about_p1') }}</p>
-                    <p>{{ _('about_p2') }}</p>
-                    <p class="about-youtube-notice">{{ _('about_youtube_notice') }}</p>
-                    <section class="about-account-note" aria-labelledby="about-account-heading">
-                        <h3 id="about-account-heading" class="about-account-note__title">{{ _('about_account_heading') }}</h3>
-                        <p>{{ _('about_account_p') }}</p>
-                        <ul class="about-account-note__list">
-                            <li>{{ _('about_account_sync') }}</li>
-                            <li>{{ _('about_account_local') }}</li>
-                        </ul>
-                        <p><a href="{{ url_for('account_page') }}">{{ _('about_account_link') }}</a></p>
+            <div class="about-page">
+                <div class="about-page__top">
+                    <section class="about-panel about-intro">
+                        <h2>{{ _('about_heading') }}</h2>
+                        <p>{{ _('about_p1') }}</p>
+                        <p>{{ _('about_p2') }}</p>
+                        <p class="about-youtube-notice">{{ _('about_youtube_notice') }}</p>
+                        <section class="about-account-note" aria-labelledby="about-account-heading">
+                            <h3 id="about-account-heading" class="about-account-note__title">{{ _('about_account_heading') }}</h3>
+                            <p>{{ _('about_account_p') }}</p>
+                            <ul class="about-account-note__list">
+                                <li>{{ _('about_account_sync') }}</li>
+                                <li>{{ _('about_account_local') }}</li>
+                            </ul>
+                            <p><a href="{{ url_for('account_page') }}">{{ _('about_account_link') }}</a></p>
+                        </section>
                     </section>
-                    <p>{{ _('about_p3') }}</p>
+
+                    <section class="about-panel about-channels" id="channels" aria-labelledby="channels-heading">
+                        <h2 id="channels-heading">{{ _('channels_heading') }}</h2>
+                        <p>{{ _('channels_intro') }}</p>
+                        <ul>
+                            {% for channel in channels %}
+                            <li>
+                                <a href="{{ channel.channel_link or '#' }}" target="_blank" rel="noopener noreferrer">
+                                    {{ channel.channel_name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                </div>
+
+                <section class="about-panel about-feedback" id="feedback" aria-labelledby="about-feedback-heading">
+                    <h2 id="about-feedback-heading">{{ _('about_feedback_heading') }}</h2>
                     <p>{{ _('about_p4') }}</p>
                     <div class="feedback-form">
                         <form id="feedbackForm" aria-label="{{ _('feedback_form_aria') }}">
@@ -83,21 +101,6 @@
                             <button type="button" onclick="document.getElementById('responseMessage').classList.add('hidden')" aria-label="{{ _('close_msg_aria') }}">×</button>
                         </div>
                     </div>
-                </section>
-
-                <!-- 右半分: 参考チャンネル -->
-                <section class="right-half">
-                    <h2>{{ _('channels_heading') }}</h2>
-                    <p>{{ _('channels_intro') }}</p>
-                    <ul>
-                        {% for channel in channels %}
-                        <li>
-                            <a href="{{ channel.channel_link or '#' }}" target="_blank" rel="noopener noreferrer">
-                                {{ channel.channel_name }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
                 </section>
             </div>
         </div>

@@ -251,12 +251,12 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Youth Soccer Drills",
     },
     "header_catalog_date_short": {
-        "ja": "{date}時点",
-        "en": "as of {date}",
+        "ja": "動画更新日 {date}",
+        "en": "Latest video {date}",
     },
     "header_catalog_date_aria": {
-        "ja": "掲載動画データの最新日（{date}）",
-        "en": "Latest catalog video date ({date})",
+        "ja": "掲載している動画のうち、いちばん新しい投稿日は {date} です",
+        "en": "Newest video in our catalog was posted on {date}",
     },
     "nav_open": {"ja": "メニューを開く", "en": "Open menu"},
     "nav_main": {"ja": "メインナビゲーション", "en": "Main navigation"},

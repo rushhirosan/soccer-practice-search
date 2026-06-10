@@ -85,7 +85,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=62">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=63">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y9J0HQNRR"></script>
     <script>
@@ -100,39 +100,9 @@
     {% set active_nav = 'home' %}
     {% include 'partials/site_header.html' %}
     <main>
-        <section class="home-seo-intro" aria-label="SEO intro">
-            <h1>{{ _('brand_title') }}</h1>
-            {% if ui_locale == 'ja' %}
-            <p>小学生〜中学生向けの練習動画を、目的・人数・レベルで探せる無料サイトです。</p>
-            <p class="home-seo-intro__quick" role="navigation" aria-label="人気検索と関連ページ">
-                <span class="home-seo-intro__inline"><strong>人気検索:</strong>
-                <a href="/?q=ドリブル">ドリブル</a> /
-                <a href="/?q=パス">パス</a> /
-                <a href="/?q=シュート">シュート</a> /
-                <a href="/?q=対人">対人</a></span>
-                <span class="home-seo-intro__quick-sep" aria-hidden="true">|</span>
-                <span class="home-seo-intro__inline"><strong>関連ページ:</strong>
-                <a href="/about">このサイトについて</a> /
-                <a href="/privacy">プライバシーポリシー</a> /
-                <a href="/board" title="{{ _('nav_board_link_title') }}">{{ _('nav_board') }}</a> /
-                <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a></span>
-            </p>
-            {% else %}
-            <p>Find youth soccer drill videos by purpose, player count, and skill level—free to use.</p>
-            <p class="home-seo-intro__quick" role="navigation" aria-label="Popular searches and related pages">
-                <span class="home-seo-intro__inline"><strong>Popular searches:</strong>
-                <a href="/?q=dribbling">dribbling</a> /
-                <a href="/?q=passing">passing</a> /
-                <a href="/?q=shooting">shooting</a> /
-                <a href="/?q=1v1">1v1</a></span>
-                <span class="home-seo-intro__quick-sep" aria-hidden="true">|</span>
-                <span class="home-seo-intro__inline"><strong>Related pages:</strong>
-                <a href="/about">About</a> /
-                <a href="/privacy">Privacy Policy</a> /
-                <a href="/board" title="{{ _('nav_board_link_title') }}">{{ _('nav_board') }}</a> /
-                <a href="/practice-notes" title="{{ _('nav_notes_link_title') }}">{{ _('nav_notes') }}</a></span>
-            </p>
-            {% endif %}
+        <section class="home-seo-intro" aria-label="{{ _('home_intro_region') }}">
+            <h1 class="visually-hidden">{{ _('brand_title') }}</h1>
+            <p class="home-seo-intro__lead">{{ _('home_intro_lead') }}</p>
         </section>
         <div class="tab-container">
             <details class="home-features">

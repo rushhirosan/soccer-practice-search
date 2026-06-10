@@ -310,8 +310,13 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Youth Soccer Drills — Find practice videos easily",
     },
     "home_meta_desc": {
-        "ja": "少年サッカー向けの練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。",
-        "en": "Search youth soccer drill videos by goal, group size, level, and more. Built to help coaches browse YouTube practice ideas faster.",
+        "ja": "小学生から中学生中心の練習ドリル動画を、目的・人数・レベルなどで検索できるサイト。YouTubeのメニュー探しをコーチ・指導者向けにサポートします。",
+        "en": "Search youth soccer drill videos—focused on elementary and junior-high levels—by goal, group size, level, and more.",
+    },
+    "home_intro_region": {"ja": "サイトの説明", "en": "Site introduction"},
+    "home_intro_lead": {
+        "ja": "小学生から中学生中心の練習動画を、目的・人数・レベルで探せる無料サイトです。",
+        "en": "Free drill search focused on elementary and junior-high players—by goal, group size, and level.",
     },
     "meta_author": {"ja": "少年サッカードリル", "en": "Youth Soccer Drills"},
     "meta_language": {"ja": "ja", "en": "en"},

@@ -835,7 +835,8 @@ function search(resetPage = true) {
     const players = (playersInput.value || '').trim().substring(0, 100);
     const level = (levelInput.value || '').trim().substring(0, 100);
     const channel = (channelInput.value || '').trim().substring(0, 100);
-    
+    const durationMax = durationMaxInput ? (durationMaxInput.value || '').trim() : '';
+
     // セキュリティ: sortパラメータのホワイトリスト検証（クライアント側）
     const allowedSorts = ['upload_date', 'view_count', 'like_count'];
     const sort = allowedSorts.includes(sortInput.value) ? sortInput.value : 'upload_date';

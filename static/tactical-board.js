@@ -23,6 +23,7 @@
   const MAX_UNDO = 50;
   const DEFAULT_TACTICAL_FORMATION = '3-3-1';
   const DEFAULT_PRACTICE_FORMATIONS = ['1対1', '2対2', '3対3', '4対4', '5対5', '6対6', '7対7', '8人', '11人'];
+  const MAX_PRACTICE_PLAYERS_PER_SIDE = 11;
   const TACTICAL_FORMATION_GROUPS = [
     { label: '11人制', options: ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1'] },
     { label: '8人制（少年）', options: ['3-3-1', '2-3-2', '3-2-2', '2-2-3'] },
@@ -609,6 +610,14 @@
     return null;
   }
 
+  function isReasonablePracticeFormation(value) {
+    const parsed = parsePracticeFormation(value);
+    if (!parsed) return false;
+    if (parsed.home > MAX_PRACTICE_PLAYERS_PER_SIDE) return false;
+    if (parsed.away > MAX_PRACTICE_PLAYERS_PER_SIDE) return false;
+    return true;
+  }
+
   function getPracticeRowDistribution(count) {
     if (count <= 0) return [];
     const rowCount = Math.min(4, Math.max(1, Math.ceil(count / 3)));
@@ -712,7 +721,7 @@
       const response = await fetch('/get_unique_values/players');
       if (!response.ok) throw new Error('practice formation fetch failed');
       const data = await response.json();
-      const parsedOptions = sortPracticeFormationOptions(data).filter(value => parsePracticeFormation(value));
+      const parsedOptions = sortPracticeFormationOptions(data).filter(isReasonablePracticeFormation);
       practiceFormationOptions = parsedOptions.length ? parsedOptions : [...DEFAULT_PRACTICE_FORMATIONS];
     } catch (_) {
       practiceFormationOptions = [...DEFAULT_PRACTICE_FORMATIONS];

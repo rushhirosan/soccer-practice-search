@@ -272,15 +272,15 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Open tactical and practice board",
     },
     "nav_favorites": {"ja": "お気に入り", "en": "Favorites"},
-    "nav_notes": {"ja": "練習記録・メモ", "en": "Records · notes"},
+    "nav_notes": {"ja": "試合記録・メモ", "en": "Match records · notes"},
     "nav_notes_short": {"ja": "記録", "en": "Log"},
     "nav_notes_link_title": {
-        "ja": "練習記録・メモ — 試合結果と日々の気づきを保存",
-        "en": "Records & notes — save match results and daily reflections",
+        "ja": "試合記録・メモ — 試合結果と日々の気づきを保存",
+        "en": "Match records & notes — save match results and daily reflections",
     },
     "nav_notes_link_aria": {
-        "ja": "練習記録・メモ。試合結果と日々の気づきを開く",
-        "en": "Records and notes: open match results and daily reflections",
+        "ja": "試合記録・メモ。試合結果と日々の気づきを開く",
+        "en": "Match records and notes: open match results and daily reflections",
     },
     "nav_account": {"ja": "アカウント", "en": "Account"},
     "nav_login": {"ja": "ログイン", "en": "Sign in"},
@@ -349,7 +349,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Draw formations and movement, then save or print—works on its own too.",
     },
     "home_feat_account_desc": {
-        "ja": "任意・メール不要。お気に入りや練習記録などを別端末と揃えたいときだけ（検索はログインなし）。",
+        "ja": "任意・メール不要。お気に入りや試合記録などを別端末と揃えたいときだけ（検索はログインなし）。",
         "en": "Optional, no email—sync favorites and records across devices; search needs no login.",
     },
     "search_region": {"ja": "検索条件", "en": "Search filters"},
@@ -424,7 +424,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Search works without signing in. A nickname account is only for syncing data across phone and PC—no email required.",
     },
     "about_account_sync": {
-        "ja": "同期の対象: お気に入り、練習記録・メモ、戦術ボード、検索履歴",
+        "ja": "同期の対象: お気に入り、試合記録・メモ、戦術ボード、検索履歴",
         "en": "Syncs: favorites, records/notes, tactical board, search history",
     },
     "about_account_local": {
@@ -463,7 +463,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "privacy_li1": {"ja": "フィードバックフォームからの送信時（名前、メールアドレス、メッセージ）", "en": "When you submit the feedback form (name, email, message)"},
     "privacy_li2": {"ja": "Google Analyticsによるアクセス解析", "en": "Through Google Analytics for usage analytics"},
     "privacy_li3": {
-        "ja": "任意の「アカウント」登録時（ニックネーム、パスワードのハッシュ、回復用キーのハッシュ、およびお気に入り・練習記録・メモなどの同期データ）。メールアドレスは収集しません。",
+        "ja": "任意の「アカウント」登録時（ニックネーム、パスワードのハッシュ、回復用キーのハッシュ、およびお気に入り・試合記録・メモなどの同期データ）。メールアドレスは収集しません。",
         "en": "If you create an optional account: nickname, password hash, recovery-key hash, and synced data such as favorites and records/notes. We do not collect email addresses.",
     },
     "privacy_h2": {"ja": "2. 個人情報の利用目的", "en": "2. How we use information"},
@@ -505,7 +505,7 @@ STRINGS: dict[str, dict[str, str]] = {
     # Account page
     "account_title": {"ja": "アカウント - 少年サッカードリル", "en": "Account — Youth Soccer Drills"},
     "account_meta_desc": {
-        "ja": "ニックネームでログインし、お気に入りと練習記録・メモを端末間で同期します。",
+        "ja": "ニックネームでログインし、お気に入りと試合記録・メモを端末間で同期します。",
         "en": "Sign in with a nickname to sync favorites and records/notes across devices.",
     },
     "account_h1": {"ja": "アカウント", "en": "Account"},
@@ -514,7 +514,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Drill search needs no account. Sign in here only when you want the same data on another device.",
     },
     "account_value_sync": {
-        "ja": "お気に入り・練習記録・メモ・戦術ボード・検索履歴を同期",
+        "ja": "お気に入り・試合記録・メモ・戦術ボード・検索履歴を同期",
         "en": "Sync favorites, records/notes, tactical board, and search history",
     },
     "account_value_no_email": {
@@ -588,15 +588,15 @@ STRINGS: dict[str, dict[str, str]] = {
     "fav_sort_saved_desc": {"ja": "追加が新しい順", "en": "Recently added"},
     "fav_sort_title_asc": {"ja": "タイトル順", "en": "Title (A–Z)"},
     # Practice notes
-    "notes_title": {"ja": "練習記録・メモ - 少年サッカードリル", "en": "Records & notes — Youth Soccer Drills"},
+    "notes_title": {"ja": "試合記録・メモ - 少年サッカードリル", "en": "Match records & notes — Youth Soccer Drills"},
     "notes_meta_desc": {
-        "ja": "練習試合の結果と日々の気づきを保存・検索できる練習記録・メモ。印刷にも対応しています。",
-        "en": "Save and search match results and daily reflections from practice.",
+        "ja": "試合の結果と日々の気づきを保存・検索できる試合記録・メモ。印刷にも対応しています。",
+        "en": "Save and search match results and daily reflections. Printable.",
     },
-    "notes_h1": {"ja": "練習記録・メモ", "en": "Records · notes"},
+    "notes_h1": {"ja": "試合記録・メモ", "en": "Match records · notes"},
     "notes_sub": {
-        "ja": "練習試合の結果と、日々の練習で思ったこと（気づき）を保存できます。",
-        "en": "Save match results and daily reflections from practice.",
+        "ja": "試合の結果と、日々の練習で思ったこと（気づき）を保存できます。",
+        "en": "Save match results and daily reflections from games and training.",
     },
     "notes_tabs_aria": {"ja": "記録の種類", "en": "Record type"},
     "tab_match": {"ja": "試合結果", "en": "Match results"},
@@ -762,7 +762,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "js_acc_deleted": {"ja": "アカウントを削除しました。", "en": "Account deleted."},
     "js_acc_logged_out": {"ja": "ログアウトしました。", "en": "Signed out."},
     "js_toast_after_login": {
-        "ja": "ログインしました。お気に入り・練習記録・メモなどを同期します。",
+        "ja": "ログインしました。お気に入り・試合記録・メモなどを同期します。",
         "en": "Signed in. Favorites, records, and notes will sync.",
     },
     "js_toast_after_register": {

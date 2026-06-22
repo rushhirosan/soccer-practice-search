@@ -1527,7 +1527,7 @@ def favorites_page():
 
 @app.route('/practice-notes')
 def practice_notes():
-    """練習記録・メモページ"""
+    """試合記録・メモページ"""
     response = make_response(render_template('practice_notes.html'))
     # 個人用・ローカル保存前提ページは検索結果に出さない
     response.headers['X-Robots-Tag'] = 'noindex, follow'
